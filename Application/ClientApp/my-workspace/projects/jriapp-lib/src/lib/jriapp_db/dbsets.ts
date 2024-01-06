@@ -33,6 +33,7 @@ export class DbSets extends BaseObject {
     forEach(this._initializedDbSets, (name, dbSet) => {
       dbSet.dispose();
     });
+    this._count = 0;
     this._initializedDbSets = Indexer();
     this._dbSets = Indexer();
     super.dispose();
@@ -44,8 +45,7 @@ export class DbSets extends BaseObject {
     });
   }
   _addDbSetOptions(name: string, options: IDbSetConstuctorOptions): void {
-    const self = this;
-    self._dbSetOptions[name] = options;
+     this._dbSetOptions[name] = options;
   }
   _createDbSet(name: string, factory: (options: IDbSetConstuctorOptions) => DbSet): void {
     const self = this;
@@ -82,7 +82,7 @@ export class DbSets extends BaseObject {
     const res = this._dbSets[name];
     return !!res;
   }
-  removeDbSet(name: string): boolean {
+  removeDbSet(name: string, removeOptions: boolean = false): boolean {
     const res = this._dbSets[name];
     if (!res) {
       return false;
@@ -94,6 +94,10 @@ export class DbSets extends BaseObject {
       delete this._initializedDbSets[name];
     }
     delete this._dbSets[name];
+    if (removeOptions) {
+      delete this._dbSetOptions[name];
+    }
+    this._count -= 1;
     return true;
   }
   findDbSet(name: string): DbSet|null {
