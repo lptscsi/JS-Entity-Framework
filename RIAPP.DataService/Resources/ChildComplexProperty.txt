@@ -1,0 +1,12 @@
+﻿export class {{TYPE_NAME}} extends RIAPP.ChildComplexProperty
+{
+{{FIELDS_DEF}}
+	constructor(name: string, parent: RIAPP.BaseComplexProperty) {
+		super(name,parent);
+{{FIELDS_INIT}}
+	}
+{{PROPERTIES}}
+	override toString() {
+		return '{{TYPE_NAME}}';
+	}
+}

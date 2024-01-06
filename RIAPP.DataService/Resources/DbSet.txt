@@ -1,0 +1,15 @@
+﻿export class {{DBSET_TYPE}} extends RIAPP.DbSet<{{ENTITY_NAME}}>
+{
+    constructor(opts: RIAPP.IDbSetConstuctorOptions) {
+       opts.itemFactory = (aspect) => new {{ENTITY_NAME}}(aspect);
+       super(opts);
+    }
+	findEntity({{PK_VALS}}): {{ENTITY_NAME}} {
+		return this.findByPK(RIAPP.Utils.arr.fromList(arguments));
+	}
+	override toString(): string {
+		return '{{DBSET_TYPE}}';
+	}
+{{QUERIES}}
+{{CALC_FIELDS}}
+}

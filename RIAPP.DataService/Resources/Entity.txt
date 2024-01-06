@@ -1,0 +1,8 @@
+﻿export class {{ENTITY_NAME}} extends RIAPP.Entity 
+{
+{{FIELDS_DEF}}
+{{ENTITY_FIELDS}}
+        override toString() {
+            return '{{ENTITY_NAME}}';
+        }         
+}

@@ -1,0 +1,45 @@
+<div class="content" role="main" *ngIf="initialized$ | async as ok; else loading">
+
+  <div>
+    <span class="title">{{ title }} app is running!</span>
+
+    <div style="padding: 5px; background-color:aqua;">
+      folders count: {{count$ | async}}
+    </div>
+    <ul>
+      <li *ngFor='let item of  items$ | async'>
+        <span [ngClass]="{ 'hasSubDirs' : item.HasSubDirs }" (click)="onItemClicked(item)">{{item.Name}}</span>
+        <ul>
+          <li *ngFor='let child of item.exProp.items$ | async'>
+            <span (click)="onItemClicked(child)">{{child.Name}}</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+   <form [formGroup]="productForm" [datasource]="currentProduct">
+    <label for="name">Product Name: </label>
+    <input id="name" class="input-control" type="text" bind bindPath="Name" bindMode="TwoWay" formControlName="Name" />
+    <br>
+    <label for="price">Price: </label>
+    <input id="price" class="input-control" type="text" bind bindMode="TwoWay" [converter]="decimalConverter" formControlName="ListPrice" />
+    <br>
+    <label for="date">Sell Date: </label>
+    <input id="date" type="datetime-local" class="input-control" bind bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="YYYY-MM-DDTHH:mm" formControlName="SellStartDate" />
+
+    <div class="actions">
+      <button class="button" (click)="onPreviousProduct()">Previous</button>
+      <button class="button" (click)="onNextProduct()">Next</button>
+      <button class="button" *ngIf="isHasChanges" (click)="onSubmit()">Submit</button>
+    </div>
+  </form>
+
+  <router-outlet></router-outlet>
+  </div>
+
+<ng-template #loading>
+  <div class="content" role="main">
+    Loading stuff...
+  </div>
+</ng-template>

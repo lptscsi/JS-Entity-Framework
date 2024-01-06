@@ -1,0 +1,7 @@
+﻿
+export class {{LIST_ITEM_NAME}} extends RIAPP.ListItem {
+{{ITEM_PROPS}}
+	override toString() {
+		return '{{LIST_ITEM_NAME}}';
+	}
+}

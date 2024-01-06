@@ -1,0 +1,139 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "jriapp-lib": {
+      "projectType": "library",
+      "root": "projects/jriapp-lib",
+      "sourceRoot": "projects/jriapp-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/jriapp-lib/tsconfig.lib.json",
+            "project": "projects/jriapp-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/jriapp-lib/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/jriapp-lib/src/test.ts",
+            "tsConfig": "projects/jriapp-lib/tsconfig.spec.json",
+            "karmaConfig": "projects/jriapp-lib/karma.conf.js"
+          }
+        }
+      }
+    },
+    "ClientApp": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/client-app",
+      "sourceRoot": "projects/client-app/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/ClientApp",
+            "index": "projects/client-app/src/index.html",
+            "main": "projects/client-app/src/main.ts",
+            "polyfills": "projects/client-app/src/polyfills.ts",
+            "tsConfig": "projects/client-app/tsconfig.app.json",
+            "assets": [
+              "projects/client-app/src/favicon.ico",
+              "projects/client-app/src/assets"
+            ],
+            "styles": [
+              "projects/client-app/src/styles.scss"
+            ],
+            "scripts": [],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/client-app/src/environments/environment.ts",
+                  "with": "projects/client-app/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": ""
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "ClientApp:build"
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "ClientApp:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "ClientApp:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/client-app/src/test.ts",
+            "polyfills": "projects/client-app/src/polyfills.ts",
+            "tsConfig": "projects/client-app/tsconfig.spec.json",
+            "karmaConfig": "projects/client-app/karma.conf.js",
+            "assets": [
+              "projects/client-app/src/favicon.ico",
+              "projects/client-app/src/assets"
+            ],
+            "styles": [
+              "projects/client-app/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": false
+  }
+}

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>RIAppDemo.BLL</RootNamespace>
+    <AssemblyName>RIAppDemo.BLL</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Metadata\FolderBrowser.xml" />
+    <None Remove="Metadata\MainDemo.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Metadata\FolderBrowser.xml" />
+    <EmbeddedResource Include="Metadata\MainDemo.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RIAPP.DataService.EFCore\RIAPP.DataService.EFCore.csproj" />
+    <ProjectReference Include="..\RIAPP.DataService\RIAPP.DataService.csproj" />
+    <ProjectReference Include="..\RIAppDemo.DAL\RIAppDemo.DAL.csproj" />
+  </ItemGroup>
+
+ </Project>

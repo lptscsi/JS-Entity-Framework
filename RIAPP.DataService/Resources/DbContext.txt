@@ -1,0 +1,14 @@
+﻿export class DbSets extends RIAPP.DbSets{
+	constructor() {
+		super();
+{{DBSETS}}
+	}
+{{DBSETS_PROPS}}
+}
+
+export class DbContext extends RIAPP.DbContext<ISvcMethods, IAssocs, DbSets>
+{
+        protected override _provideDbSets(): DbSets {
+            return new DbSets();
+        }
+}

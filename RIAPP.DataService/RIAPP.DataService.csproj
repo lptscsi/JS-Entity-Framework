@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\ChildComplexProperty.txt" />
+    <None Remove="Resources\DbContext.txt" />
+    <None Remove="Resources\DbSet.txt" />
+    <None Remove="Resources\Dictionary.txt" />
+    <None Remove="Resources\Entity.txt" />
+    <None Remove="Resources\EntityInterface.txt" />
+    <None Remove="Resources\Header.txt" />
+    <None Remove="Resources\List.txt" />
+    <None Remove="Resources\ListItem.txt" />
+    <None Remove="Resources\RootComplexProperty.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ChildComplexProperty.txt" />
+    <EmbeddedResource Include="Resources\DbContext.txt" />
+    <EmbeddedResource Include="Resources\DbSet.txt" />
+    <EmbeddedResource Include="Resources\Dictionary.txt" />
+    <EmbeddedResource Include="Resources\Entity.txt" />
+    <EmbeddedResource Include="Resources\EntityInterface.txt" />
+    <EmbeddedResource Include="Resources\Header.txt" />
+    <EmbeddedResource Include="Resources\List.txt" />
+    <EmbeddedResource Include="Resources\ListItem.txt" />
+    <EmbeddedResource Include="Resources\RootComplexProperty.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.14" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\ErrorStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ErrorStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\ErrorStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Utils\DynamicLinq\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,12 @@
+﻿export class {{TYPE_NAME}} extends RIAPP.RootComplexProperty 
+{
+{{FIELDS_DEF}}
+	constructor(name: string, owner: RIAPP.EntityAspect) {
+		super(name, owner);
+{{FIELDS_INIT}}
+	}
+{{PROPERTIES}}
+	override toString() {
+		return '{{TYPE_NAME}}';
+	}
+}

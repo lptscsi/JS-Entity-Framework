@@ -1,0 +1,11 @@
+﻿export class {{LIST_NAME}} extends RIAPP.BaseList<{{ITEM_TYPE_NAME}}> {
+	constructor() {
+		super({{PROP_INFOS}});
+	}
+	override itemFactory(aspect: RIAPP.ListItemAspect): {{ITEM_TYPE_NAME}} {
+		return new {{ITEM_TYPE_NAME}}(aspect);
+	}
+	override toString() {
+		return '{{LIST_NAME}}';
+	}
+}
