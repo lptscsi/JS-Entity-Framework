@@ -32,7 +32,8 @@ namespace RIAPP.DataService.Core.UseCases.InvokeMiddleware
             using (RequestCallContext callContext = new RequestCallContext(req))
             {
                 MethodInfoData methodData = method.GetMethodData();
-                object instance = serviceHelper.GetMethodOwner(methodData);
+                // invoke (aka service methods) are on the Domain Service only, so dbSetName is empty
+                object instance = serviceHelper.GetMethodOwner(string.Empty, methodData);
                 object invokeRes = methodData.MethodInfo.Invoke(instance, methParams.ToArray());
                 object methodResult = await serviceHelper.GetMethodResult(invokeRes);
 

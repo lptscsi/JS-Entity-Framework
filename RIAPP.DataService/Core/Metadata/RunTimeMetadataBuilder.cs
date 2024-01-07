@@ -239,8 +239,8 @@ namespace RIAPP.DataService.Core.Metadata
         {
             IEnumerable<MethodInfoData> allMethods = GetMethodsFromType(handlerType, true);
 
-            // query and invoke only 
-            MethodsList svcMethInfos = allMethods.GetSvcMethods(valueConverter);
+            // For handlers only query methods (no invoke ones, because they belong to the dataservice only, and the handlers don't have them) 
+            MethodsList svcMethInfos = allMethods.GetSvcMethods(valueConverter, MethodType.Query);
 
             InitHandlerSvcMethods(svcMethInfos, svcMethods, dbSetInfo);
 
@@ -258,8 +258,8 @@ namespace RIAPP.DataService.Core.Metadata
         {
             IEnumerable<MethodInfoData> allMethods = GetMethodsFromType(serviceType, false);
 
-            // query and invoke only 
-            MethodsList svcMethInfos = allMethods.GetSvcMethods(valueConverter);
+            // For DataService query and invoke only 
+            MethodsList svcMethInfos = allMethods.GetSvcMethods(valueConverter, MethodType.Query | MethodType.Invoke);
 
             InitSvcMethods(svcMethInfos, svcMethods, dbSets, dbSetsByTypeLookUp);
 

@@ -19,7 +19,7 @@ namespace RIAPP.DataService.Core
         void ApplyValues(object entity, RowInfo rowInfo, string path, ValueChange[] values, bool isOriginal);
         void CheckValuesChanges(RowInfo rowInfo, string path, ValueChange[] values);
         Task DeleteEntity(RunTimeMetadata metadata, RowInfo rowInfo);
-        object GetMethodOwner(MethodInfoData methodData);
+        object GetMethodOwner(string dbSetName, MethodInfoData methodData);
         object GetOriginalEntity(RowInfo rowInfo);
         object GetOriginalEntity(object entity, RowInfo rowInfo);
         T GetOriginalEntity<T>(RowInfo rowInfo) where T : class;
@@ -33,7 +33,6 @@ namespace RIAPP.DataService.Core
         void UpdateRowInfoFromEntity(object entity, RowInfo rowInfo);
         void UpdateValuesFromEntity(object entity, string path, DbSetInfo dbSetInfo, ValueChange[] values);
         Task<bool> ValidateEntity(RunTimeMetadata metadata, RequestContext requestContext);
-
         Task<object> GetMethodResult(object invokeRes);
     }
 

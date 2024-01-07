@@ -39,7 +39,7 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
             using (RequestCallContext callContext = new RequestCallContext(req))
             {
                 MethodInfoData methodData = method.GetMethodData();
-                object instance = serviceHelper.GetMethodOwner(methodData);
+                object instance = serviceHelper.GetMethodOwner(dbSetInfo.dbSetName, methodData);
                 object invokeRes = methodData.MethodInfo.Invoke(instance, methParams.ToArray());
                 QueryResult queryResult = (QueryResult)await serviceHelper.GetMethodResult(invokeRes);
 

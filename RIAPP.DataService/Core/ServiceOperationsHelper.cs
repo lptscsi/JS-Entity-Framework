@@ -16,9 +16,10 @@ namespace RIAPP.DataService.Core
         where TService : BaseDomainService
     {
         /// <summary>
-        /// Already created instances of DataManagers indexed by modelType
+        /// Already created instances of DataManagers indexed by dbSetName (their lifetime should span the whole request execution for all entities)
+        /// they are disposed after the request ended
         /// </summary>
-        private readonly ConcurrentDictionary<Type, object> _dataManagers;
+        private readonly ConcurrentDictionary<string, object> _dataManagers;
         private readonly IDataHelper<TService> _dataHelper;
         private readonly IValidationHelper<TService> _validationHelper;
         private TService _domainService;
@@ -34,7 +35,7 @@ namespace RIAPP.DataService.Core
             _domainService = domainService ?? throw new ArgumentNullException(nameof(domainService));
             _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
             _validationHelper = validationHelper ?? throw new ArgumentNullException(nameof(validationHelper));
-            _dataManagers = new ConcurrentDictionary<Type, object>();
+            _dataManagers = new ConcurrentDictionary<string, object>();
         }
 
         public void Dispose()
@@ -57,7 +58,7 @@ namespace RIAPP.DataService.Core
             }
         }
 
-        public object GetMethodOwner(MethodInfoData methodData)
+        public object GetMethodOwner(string dbSetName, MethodInfoData methodData)
         {
             // if method is not on datta manager (aka handler) then it is defined on the Data Service
             if (!methodData.IsInDataManager)
@@ -70,10 +71,19 @@ namespace RIAPP.DataService.Core
                 return _domainService;
             }
 
+            if (string.IsNullOrEmpty(dbSetName))
+            {
+                throw new InvalidOperationException("For DataManamagers (aka handlers) the DbSetName argument must not be empty");
+            }
+
+            // just to initialize metadata (in case it is not initialized)
             RunTimeMetadata metadata = _domainService.GetMetadata();
-            object handlerInstance = _dataManagers.GetOrAdd(methodData.OwnerType, type => {
+
+            // different DbSets can have the same entity type, but the instances of data managers (aka handlers) should be different
+            // so we use dbSet Name indexing for them
+            object handlerInstance = _dataManagers.GetOrAdd(dbSetName, name => {
                 IServiceProvider sp = _domainService.ServiceContainer.ServiceProvider;
-                return ActivatorUtilities.CreateInstance(sp, type);
+                return ActivatorUtilities.CreateInstance(sp, methodData.OwnerType);
             });
             return handlerInstance;
         }
@@ -370,7 +380,7 @@ namespace RIAPP.DataService.Core
             object dbEntity = Activator.CreateInstance(dbSetInfo.GetEntityType());
             UpdateEntityFromRowInfo(dbEntity, rowInfo, false);
             rowInfo.GetChangeState().Entity = dbEntity;
-            object instance = GetMethodOwner(methodData);
+            object instance = GetMethodOwner(dbSetInfo.dbSetName, methodData);
             object res = methodData.MethodInfo.Invoke(instance, new[] { dbEntity });
             if (res is Task)
             {
@@ -399,7 +409,7 @@ namespace RIAPP.DataService.Core
             object original = GetOriginalEntity(dbEntity, rowInfo);
             rowInfo.GetChangeState().Entity = dbEntity;
             rowInfo.GetChangeState().OriginalEntity = original;
-            object instance = GetMethodOwner(methodData);
+            object instance = GetMethodOwner(dbSetInfo.dbSetName, methodData);
             //apply this changes to entity that is in the database (this is done in user domain service method)
             object res = methodData.MethodInfo.Invoke(instance, new[] { dbEntity });
             if (res is Task)
@@ -428,7 +438,7 @@ namespace RIAPP.DataService.Core
             UpdateEntityFromRowInfo(dbEntity, rowInfo, true);
             rowInfo.GetChangeState().Entity = dbEntity;
             rowInfo.GetChangeState().OriginalEntity = dbEntity;
-            object instance = GetMethodOwner(methodData);
+            object instance = GetMethodOwner(dbSetInfo.dbSetName, methodData);
             object res = methodData.MethodInfo.Invoke(instance, new[] { dbEntity });
             if (res is Task)
             {
@@ -503,7 +513,7 @@ namespace RIAPP.DataService.Core
             MethodInfoData methodData = metadata.GetOperationMethodInfo(dbSetInfo.dbSetName, MethodType.Validate);
             if (methodData != null)
             {
-                object instance = GetMethodOwner(methodData);
+                object instance = GetMethodOwner(dbSetInfo.dbSetName, methodData);
                 object invokeRes = methodData.MethodInfo.Invoke(instance,
                     new[] { rowInfo.GetChangeState().Entity, rowInfo.GetChangeState().ChangedFieldNames });
                 errs1 = (IEnumerable<ValidationErrorInfo>)await GetMethodResult(invokeRes);
