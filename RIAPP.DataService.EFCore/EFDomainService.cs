@@ -104,19 +104,19 @@ namespace RIAPP.DataService.EFCore
                 IEnumerable<IProperty> edmProps = entityInfo.GetProperties().Where(p => !p.IsShadowProperty()).ToArray();
                 // IEnumerable<string> edmProps1 = entityInfo.GetNavigations().Select(n => n.ForeignKey.DeclaringEntityType.Name).ToArray();
                 IEnumerable<INavigation> ownedTypes = entityInfo.GetNavigations().Where(n => ownedTypesMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name)).ToArray();
-                DbSetInfo dbSetInfo = new DbSetInfo
-                {
-                    dbSetName = entityInfo.ClrType.Name
-                };
+              
+                FieldsList fields = GenerateFieldInfos(edmProps, ownedTypes, ownedTypesMap);
 
+                DbSetInfo dbSetInfo = new DbSetInfo(entityInfo.ClrType.Name, fields);
+ 
                 dbSetInfo.SetEntityType(entityInfo.ClrType);
                 metadata.DbSets.Add(dbSetInfo);
-                GenerateFieldInfos(metadata, entityInfo, dbSetInfo, edmProps, ownedTypes, ownedTypesMap);
                 GenerateAssociations(metadata, entityInfo, dbSetInfo);
             }
 
             return metadata;
         }
+
         #endregion
 
         #region helper methods
@@ -200,7 +200,7 @@ namespace RIAPP.DataService.EFCore
         }
         #endregion
 
-        private void GenerateAssociation(DesignTimeMetadata metadata, IEntityType entityInfo, DbSetInfo dbSetInfo, INavigation childToParentNav)
+        private void GenerateAssociation(DesignTimeMetadata metadata, INavigation childToParentNav)
         {
             INavigation inverseNavigation = childToParentNav.Inverse; //.FindInverse();
             string assoc_name = string.Format("{0}_{1}", inverseNavigation.Name, childToParentNav.Name);
@@ -325,8 +325,9 @@ namespace RIAPP.DataService.EFCore
             }
         }
 
-        private void GenerateFieldInfos(DesignTimeMetadata metadata, IEntityType entityInfo, DbSetInfo dbSetInfo, IEnumerable<IProperty> edmProps, IEnumerable<INavigation> ownedTypes, Dictionary<string, IEntityType> ownedMap)
+        private FieldsList GenerateFieldInfos(IEnumerable<IProperty> edmProps, IEnumerable<INavigation> ownedTypes, Dictionary<string, IEntityType> ownedMap)
         {
+            FieldsList fieldInfos = new FieldsList();
             short pkNum = 0;
             // Console.WriteLine($"Generate fields: {entityInfo.Name} FieldsCount: {edmProps.Count()}");
 
@@ -337,7 +338,7 @@ namespace RIAPP.DataService.EFCore
                 IEntityType ownedType = ownedMap[nm];
                 IEnumerable<INavigation> nestedOwnedTypes = ownedType.GetNavigations().Where(n => ownedMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name)).ToArray();
                 GenerateOwnedTypeFieldInfos(fieldInfo, ownedType, nestedOwnedTypes, ownedMap);
-                dbSetInfo.fieldInfos.Add(fieldInfo);
+                fieldInfos.Add(fieldInfo);
             }
 
             DataService.Utils.IValueConverter valueConverter = ServiceContainer.ValueConverter;
@@ -374,8 +375,10 @@ namespace RIAPP.DataService.EFCore
                     }
                 }
 
-                dbSetInfo.fieldInfos.Add(fieldInfo);
+                fieldInfos.Add(fieldInfo);
             }
+
+            return fieldInfos;
         }
 
         private void GenerateAssociations(DesignTimeMetadata metadata, IEntityType entityInfo, DbSetInfo dbSetInfo)
@@ -383,7 +386,7 @@ namespace RIAPP.DataService.EFCore
             IEnumerable<INavigation> childToParentNavs = entityInfo.GetNavigations().Where(n => n.IsOnDependent /*IsDependentToPrincipal() */);
             foreach (INavigation childToParentNav in childToParentNavs)
             {
-                GenerateAssociation(metadata, entityInfo, dbSetInfo, childToParentNav);
+                GenerateAssociation(metadata, childToParentNav);
             }
         }
 

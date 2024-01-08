@@ -162,7 +162,7 @@ namespace RIAPP.DataService.Utils
 
         public Field GetFieldInfo(DbSetInfo dbSetInfo, string fullName)
         {
-            Dictionary<string, Field> fieldsByName = dbSetInfo.GetFieldByNames();
+            IReadOnlyDictionary<string, Field> fieldsByName = dbSetInfo.fieldInfos.GetFieldByNames();
             return fieldsByName[fullName];
         }
 

@@ -51,7 +51,7 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
                 SubsetsGenerator subsetsGenerator = new SubsetsGenerator(metadata, dataHelper);
                 SubsetList subResults = subsetsGenerator.CreateSubsets(queryResult.subResults);
 
-                ctx.Response.names = dbSetInfo.GetNames();
+                ctx.Response.names = dbSetInfo.GetFieldNames();
                 ctx.Response.totalCount = totalCount;
                 ctx.Response.rows = rows;
                 ctx.Response.subsets = subResults;

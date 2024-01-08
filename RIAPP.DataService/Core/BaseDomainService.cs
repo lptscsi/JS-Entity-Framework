@@ -104,7 +104,7 @@ namespace RIAPP.DataService.Core
                         break;
                     default:
                         {
-                            changed = dbSetInfo.GetNames().Select(f => f.n).ToArray();
+                            changed = dbSetInfo.GetFieldNames().Select(f => f.n).ToArray();
                         }
                         break;
                 }
