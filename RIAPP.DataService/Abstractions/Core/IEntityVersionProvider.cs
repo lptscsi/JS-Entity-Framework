@@ -5,6 +5,7 @@ namespace RIAPP.DataService.Core
     public interface IEntityVersionProvider
     {
         object GetOriginal();
+
         object GetParent(Type entityType);
 
         TModel GetOriginal<TModel>()

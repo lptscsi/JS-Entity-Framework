@@ -36,7 +36,13 @@ namespace RIAPP.DataService.Core.Config
 
             services.TryAddSingleton<IValidationHelper<TService>, ValidationHelper<TService>>();
 
+            services.TryAddScoped<IServiceOperations<TService>, ServiceOperations<TService>>();
+
             services.TryAddScoped<IServiceOperationsHelper<TService>, ServiceOperationsHelper<TService>>();
+
+            services.TryAddScoped<IEntityVersionHelper<TService>>(sp => {
+                return (IEntityVersionHelper<TService>)sp.GetRequiredService<IServiceOperationsHelper<TService>>();
+            });
 
             services.TryAddScoped<IServiceContainer<TService>, ServiceContainer<TService>>();
 

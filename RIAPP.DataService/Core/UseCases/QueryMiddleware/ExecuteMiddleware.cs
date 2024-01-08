@@ -41,7 +41,7 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
                 MethodInfoData methodData = method.GetMethodData();
                 object instance = serviceHelper.GetMethodOwner(dbSetInfo.dbSetName, methodData);
                 object invokeRes = methodData.MethodInfo.Invoke(instance, methParams.ToArray());
-                QueryResult queryResult = (QueryResult)await serviceHelper.GetMethodResult(invokeRes);
+                QueryResult queryResult = (QueryResult)await PropHelper.GetMethodResult(invokeRes);
 
                 IEnumerable<object> entities = queryResult.Result;
                 int? totalCount = queryResult.TotalCount;

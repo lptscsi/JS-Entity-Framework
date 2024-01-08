@@ -39,7 +39,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
         private async Task Insert(CRUDContext<TService> ctx, RunTimeMetadata metadata, ChangeSetRequest changeSet, IChangeSetGraph graph, RowInfo rowInfo)
         {
             TService service = ctx.Service;
-            IServiceOperationsHelper<TService> serviceHelper = ctx.ServiceContainer.GetServiceHelper();
+            IServiceOperations<TService> serviceHelper = ctx.ServiceContainer.GetServiceOperations<TService>();
 
             CheckRowInfo(rowInfo);
 
@@ -53,7 +53,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
         private async Task Update(CRUDContext<TService> ctx, RunTimeMetadata metadata, ChangeSetRequest changeSet, RowInfo rowInfo)
         {
             TService service = ctx.Service;
-            IServiceOperationsHelper<TService> serviceHelper = ctx.ServiceContainer.GetServiceHelper();
+            IServiceOperations<TService> serviceHelper = ctx.ServiceContainer.GetServiceOperations<TService>();
 
             CheckRowInfo(rowInfo);
 
@@ -67,7 +67,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
         private async Task Delete(CRUDContext<TService> ctx, RunTimeMetadata metadata, ChangeSetRequest changeSet, RowInfo rowInfo)
         {
             TService service = ctx.Service;
-            IServiceOperationsHelper<TService> serviceHelper = ctx.ServiceContainer.GetServiceHelper();
+            IServiceOperations<TService> serviceHelper = ctx.ServiceContainer.GetServiceOperations<TService>();
 
             CheckRowInfo(rowInfo);
 

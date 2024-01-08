@@ -29,7 +29,7 @@ namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
                 MethodInfoData methodData = metadata.GetOperationMethodInfo(ctx.Request.dbSetName, MethodType.Refresh);
                 object instance = serviceHelper.GetMethodOwner(dbSetInfo.dbSetName, methodData);
                 object invokeRes = methodData.MethodInfo.Invoke(instance, new object[] { ctx.Request });
-                object dbEntity = await serviceHelper.GetMethodResult(invokeRes);
+                object dbEntity = await PropHelper.GetMethodResult(invokeRes);
 
                 if (dbEntity != null)
                 {
