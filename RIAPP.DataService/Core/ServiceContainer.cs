@@ -70,8 +70,9 @@ namespace RIAPP.DataService.Core
 
         public ISerializer Serializer => _serializer;
 
-
         IServiceOperationsHelper IServiceContainer.ServiceHelper => this.GetServiceHelper();
+
+        IEntityVersionHelper IServiceContainer.EntityVersionHelper => this.GetEntityVersionHelper();
 
         IDataHelper IServiceContainer.DataHelper => this.GetDataHelper();
 

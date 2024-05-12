@@ -24,7 +24,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
         private async Task<bool> ValidateRows(CRUDContext<TService> ctx, ChangeSetRequest changeSet, RunTimeMetadata metadata, IEnumerable<RowInfo> rows)
         {
             TService service = ctx.Service;
-            IServiceOperationsHelper<TService> serviceHelper = ctx.ServiceContainer.GetServiceHelper();
+            IServiceOperations<TService> serviceHelper = ctx.ServiceContainer.GetServiceOperations<TService>();
 
             foreach (RowInfo rowInfo in rows)
             {

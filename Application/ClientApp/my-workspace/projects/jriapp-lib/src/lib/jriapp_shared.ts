@@ -10,6 +10,7 @@ export { createWeakMap } from "./jriapp_shared/utils/weakmap";
 export { STRS as LocaleSTRS, ERRS as LocaleERRS } from "./lang";
 
 export { BaseCollection } from "./jriapp_shared/collection/base";
+export * from "./jriapp_shared/collection/int";
 export { CollectionItem } from "./jriapp_shared/collection/item";
 export { ItemAspect } from "./jriapp_shared/collection/aspect";
 export * from "./jriapp_shared/collection/const";

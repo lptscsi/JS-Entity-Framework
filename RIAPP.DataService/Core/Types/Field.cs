@@ -5,7 +5,7 @@ using System.Linq;
 namespace RIAPP.DataService.Core.Types
 {
     /// <summary>
-    ///     Stores field description (it's attributes)
+    /// Stores field description (it's attributes)
     /// </summary>
     public class Field
     {

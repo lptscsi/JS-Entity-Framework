@@ -1,14 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { Utils } from "jriapp-lib";
+import { DbSet, Utils } from "jriapp-lib";
 import { Product } from 'projects/client-app/src/db/adwDB';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as FOLDER_DB from "../db/folderDB";
 import { dateConverter, dateTimeConverter, decimalConverter } from "../logic/converter";
 import { AdwService } from '../services/adw.service';
 import { FolderService, IFileSystemObject } from '../services/folder.service';
+import { PaginatorState } from 'primeng/paginator';
+import { SortEvent } from 'primeng/api';
+import { ViewChild } from '@angular/core';
+import { Table } from 'primeng/table';
 
 const utils = Utils;
+
+interface PageEvent {
+  first: number;
+  rows: number;
+  page: number;
+  pageCount: number;
+}
 
 @Component({
   selector: 'app-root',
@@ -21,10 +32,29 @@ export class AppComponent implements OnInit {
   readonly dateTimeConverter = dateTimeConverter;
   readonly dateConverter = dateConverter;
 
+  @ViewChild('dt') dt: Table;
 
   items$: Observable<IFileSystemObject[]>;
   count$: Observable<number>;
   initialized$: Observable<boolean>;
+
+  metaKey: boolean = true;
+
+  get products(): DbSet<Product> {
+    return this.adwService.dbSet;
+  }
+
+  get productsCount(): number {
+    return this.adwService.dbSet.totalCount;
+  }
+
+  get selectedProduct() {
+    return this.products.currentItem;
+  }
+
+  set selectedProduct(v: Product) {
+    this.products.currentItem = v;
+  }
 
   constructor(
     private folderService: FolderService,
@@ -48,7 +78,43 @@ export class AppComponent implements OnInit {
     this.items$ = this.folderService.items$;
     this.count$ = this.folderService.count$;
     this.folderService.loadRootFolder();
-    this.adwService.load();
+    this.adwService.load(0, this.pageSize);
+  }
+
+  pageIndex: number = 0;
+  pageSize: number = 10;
+  offset: number = 0;
+
+
+  customSort(event: SortEvent) {
+    const field = event.field;
+    const order = event.order;
+    //console.log("sort", event);
+    this.adwService.sortChanged(field, order).finally(() => {
+      this.pageIndex = 0;
+      this.offset = 0;
+    });
+  }
+
+  onPageChange(event: PaginatorState) {
+    this.offset = event.first;
+    this.pageSize = event.rows;
+    this.pageIndex = event.page;
+    this.adwService.pageChanged(this.pageIndex, this.pageSize);
+  }
+
+  onRowEditInit(product: Product) {
+    product._aspect.beginEdit()
+  }
+
+  onRowEditSave(product: Product) {
+    if (!product._aspect.getIsHasErrors()) {
+      const isSuccess = product._aspect.endEdit();
+    }
+  }
+
+  onRowEditCancel(product: Product, index: number) {
+    product._aspect.cancelEdit();
   }
 
   // currently not used
@@ -79,9 +145,13 @@ export class AppComponent implements OnInit {
   onNextProduct() {
     this.adwService.dbSet.moveNext();
   }
+  onReject() {
+    this.adwService.dbSet.cancelEdit();
+    return this.adwService.dbContext.rejectChanges();
+  }
   onSubmit() {
     this.adwService.dbSet.endEdit();
-    return this.adwService.submit();
+    return this.adwService.dbContext.submitChanges();
   }
 
   //#region Forms

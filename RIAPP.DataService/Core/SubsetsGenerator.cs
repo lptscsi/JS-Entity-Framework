@@ -42,7 +42,7 @@ namespace RIAPP.DataService.Core
                 {
                     dbSetName = dbSetInfo.dbSetName,
                     rows = rowGenerator.CreateDistinctRows(),
-                    names = dbSetInfo.GetNames()
+                    columns = dbSetInfo.GetColumns()
                 };
 
                 result.Add(current);

@@ -1,4 +1,4 @@
-﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
+/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { IIndexer } from "../int";
 import { ERROR } from "./error";
 import { CoreUtils } from "./coreutils";
@@ -23,8 +23,8 @@ interface ITask {
 }
 
 export function createQueue(interval: number = 0): IQueue {
-    let _tasks: ITask[] = [], _taskMap: IIndexer<ITask> = Indexer(),
-        _timer: number = null, _newTaskId = 1;
+  let _tasks: ITask[] = [], _taskMap: IIndexer<ITask> = Indexer(),
+    _timer: any = null, _newTaskId = 1;
 
     const _queue: IQueue = {
         cancel: function (taskId: number): void {

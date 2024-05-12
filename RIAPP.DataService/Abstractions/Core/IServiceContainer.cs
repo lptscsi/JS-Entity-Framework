@@ -16,6 +16,8 @@ namespace RIAPP.DataService.Core
 
         IServiceOperationsHelper ServiceHelper { get; }
 
+        IEntityVersionHelper EntityVersionHelper { get; }
+
         IDataHelper DataHelper { get; }
 
         IValueConverter ValueConverter { get; }

@@ -28,7 +28,7 @@ p {
   display: flex;
   margin: 20px auto 32px;
   padding: 0 16px;
-  max-width: 960px;
+  max-width: 1200px;
   flex-direction: column;
   align-items: center;
 }
@@ -86,3 +86,9 @@ form > label {
     display: inline-block;
     min-width: 10em;
 }
+
+.ng-invalid {
+    outline: 2px solid red;
+}
+
+

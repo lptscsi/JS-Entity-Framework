@@ -18,28 +18,105 @@
     </ul>
   </div>
 
-   <form [formGroup]="productForm" [datasource]="currentProduct">
+  <form [formGroup]="productForm" [datasource]="currentProduct">
     <label for="name">Product Name: </label>
-    <input id="name" class="input-control" type="text" bind bindPath="Name" bindMode="TwoWay" formControlName="Name" />
+    <input id="name" class="input-control" type="text" bind="Name" bindMode="TwoWay" formControlName="Name" />
     <br>
     <label for="price">Price: </label>
-    <input id="price" class="input-control" type="text" bind bindMode="TwoWay" [converter]="decimalConverter" formControlName="ListPrice" />
+    <input id="price" class="input-control" type="text" bind="ListPrice" bindMode="TwoWay" [converter]="decimalConverter" formControlName="ListPrice" />
     <br>
     <label for="date">Sell Date: </label>
-    <input id="date" type="datetime-local" class="input-control" bind bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="YYYY-MM-DDTHH:mm" formControlName="SellStartDate" />
+    <input id="date" type="datetime-local" class="input-control" bind="SellStartDate" bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="YYYY-MM-DDTHH:mm" formControlName="SellStartDate" />
 
     <div class="actions">
       <button class="button" (click)="onPreviousProduct()">Previous</button>
       <button class="button" (click)="onNextProduct()">Next</button>
-      <button class="button" *ngIf="isHasChanges" (click)="onSubmit()">Submit</button>
+      <button class="button" *ngIf="isHasChanges" (click)="onReject()">Reject Changes</button>
+      <button class="button" *ngIf="isHasChanges" (click)="onSubmit()">Submit Changes</button>
     </div>
   </form>
 
-  <router-outlet></router-outlet>
-  </div>
+ 
+    <div style="width:100%">
+      <h2>PRODUCTS</h2>
+      <p-table  #dt
+               [dbset]="products"
+               [resizableColumns]="true"
+               [scrollable]="true" 
+               scrollHeight="400px" 
+               styleClass="p-datatable-gridlines" 
+               dataKey="ProductId"
+               editMode="row"
+               [metaKeySelection]="metaKey" 
+               selectionMode="single" [(selection)]="selectedProduct"
+               (sortFunction)="customSort($event)" [customSort]="true"
+               [tableStyle]="{ 'min-width': '50rem' }"
+               [style.display]="'block'"
+               [style.width.%]="100">
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="Name">Name <p-sortIcon field="Name" /></th>
+            <th pSortableColumn="ListPrice">Price <p-sortIcon field="ListPrice" /></th>
+            <th pSortableColumn="SellStartDate">SellStartDate <p-sortIcon field="SellStartDate" /></th>
+            <th>&nbsp;</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product  let-editing="editing" let-ri="rowIndex">
+          <tr [pEditableRow]="product" [pSelectableRow]="product" error-info [datasource]="product">
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <input pInputText type="text" ngModel bind="Name" bindMode="TwoWay">
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{product.Name}}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <input pInputText type="text" ngModel bind="ListPrice" bindMode="TwoWay" [converter]="decimalConverter" />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{product.ListPrice}}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <p-cellEditor>
+                <ng-template pTemplate="input">
+                  <input pInputText type="text" ngModel bind="SellStartDate" bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="DD.MM.YYYY" />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{product.SellStartDate | date: 'dd.MM.yyyy'}}
+                </ng-template>
+              </p-cellEditor>
+            </td>
+            <td>
+              <div class="flex align-items-center justify-content-center gap-2">
+                <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInit(product)" class="p-button-rounded p-button-text"></button>
+                <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(product)" class="p-button-rounded p-button-text p-button-success mr-2"></button>
+                <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(product, ri)" class="p-button-rounded p-button-text p-button-danger"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
 
-<ng-template #loading>
-  <div class="content" role="main">
-    Loading stuff...
+      <p-paginator (onPageChange)="onPageChange($event)"
+                   [first]="offset"
+                   [rows]="pageSize"
+                   [totalRecords]="productsCount"
+                   [rowsPerPageOptions]="[5, 10, 20, 30]">
+      </p-paginator>
+    </div>
+    
+    <router-outlet></router-outlet>
   </div>
-</ng-template>
+  
+  <ng-template #loading>
+    <div class="content" role="main">
+      Loading stuff...
+    </div>
+  </ng-template>

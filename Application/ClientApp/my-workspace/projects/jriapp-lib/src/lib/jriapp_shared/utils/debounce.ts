@@ -1,4 +1,4 @@
-﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
+/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { IDisposable, TFunc } from "../int";
 import { getTaskQueue } from "./queue";
 import { ERROR } from "./error";
@@ -6,7 +6,7 @@ import { ERROR } from "./error";
 const error = ERROR, win = window;
 
 export class Debounce implements IDisposable {
-    private _timer: number;
+    private _timer: any;
     private _interval: number;
     private _fn: TFunc;
 

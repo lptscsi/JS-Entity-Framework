@@ -135,13 +135,13 @@ namespace RIAPP.DataService.Core.CodeGen
 
                 _dbSets.ForEach(dbSetInfo =>
                 {
-                    dbSetInfo.fieldInfos.ForEach(fieldInfo =>
+                    foreach(var fieldInfo in dbSetInfo.fieldInfos)
                     {
                         if (fieldInfo.fieldType == FieldType.Object)
                         {
                             ctbuilder.CreateComplexType(dbSetInfo, fieldInfo, 0);
                         }
-                    });
+                    };
                 });
 
                 string complexTypes = ctbuilder.GetComplexTypes();
@@ -521,7 +521,7 @@ namespace RIAPP.DataService.Core.CodeGen
             string entityInterfaceName = GetEntityInterfaceName(dbSetInfo.dbSetName);
             StringBuilder sb = new StringBuilder(256);
 
-            dbSetInfo.fieldInfos.ForEach(fieldInfo =>
+            foreach(var fieldInfo in dbSetInfo.fieldInfos)
             {
                 _dataHelper.ForEachFieldInfo("", fieldInfo, (fullName, f) =>
                 {
@@ -535,7 +535,7 @@ namespace RIAPP.DataService.Core.CodeGen
                         sb.AppendLine();
                     }
                 });
-            });
+            }
 
             return TrimEnd(sb.ToString());
         }
@@ -580,10 +580,11 @@ namespace RIAPP.DataService.Core.CodeGen
             string dbSetType = GetDbSetTypeName(dbSetInfo.dbSetName);
             List<Association> childAssoc = _associations.Where(assoc => assoc.childDbSetName == dbSetInfo.dbSetName).ToList();
             List<Association> parentAssoc = _associations.Where(assoc => assoc.parentDbSetName == dbSetInfo.dbSetName).ToList();
-            FieldsList fieldInfos = dbSetInfo.fieldInfos;
+            IFieldsList fieldInfos = dbSetInfo.fieldInfos;
 
             Field[] pkFields = dbSetInfo.GetPKFields();
             string pkVals = "";
+
             foreach (Field pkField in pkFields)
             {
                 if (!string.IsNullOrEmpty(pkVals))
@@ -593,6 +594,7 @@ namespace RIAPP.DataService.Core.CodeGen
 
                 pkVals += pkField.fieldName.ToCamelCase() + ": " + GetFieldDataType(pkField);
             }
+
             Dictionary<string, Func<TemplateParser.Context, string>> dic = new Dictionary<string, Func<TemplateParser.Context, string>>
             {
                 { "DBSET_NAME", (context) => dbSetInfo.dbSetName },
@@ -605,8 +607,8 @@ namespace RIAPP.DataService.Core.CodeGen
                         //we are making copy of the object, in order that we don't change original object
                         //while it can be accessed by other threads
                         //we change our own copy, making it threadsafe
-                        DbSetInfo copy = dbSetInfo.ShallowCopy();
-                        copy.SetFieldInfos(new FieldsList()); //serialze with empty field infos
+                        //serialze with empty field infos
+                        DbSetInfo copy = new DbSetInfo(dbSetInfo, new FieldsList());
                         return _serializer.Serialize(copy);
                      }
                 },
@@ -642,7 +644,7 @@ namespace RIAPP.DataService.Core.CodeGen
             entityDef.interfaceName = GetEntityInterfaceName(dbSetInfo.dbSetName);
             entityDef.entityName = GetEntityTypeName(dbSetInfo.dbSetName);
 
-            FieldsList fieldInfos = dbSetInfo.fieldInfos;
+            IFieldsList fieldInfos = dbSetInfo.fieldInfos;
             StringBuilder sbFields = new StringBuilder();
             StringBuilder sbFieldsDef = new StringBuilder();
             StringBuilder sbFieldsInit = new StringBuilder();
@@ -720,7 +722,7 @@ namespace RIAPP.DataService.Core.CodeGen
                 sbValsFields.AppendLine();
             };
 
-            fieldInfos.ForEach(fieldInfo =>
+            foreach(var fieldInfo in fieldInfos)
             {
                 if (fieldInfo.fieldType == FieldType.Calculated)
                 {
@@ -738,7 +740,7 @@ namespace RIAPP.DataService.Core.CodeGen
                 {
                     AddSimpleField(fieldInfo);
                 }
-            });
+            }
 
             Dictionary<string, Func<TemplateParser.Context, string>> dic = new Dictionary<string, Func<TemplateParser.Context, string>>
             {

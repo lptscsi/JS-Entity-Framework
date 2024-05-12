@@ -1,10 +1,10 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import {
-    assign, ERRS, IErrors
+    assign, ERRS, IErrorStrings
 } from "./lang";
 
 
-const _ERRS: IErrors = {
+const _ERRS: IErrorStrings = {
     ERR_OBJ_ALREADY_REGISTERED: "Объект с именем: {0} уже зарегестрирован и не может быть перезаписан",
     ERR_OPTIONS_ALREADY_REGISTERED: "Опции с именем: {0} уже зарегестрированы и не могут быть перезаписаны",
     ERR_APP_NEED_JQUERY: "Проект зависит от JQuery и не может без него правильно работать",

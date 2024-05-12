@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Utils
 {
@@ -18,6 +19,7 @@ namespace RIAPP.DataService.Utils
         {
            return _GetValue((dynamic)obj, propertyName, throwErrors);
         }
+
         public static bool SetValue(object obj, string propertyName, object value, bool throwErrors)
         {
             return _SetValue((dynamic)obj, propertyName, value, throwErrors);
@@ -26,6 +28,24 @@ namespace RIAPP.DataService.Utils
         public static object SetFieldValue(object entity, string fullName, Field fieldInfo, string value, IValueConverter valueConverter)
         {
             return _SetFieldValue((dynamic)entity, fullName, fieldInfo, value, valueConverter);
+        }
+
+        public static async Task<object> GetMethodResult(object invokeRes)
+        {
+            System.Type typeInfo = invokeRes != null ? invokeRes.GetType() : null;
+            if (typeInfo != null && invokeRes is Task)
+            {
+                await ((Task)invokeRes);
+                if (typeInfo.IsGenericType)
+                {
+                    return typeInfo.GetProperty("Result").GetValue(invokeRes, null);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            return invokeRes;
         }
 
         private static object _GetValue(object obj, string propertyName, bool throwErrors)

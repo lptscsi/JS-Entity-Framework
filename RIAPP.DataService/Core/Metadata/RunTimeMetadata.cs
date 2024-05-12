@@ -12,15 +12,14 @@ namespace RIAPP.DataService.Core.Metadata
         private readonly OperationalMethods _operMethods;
         private readonly MethodMap _svcMethods;
 
-        public RunTimeMetadata(DbSetsDictionary dbSets,
-            ILookup<Type, DbSetInfo> dbSetsByEntityType,
-            AssociationsDictionary associations,
+        public RunTimeMetadata(
+            DbSetInfoMap dbSets,
+            AssociationMap associations,
             MethodMap svcMethods,
             OperationalMethods operMethods,
             string[] typeScriptImports)
         {
             DbSets = dbSets;
-            DbSetsByEntityType = dbSetsByEntityType;
             Associations = associations;
             _svcMethods = svcMethods;
             _operMethods = operMethods;
@@ -75,9 +74,9 @@ namespace RIAPP.DataService.Core.Metadata
             return _operMethods.GetMethod(dbSetName, methodType);
         }
 
-        public DbSetsDictionary DbSets { get; }
+        public DbSetInfoMap DbSets { get; }
 
-        public AssociationsDictionary Associations { get; }
+        public AssociationMap Associations { get; }
 
         public MethodsList MethodDescriptions => new MethodsList(_svcMethods.Values);
 

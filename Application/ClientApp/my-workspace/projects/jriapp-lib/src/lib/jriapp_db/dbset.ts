@@ -15,7 +15,7 @@ import { REFRESH_MODE } from "./const";
 import { DataQuery, TDataQuery } from "./dataquery";
 import { DbContext } from "./dbcontext";
 import { EntityAspect } from "./entity_aspect";
-import { IAssociationInfo, ICalcFieldImpl, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, IFieldName, INavFieldImpl, IQueryResponse, IQueryResult, IRowData, IRowInfo, ITrackAssoc } from "./int";
+import { IAssociationInfo, ICalcFieldImpl, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, IColumn, INavFieldImpl, IQueryResponse, IQueryResult, IRowData, IRowInfo, ITrackAssoc } from "./int";
 
 const utils = Utils, { isArray, isNt } = utils.check, { format } = utils.str,
   { getValue, setValue, merge, forEach, Indexer } = utils.core, ERROR = utils.err,
@@ -346,18 +346,18 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     }
     return result;
   }
-  protected _refreshValues(path: string, item: IEntityItem, values: any[], names: IFieldName[], rm: REFRESH_MODE): void {
+  protected _refreshValues(path: string, item: IEntityItem, values: any[], columns: IColumn[], rm: REFRESH_MODE): void {
     const self = this, dependents = utils.core.Indexer();
 
     values.forEach((value, index) => {
-      const name: IFieldName = names[index], fieldName = path + name.n, fld = self.getFieldInfo(fieldName);
+      const name: IColumn = columns[index], fieldName = path + name.name, fld = self.getFieldInfo(fieldName);
       if (!fld) {
         throw new Error(format(ERRS.ERR_DBSET_INVALID_FIELDNAME!, self.dbSetName, fieldName));
       }
 
       if (fld.fieldType === FIELD_TYPE.Object) {
         // for object fields the value should be an array of values - recursive processing
-        self._refreshValues(fieldName + ".", item, <any[]>value, name.p!, rm);
+        self._refreshValues(fieldName + ".", item, <any[]>value, name.nested!, rm);
       } else {
         // for other fields the value is a string
         item._aspect._refreshValue(value, fieldName, rm, dependents);
@@ -366,10 +366,10 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
     item._aspect._updateDependents(dependents);
   }
-  protected _applyFieldVals(vals: any, path: string, values: any[], names: IFieldName[]) {
+  protected _applyFieldVals(vals: any, path: string, values: any[], columns: IColumn[]) {
     const self = this;
     values.forEach((value, index) => {
-      const name: IFieldName = names[index], fieldName = path + name.n,
+      const name: IColumn = columns[index], fieldName = path + name.name,
         fld = self.getFieldInfo(fieldName);
       if (!fld) {
         throw new Error(format(ERRS.ERR_DBSET_INVALID_FIELDNAME!, self.dbSetName, fieldName));
@@ -377,7 +377,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
       if (fld.fieldType === FIELD_TYPE.Object) {
         // for object fields the value should be an array of values - recursive processing
-        self._applyFieldVals(vals, fieldName + ".", <any[]>value, name.p!);
+        self._applyFieldVals(vals, fieldName + ".", <any[]>value, name.nested!);
       } else {
         // for other fields the value is a string, which is parsed to a typed value
         const val = parseValue(value, fld.dataType);
@@ -658,7 +658,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     }
   }
   protected _fillFromService(info: IFillFromServiceArgs): IQueryResult<TItem> {
-    const self = this, res = info.res, fieldNames = res.names, rows = res.rows || [],
+    const self = this, res = info.res, columns = res.columns, rows = res.rows || [],
       isPagingEnabled = this.isPagingEnabled, query = info.query;
     let isClearAll = true;
 
@@ -681,9 +681,9 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
       let item = self.getItemByKey(key);
       if (!item) {
-        item = self.createEntityFromData(row, fieldNames);
+        item = self.createEntityFromData(row, columns);
       } else {
-        self._refreshValues("", item, row.v, fieldNames, REFRESH_MODE.RefreshCurrent);
+        self._refreshValues("", item, row.v, columns, REFRESH_MODE.RefreshCurrent);
       }
 
       return item;
@@ -892,34 +892,32 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
       query.dispose();
     }
   }
-  protected _getNames(): IFieldName[] {
-    const fieldInfos = this.getFieldInfos(), names: IFieldName[] = [];
-    const callback = (fld: IFieldInfo, _fullName: string, arr: IFieldName[]) => {
+  protected _getNames(): IColumn[] {
+    const fieldInfos = this.getFieldInfos(), names: IColumn[] = [];
+    const callback = (fld: IFieldInfo, _fullName: string, arr: IColumn[]) => {
       if (fld.fieldType === FIELD_TYPE.Object) {
-        const res: IFieldName[] = [];
+        const res: IColumn[] = [];
         arr?.push({
-          n: fld.fieldName, p: res
+          name: fld.fieldName, nested: res
         });
         return res;
       } else {
         const isOK = fld.fieldType === FIELD_TYPE.None || fld.fieldType === FIELD_TYPE.RowTimeStamp || fld.fieldType === FIELD_TYPE.ServerCalculated;
         if (isOK) {
           arr?.push({
-            n: fld.fieldName, p: null
+            name: fld.fieldName, nested: null
           });
         }
         return arr;
       }
     };
-    walkFields(fieldInfos, callback as WalkFieldCB<IFieldName[]>, names);
+    walkFields(fieldInfos, callback as WalkFieldCB<IColumn[]>, names);
     return names;
   }
-  // override
-  getFieldMap(): IIndexer<IFieldInfo> {
+  override getFieldMap(): IIndexer<IFieldInfo> {
     return this._fieldMap;
   }
-  // override
-  getFieldInfos(): IFieldInfo[] {
+  override getFieldInfos(): IFieldInfo[] {
     return this._fieldInfos;
   }
   createEntityFromObj(obj: object, key?: string): TItem {
@@ -928,10 +926,10 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     const aspect = new EntityAspect(this as unknown as DbSet<IEntityItem>, vals, _key, isNew);
     return aspect.item as TItem;
   }
-  createEntityFromData(row: IRowData | null, fieldNames: IFieldName[] | null): TItem {
+  createEntityFromData(row: IRowData | null, columns: IColumn[] | null): TItem {
     const vals: any = initVals(this.getFieldInfos(), {}), isNew = !row;
     if (!!row) {
-      this._applyFieldVals(vals, "", row.v, fieldNames!);
+      this._applyFieldVals(vals, "", row.v, columns!);
     }
     const aspect = new EntityAspect(this as unknown as DbSet<IEntityItem>, vals, isNew ? this._getNewKey() : row.k, isNew);
     return aspect.item as TItem;
@@ -940,7 +938,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     return <IInternalDbSetMethods<TItem>>super._getInternal();
   }
   refreshData(data: {
-    names: IFieldName[];
+    columns: IColumn[];
     rows: IRowData[];
   }): void {
     for (const row of data.rows) {
@@ -952,13 +950,13 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
       let item = this.getItemByKey(key);
       if (!!item) {
-        this._refreshValues("", item, row.v, data.names, REFRESH_MODE.RefreshCurrent);
+        this._refreshValues("", item, row.v, data.columns, REFRESH_MODE.RefreshCurrent);
       }
     }
   }
   // fill items from row data (in wire format)
   fillData(data: {
-    names: IFieldName[];
+    columns: IColumn[];
     rows: IRowData[];
   }, isAppend?: boolean): IQueryResult<TItem> {
     const self = this, reason = COLL_CHANGE_REASON.None;
@@ -977,9 +975,9 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
       let item = self.getItemByKey(key);
       if (!item) {
-        item = self.createEntityFromData(row, data.names);
+        item = self.createEntityFromData(row, data.columns);
       } else {
-        self._refreshValues("", item, row.v, data.names, REFRESH_MODE.RefreshCurrent);
+        self._refreshValues("", item, row.v, data.columns, REFRESH_MODE.RefreshCurrent);
       }
       return item;
     });

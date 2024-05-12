@@ -1,7 +1,8 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, Optional, SkipSelf } from '@angular/core';
 import { IPromise, IQueryResult, IStatefulPromise, SORT_ORDER, Utils } from 'jriapp-lib';
 import { DbContext, Product } from "../db/adwDB";
-import { HttpClient } from '@angular/common/http';
+
 const utils = Utils;
 
 export interface IOptions {
@@ -15,6 +16,7 @@ export class AdwService {
   private _dbContext: DbContext;
   private _uniqueID: string;
   private _initPromise: Promise<any>;
+
   
   constructor(
     @Optional() @SkipSelf() existingService: AdwService,
@@ -25,6 +27,7 @@ export class AdwService {
         'The service has already been provided in the app. Avoid providing it again in child modules'
       );
     }
+
     const self = this, options: IOptions = { service_url: "/RIAppDemoServiceEF" };
     self._uniqueID = utils.core.getNewID();
     self._dbContext = new DbContext();
@@ -32,7 +35,6 @@ export class AdwService {
       serviceUrl: options.service_url,
       http: http
     }).then(() => {
-
       this.dbSet.addOnEndEdit(function (_s, args) {
         // NOOP
       }, self.uniqueID);
@@ -48,16 +50,44 @@ export class AdwService {
       this.dbContext.addOnError(function (s, args) {
         console.error(args.error);
       }, self.uniqueID);
-
     });
   }
-  load(): IStatefulPromise<IQueryResult<Product>> {
+
+  load(pageIndex: number = 0, pageSize: number): IStatefulPromise<IQueryResult<Product>> {
     const self = this, query = self.dbSet.createReadProductQuery({ param1: [0], param2: "test" });
     query.isClearPrevData = true;
-    query.orderBy('Name').thenBy('SellStartDate', SORT_ORDER.DESC);
+    query.isPagingEnabled = true;
+    query.pageIndex = pageIndex;
+    query.pageSize = pageSize;
+    query
+      .orderBy('Name')
+      .thenBy('SellStartDate', SORT_ORDER.DESC);
     let promise = query.load();
     return promise;
   }
+
+  pageChanged(pageIndex: number = 0, pageSize: number) {
+    const self = this;
+    self.dbSet.pageSize = pageSize;
+    self.dbSet.pageIndex = pageIndex;
+  }
+
+  sortChanged(field: string, order: number): IStatefulPromise<IQueryResult<Product>>  {
+    const self = this, query = self.dbSet.query;
+    if (!!field) {
+      query.clearSort();
+      query.pageIndex = 0;
+      query.orderBy(field, order > 0 ? SORT_ORDER.DESC : SORT_ORDER.ASC);
+      // console.log(query.sortInfo);
+    }
+    else {
+      query
+        .orderBy('Name')
+        .thenBy('SellStartDate', SORT_ORDER.DESC);
+    }
+    return query.load();
+  }
+
   submit(): IPromise<any> {
     const self = this;
     return self.dbContext.submitChanges();

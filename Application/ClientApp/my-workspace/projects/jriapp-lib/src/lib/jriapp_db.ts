@@ -10,7 +10,7 @@ export { DbSet, IDbSetConstructor, IInternalDbSetMethods } from "./jriapp_db/dbs
 export * from "./jriapp_db/dbsets";
 export * from "./jriapp_db/entity_aspect";
 export * from "./jriapp_db/error";
-export { IAssociationInfo, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, IErrorInfo, IFieldName, IFilterInfo, IMetadata, IQueryInfo, IQueryResult, IRowData, ISortInfo, IValidationErrorInfo } from "./jriapp_db/int";
+export { IAssociationInfo, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, IErrorInfo, IColumn, IFilterInfo, IMetadata, IQueryInfo, IQueryResult, IRowData, ISortInfo, IValidationErrorInfo } from "./jriapp_db/int";
 
 
 export const VERSION = "1.1.0";

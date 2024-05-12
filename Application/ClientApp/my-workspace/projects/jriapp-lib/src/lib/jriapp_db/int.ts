@@ -13,9 +13,9 @@ import { DELETE_ACTION } from "./const";
 import { DbContext } from "./dbcontext";
 import { EntityAspect } from "./entity_aspect";
 
-export interface IFieldName {
-    n: string; // field's name
-    p: IFieldName[] | null; // for object field contains its properties, for others is null
+export interface IColumn {
+    name: string; // field's name
+    nested: IColumn[] | null; // for object field contains its properties, for others is null
 }
 
 export interface IEntityItem extends ICollectionItem {
@@ -80,7 +80,7 @@ export interface IErrorInfo {
 }
 
 export interface ISubset {
-    names: IFieldName[];
+    columns: IColumn[];
     rows: IRowData[];
     dbSetName: string;
 }
@@ -206,7 +206,7 @@ export interface IQueryResult<TItem extends IEntityItem> {
 }
 
 export interface IQueryResponse {
-    names: IFieldName[];
+    columns: IColumn[];
     rows: IRowData[];
     dbSetName: string;
     pageIndex: number;

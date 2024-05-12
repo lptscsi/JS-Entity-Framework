@@ -39,9 +39,9 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
             using (RequestCallContext callContext = new RequestCallContext(req))
             {
                 MethodInfoData methodData = method.GetMethodData();
-                object instance = serviceHelper.GetMethodOwner(methodData);
+                object instance = serviceHelper.GetMethodOwner(dbSetInfo.dbSetName, methodData);
                 object invokeRes = methodData.MethodInfo.Invoke(instance, methParams.ToArray());
-                QueryResult queryResult = (QueryResult)await serviceHelper.GetMethodResult(invokeRes);
+                QueryResult queryResult = (QueryResult)await PropHelper.GetMethodResult(invokeRes);
 
                 IEnumerable<object> entities = queryResult.Result;
                 int? totalCount = queryResult.TotalCount;
@@ -51,7 +51,7 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
                 SubsetsGenerator subsetsGenerator = new SubsetsGenerator(metadata, dataHelper);
                 SubsetList subResults = subsetsGenerator.CreateSubsets(queryResult.subResults);
 
-                ctx.Response.names = dbSetInfo.GetNames();
+                ctx.Response.columns = dbSetInfo.GetColumns();
                 ctx.Response.totalCount = totalCount;
                 ctx.Response.rows = rows;
                 ctx.Response.subsets = subResults;

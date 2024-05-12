@@ -17,7 +17,7 @@ namespace RIAPP.DataService.Core.Metadata
         private static readonly XNamespace NS_XAML = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public DBSetList DbSets { get; } = new DBSetList();
+        public DbSetInfoList DbSets { get; } = new DbSetInfoList();
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public AssocList Associations { get; } = new AssocList();
@@ -110,11 +110,10 @@ namespace RIAPP.DataService.Core.Metadata
 
                     string xType3 = xdbSet.Attribute("ValidatorType")?.Value;
                     Type validatorType = _GetTypeFromXType(xType3, xdoc);
-              
-                    DbSetInfo dbSetInfo = new DbSetInfo
-                    {
-                        dbSetName = dbSetName
-                    };
+
+                    DbSetInfo dbSetInfo = new DbSetInfo(dbSetName);
+
+                    FieldsList fieldsList = new FieldsList();
 
                     dbSetInfo.SetEntityType(entityType);
                     if (handlerType != null)
@@ -141,11 +140,11 @@ namespace RIAPP.DataService.Core.Metadata
                         dbSetInfo.SetIsTrackChanges((bool)xdbSet.Attribute("isTrackChanges"));
                     }
 
-                    metadata.DbSets.Add(dbSetInfo);
-
                     XElement xFields = xdbSet.Element(NS_DATA + "DbSetInfo.fieldInfos");
                     IEnumerable<XElement> fields = xFields.Elements(NS_DATA + "Field");
-                    dbSetInfo.fieldInfos.AddRange(_XElementsToFieldList(fields));
+                    fieldsList.AddRange(_XElementsToFieldList(fields));
+
+                    metadata.DbSets.Add(new DbSetInfo(dbSetInfo, fieldsList));
                 }
             }
 
@@ -313,7 +312,7 @@ namespace RIAPP.DataService.Core.Metadata
                        );
         }
 
-        private static IEnumerable<XElement> _FieldsToXElements(FieldsList fields)
+        private static IEnumerable<XElement> _FieldsToXElements(IFieldsList fields)
         {
             return from fld in fields
                    select new XElement(NS_DATA + "Field",
