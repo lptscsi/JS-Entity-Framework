@@ -30,11 +30,13 @@ namespace RIAppDemo.BLL.DataManagers
             IEnumerable<Expando> expandoList = productsList.Select(p => p.ToDictionary(() => new Expando())).ToList();
             QueryResult<Expando> queryResult = new QueryResult<Expando>(expandoList, totalCount);
 
-
             SubResult subResult = new SubResult
             {
                 dbSetName = "SalesOrderDetail",
-                Result = await DB.SalesOrderDetail.AsNoTracking().Where(sod => productIDs.Contains(sod.ProductId)).ToListAsync()
+                Result = await DB.SalesOrderDetail
+                .AsNoTracking()
+                .Where(sod => productIDs.Contains(sod.ProductId))
+                .ToListAsync()
             };
 
             // include related SalesOrderDetails with the products in the same query result
