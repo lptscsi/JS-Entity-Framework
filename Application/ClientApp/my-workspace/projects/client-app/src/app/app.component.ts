@@ -82,7 +82,7 @@ export class AppComponent implements OnInit {
   }
 
   pageIndex: number = 0;
-  pageSize: number = 10;
+  pageSize: number = 50;
   offset: number = 0;
 
 
