@@ -21,12 +21,12 @@ namespace RIAPP.DataService.Core.UseCases.InvokeMiddleware
             IDataHelper<TService> dataHelper = ctx.ServiceContainer.GetDataHelper();
             IServiceOperationsHelper<TService> serviceHelper = ctx.ServiceContainer.GetServiceHelper();
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
-            MethodDescription method = metadata.GetInvokeMethod(ctx.Request.methodName);
+            MethodDescription method = metadata.GetInvokeMethod(ctx.Request.MethodName);
 
             List<object> methParams = new List<object>();
             for (int i = 0; i < method.parameters.Count; ++i)
             {
-                methParams.Add(ctx.Request.paramInfo.GetValue(method.parameters[i].name, method, dataHelper));
+                methParams.Add(ctx.Request.ParamInfo.GetValue(method.parameters[i].Name, method, dataHelper));
             }
             RequestContext req = InvokeContext<TService>.CreateRequestContext(ctx.Service);
             using (RequestCallContext callContext = new RequestCallContext(req))
@@ -39,7 +39,7 @@ namespace RIAPP.DataService.Core.UseCases.InvokeMiddleware
 
                 if (method.methodResult)
                 {
-                    ctx.Response.result = methodResult;
+                    ctx.Response.Result = methodResult;
                 }
             }
 

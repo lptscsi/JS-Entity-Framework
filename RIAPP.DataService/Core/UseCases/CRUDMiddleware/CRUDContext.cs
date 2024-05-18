@@ -31,7 +31,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
         public static RequestContext CreateRequestContext(TService service, ChangeSetRequest changeSet, RowInfo rowInfo = null)
         {
-            DbSet dbSet = rowInfo == null ? null : changeSet.dbSets.Where(d => d.dbSetName == rowInfo.GetDbSetInfo().dbSetName).Single();
+            DbSet dbSet = rowInfo == null ? null : changeSet.DbSets.Where(d => d.DbSetName == rowInfo.GetDbSetInfo().dbSetName).Single();
             return new RequestContext(service, changeSet: changeSet, dbSet: dbSet, rowInfo: rowInfo,
                 operation: ServiceOperationType.SaveChanges);
         }

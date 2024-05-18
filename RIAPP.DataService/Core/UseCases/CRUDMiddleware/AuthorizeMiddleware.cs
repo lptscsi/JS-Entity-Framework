@@ -25,19 +25,19 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
             IAuthorizer<TService> authorizer = ctx.ServiceContainer.GetAuthorizer();
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
 
-            foreach (DbSet dbSet in ctx.Request.dbSets)
+            foreach (DbSet dbSet in ctx.Request.DbSets)
             {
                 //methods on domain service which are attempted to be executed by client (SaveChanges triggers their execution)
                 Dictionary<string, MethodInfoData> domainServiceMethods = new Dictionary<string, MethodInfoData>();
-                DbSetInfo dbInfo = metadata.DbSets[dbSet.dbSetName];
+                DbSetInfo dbInfo = metadata.DbSets[dbSet.DbSetName];
 
-                dbSet.rows.Aggregate<RowInfo, Dictionary<string, MethodInfoData>>(domainServiceMethods, (dict, rowInfo) =>
+                dbSet.Rows.Aggregate<RowInfo, Dictionary<string, MethodInfoData>>(domainServiceMethods, (dict, rowInfo) =>
                 {
                     MethodInfoData method = rowInfo.GetCRUDMethodInfo(metadata, dbInfo.dbSetName);
                     if (method == null)
                     {
                         throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_CHANGETYPE_INVALID,
-                            dbInfo.GetEntityType().Name, rowInfo.changeType));
+                            dbInfo.GetEntityType().Name, rowInfo.ChangeType));
                     }
 
                     string dicKey = string.Format("{0}:{1}", method.OwnerType.FullName, method.MethodInfo.Name);

@@ -34,28 +34,28 @@ namespace RIAPP.DataService.Core.Query
             where T : class
         {
             IQueryable<T> result = entities;
-            if (sort == null || sort.sortItems == null || sort.sortItems.Count == 0)
+            if (sort == null || sort.SortItems == null || sort.SortItems.Count == 0)
             {
                 return result;
             }
 
-            if (sort == null || sort.sortItems == null || sort.sortItems.Count == 0)
+            if (sort == null || sort.SortItems == null || sort.SortItems.Count == 0)
             {
                 return result;
             }
 
             bool first = true;
             StringBuilder sb = new StringBuilder();
-            foreach (SortItem si in sort.sortItems)
+            foreach (SortItem si in sort.SortItems)
             {
-                string fldName = si.fieldName;
+                string fldName = si.FieldName;
                 if (!first)
                 {
                     sb.Append(",");
                 }
 
                 sb.Append(fldName);
-                if (si.sortOrder == SortOrder.DESC)
+                if (si.SortOrder == SortOrder.DESC)
                 {
                     sb.Append(" DESC");
                 }
@@ -72,7 +72,7 @@ namespace RIAPP.DataService.Core.Query
         {
             Utils.IDataHelper dataHelper = dataService.ServiceContainer.DataHelper;
             IQueryable<T> result = entities;
-            if (filter == null || filter.filterItems == null || filter.filterItems.Count == 0)
+            if (filter == null || filter.FilterItems == null || filter.FilterItems.Count == 0)
             {
                 return result;
             }
@@ -80,12 +80,12 @@ namespace RIAPP.DataService.Core.Query
             int cnt = 0;
             StringBuilder sb = new StringBuilder();
             LinkedList<object> filterParams = new LinkedList<object>();
-            foreach (FilterItem filterItem in filter.filterItems)
+            foreach (FilterItem filterItem in filter.FilterItems)
             {
-                Field field = dbInfo.fieldInfos.Where(finf => finf.fieldName == filterItem.fieldName).FirstOrDefault();
+                Field field = dbInfo.fieldInfos.Where(finf => finf.fieldName == filterItem.FieldName).FirstOrDefault();
                 if (field == null)
                 {
-                    throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_FIELDNAME_INVALID, dbInfo.dbSetName, filterItem.fieldName));
+                    throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_FIELDNAME_INVALID, dbInfo.dbSetName, filterItem.FieldName));
                 }
 
                 if (cnt > 0)
@@ -93,61 +93,61 @@ namespace RIAPP.DataService.Core.Query
                     sb.Append(" and ");
                 }
 
-                switch (filterItem.kind)
+                switch (filterItem.Kind)
                 {
                     case FilterType.Equals:
-                        if (filterItem.values.Count == 1)
+                        if (filterItem.Values.Count == 1)
                         {
-                            sb.AppendFormat("{0}=@{1}", filterItem.fieldName, cnt++);
-                            filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                            sb.AppendFormat("{0}=@{1}", filterItem.FieldName, cnt++);
+                            filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         }
                         else
                         {
-                            string args = string.Join(",", filterItem.values.Select(v => string.Format("@{0}", cnt++)));
-                            sb.AppendFormat("({0} in ({1}))", filterItem.fieldName, args);
+                            string args = string.Join(",", filterItem.Values.Select(v => string.Format("@{0}", cnt++)));
+                            sb.AppendFormat("({0} in ({1}))", filterItem.FieldName, args);
 
-                            foreach (string v in filterItem.values)
+                            foreach (string v in filterItem.Values)
                             {
                                 filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, v));
                             }
                         }
                         break;
                     case FilterType.StartsWith:
-                        sb.AppendFormat("{0}.StartsWith(@{1})", filterItem.fieldName, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                        sb.AppendFormat("{0}.StartsWith(@{1})", filterItem.FieldName, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         break;
                     case FilterType.EndsWith:
-                        sb.AppendFormat("{0}.EndsWith(@{1})", filterItem.fieldName, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                        sb.AppendFormat("{0}.EndsWith(@{1})", filterItem.FieldName, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         break;
                     case FilterType.Contains:
-                        sb.AppendFormat("{0}.Contains(@{1})", filterItem.fieldName, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                        sb.AppendFormat("{0}.Contains(@{1})", filterItem.FieldName, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         break;
                     case FilterType.Gt:
-                        sb.AppendFormat("{0}>@{1}", filterItem.fieldName, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                        sb.AppendFormat("{0}>@{1}", filterItem.FieldName, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         break;
                     case FilterType.Lt:
-                        sb.AppendFormat("{0}<@{1}", filterItem.fieldName, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                        sb.AppendFormat("{0}<@{1}", filterItem.FieldName, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         break;
                     case FilterType.GtEq:
-                        sb.AppendFormat("{0}>=@{1}", filterItem.fieldName, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                        sb.AppendFormat("{0}>=@{1}", filterItem.FieldName, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         break;
                     case FilterType.LtEq:
-                        sb.AppendFormat("{0}<=@{1}", filterItem.fieldName, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                        sb.AppendFormat("{0}<=@{1}", filterItem.FieldName, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         break;
                     case FilterType.NotEq:
-                        sb.AppendFormat("{0}!=@{1}", filterItem.fieldName, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
+                        sb.AppendFormat("{0}!=@{1}", filterItem.FieldName, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
                         break;
                     case FilterType.Between:
-                        sb.AppendFormat("({0}>=@{1} and {0}<=@{2})", filterItem.fieldName, cnt++, cnt++);
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.FirstOrDefault()));
-                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.values.LastOrDefault()));
+                        sb.AppendFormat("({0}>=@{1} and {0}<=@{2})", filterItem.FieldName, cnt++, cnt++);
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.FirstOrDefault()));
+                        filterParams.AddLast(dataHelper.DeserializeField(typeof(T), field, filterItem.Values.LastOrDefault()));
                         break;
                 }
             }
@@ -182,13 +182,13 @@ namespace RIAPP.DataService.Core.Query
             totalCountQuery = null;
             RequestContext reqCtxt = RequestContext.Current;
             QueryRequest queryInfo = reqCtxt.CurrentQueryInfo;
-            entities = PerformFilter(dataService, entities, queryInfo.filterInfo, queryInfo.GetDbSetInfo());
-            if (queryInfo.isIncludeTotalCount)
+            entities = PerformFilter(dataService, entities, queryInfo.FilterInfo, queryInfo.GetDbSetInfo());
+            if (queryInfo.IsIncludeTotalCount)
             {
                 totalCountQuery = entities;
             }
-            entities = PerformSort(dataService, entities, queryInfo.sortInfo);
-            entities = GetPage(dataService, entities, queryInfo.pageIndex, queryInfo.pageSize, queryInfo.pageCount, queryInfo.GetDbSetInfo());
+            entities = PerformSort(dataService, entities, queryInfo.SortInfo);
+            entities = GetPage(dataService, entities, queryInfo.PageIndex, queryInfo.PageSize, queryInfo.PageCount, queryInfo.GetDbSetInfo());
             return entities;
         }
 
@@ -231,8 +231,8 @@ namespace RIAPP.DataService.Core.Query
             where T : class
         {
             Utils.IDataHelper dataHelper = dataService.ServiceContainer.DataHelper;
-            object[] keyValue = info.rowInfo.GetPKValues(dataHelper);
-            return FindEntityQuery(entities, info.rowInfo, keyValue);
+            object[] keyValue = info.RowInfo.GetPKValues(dataHelper);
+            return FindEntityQuery(entities, info.RowInfo, keyValue);
         }
 
         public static int? GetTotalCount<T>(this IDataServiceComponent dataService, IQueryable<T> entities, FilterInfo filter, DbSetInfo dbSetInfo)

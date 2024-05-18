@@ -8,10 +8,10 @@ namespace RIAPP.DataService.Core.Types
         /// <summary>
         /// field names
         /// </summary>
-        public IEnumerable<Column> columns { get; set; }
+        public IEnumerable<Column> Columns { get; set; }
 
-        public IEnumerable<Row> rows { get; set; }
+        public IEnumerable<Row> Rows { get; set; }
 
-        public string dbSetName { get; set; }
+        public string DbSetName { get; set; }
     }
 }

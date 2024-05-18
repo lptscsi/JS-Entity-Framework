@@ -14,8 +14,8 @@ namespace RIAPP.DataService.Core.Types
             object[] result = new object[finfos.Length];
             for (int i = 0; i < finfos.Length; ++i)
             {
-                ValueChange fv = rowInfo.values.Single(v => v.fieldName == finfos[i].fieldName);
-                result[i] = dataHelper.DeserializeField(entityType, finfos[i], fv.val);
+                ValueChange fv = rowInfo.Values.Single(v => v.FieldName == finfos[i].fieldName);
+                result[i] = dataHelper.DeserializeField(entityType, finfos[i], fv.Val);
             }
             return result;
         }
@@ -43,8 +43,8 @@ namespace RIAPP.DataService.Core.Types
             string[] vals = new string[finfos.Length];
             for (int i = 0; i < finfos.Length; ++i)
             {
-                ValueChange fv = rowInfo.values.Single(v => v.fieldName == finfos[i].fieldName);
-                vals[i] = fv.val;
+                ValueChange fv = rowInfo.Values.Single(v => v.FieldName == finfos[i].fieldName);
+                vals[i] = fv.Val;
             }
             return string.Join(";", vals);
         }

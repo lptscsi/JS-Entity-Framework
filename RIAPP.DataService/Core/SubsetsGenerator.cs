@@ -31,7 +31,7 @@ namespace RIAPP.DataService.Core
             {
                 DbSetInfo dbSetInfo = _metadata.DbSets[subResult.dbSetName];
 
-                if (result.Any(r => r.dbSetName == subResult.dbSetName))
+                if (result.Any(r => r.DbSetName == subResult.dbSetName))
                 {
                     throw new DomainServiceException(string.Format("The included sub results already have DbSet {0} entities", dbSetInfo.dbSetName));
                 }
@@ -40,9 +40,9 @@ namespace RIAPP.DataService.Core
 
                 Subset current = new Subset
                 {
-                    dbSetName = dbSetInfo.dbSetName,
-                    rows = rowGenerator.CreateDistinctRows(),
-                    columns = dbSetInfo.GetColumns()
+                    DbSetName = dbSetInfo.dbSetName,
+                    Rows = rowGenerator.CreateDistinctRows(),
+                    Columns = dbSetInfo.GetColumns()
                 };
 
                 result.Add(current);

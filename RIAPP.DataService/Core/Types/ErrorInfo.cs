@@ -10,14 +10,14 @@
 
         public ErrorInfo(string message, string name)
         {
-            this.message = message;
-            this.name = name;
+            this.Message = message;
+            this.Name = name;
         }
 
 
-        public string message { get; set; }
+        public string Message { get; set; }
 
 
-        public string name { get; set; }
+        public string Name { get; set; }
     }
 }

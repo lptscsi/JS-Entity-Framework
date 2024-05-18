@@ -44,12 +44,12 @@ namespace RIAPP.DataService.Core
                 }
 
                 string err = _serviceMethods.OnError(ex);
-                response.error = new ErrorInfo(err, ex.GetType().Name);
+                response.Error = new ErrorInfo(err, ex.GetType().Name);
             }
 
             outputPort.Handle(response);
 
-            return response.error == null;
+            return response.Error == null;
         }
     }
 }

@@ -19,11 +19,11 @@ namespace RIAppDemo.BLL.DataManagers
             IQueryable<Customer> customers = DB.Customer;
             QueryRequest queryInfo = this.GetCurrentQueryInfo();
             // AddressCount does not exists in Database (we calculate it), so it is needed to sort it manually
-            SortItem addressCountSortItem = queryInfo.sortInfo.sortItems.FirstOrDefault(sortItem => sortItem.fieldName == "AddressCount");
+            SortItem addressCountSortItem = queryInfo.SortInfo.SortItems.FirstOrDefault(sortItem => sortItem.FieldName == "AddressCount");
             if (addressCountSortItem != null)
             {
-                queryInfo.sortInfo.sortItems.Remove(addressCountSortItem);
-                if (addressCountSortItem.sortOrder == SortOrder.ASC)
+                queryInfo.SortInfo.SortItems.Remove(addressCountSortItem);
+                if (addressCountSortItem.SortOrder == SortOrder.ASC)
                 {
                     customers = customers.OrderBy(c => c.CustomerAddress.Count());
                 }
@@ -33,15 +33,15 @@ namespace RIAppDemo.BLL.DataManagers
                 }
             }
 
-            int? totalCount = queryInfo.pageIndex == 0 ? 0 : (int?)null;
+            int? totalCount = queryInfo.PageIndex == 0 ? 0 : (int?)null;
             // perform query
-            PerformQueryResult<Customer> customersResult = this.PerformQuery(customers.AsNoTracking(), queryInfo.pageIndex == 0 ? (countQuery) => countQuery.CountAsync() : (Func<IQueryable<Customer>, Task<int>>)null);
+            PerformQueryResult<Customer> customersResult = this.PerformQuery(customers.AsNoTracking(), queryInfo.PageIndex == 0 ? (countQuery) => countQuery.CountAsync() : (Func<IQueryable<Customer>, Task<int>>)null);
             System.Collections.Generic.List<Customer> customersList = await customersResult.Data.ToListAsync();
             // only execute total counting if we got full page size of rows, preventing unneeded database call to count total
-            if (queryInfo.pageIndex == 0 && customersList.Any())
+            if (queryInfo.PageIndex == 0 && customersList.Any())
             {
                 int cnt = customersList.Count;
-                if (cnt < queryInfo.pageSize)
+                if (cnt < queryInfo.PageSize)
                 {
                     totalCount = cnt;
                 }
@@ -80,8 +80,8 @@ namespace RIAppDemo.BLL.DataManagers
                 });
 
                 // return two subresults with the query results
-                queryRes.subResults.Add(subResult1);
-                queryRes.subResults.Add(subResult2);
+                queryRes.SubResults.Add(subResult1);
+                queryRes.SubResults.Add(subResult2);
             }
 
             return queryRes;

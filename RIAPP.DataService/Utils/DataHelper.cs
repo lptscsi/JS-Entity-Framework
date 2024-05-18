@@ -157,7 +157,7 @@ namespace RIAPP.DataService.Utils
 
         public object ParseParameter(Type paramType, ParamMetadata pinfo, bool isArray, string val)
         {
-            return (isArray && val != null) ? ParseArray(paramType, pinfo, val) : _valueConverter.DeserializeValue(paramType, pinfo.dataType, pinfo.dateConversion, val);
+            return (isArray && val != null) ? ParseArray(paramType, pinfo, val) : _valueConverter.DeserializeValue(paramType, pinfo.DataType, pinfo.DateConversion, val);
         }
 
         public Field GetFieldInfo(DbSetInfo dbSetInfo, string fullName)

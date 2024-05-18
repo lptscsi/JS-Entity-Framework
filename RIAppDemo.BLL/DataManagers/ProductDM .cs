@@ -40,10 +40,10 @@ namespace RIAppDemo.BLL.DataManagers
             };
 
             // include related SalesOrderDetails with the products in the same query result
-            queryResult.subResults.Add(subResult);
+            queryResult.SubResults.Add(subResult);
 
             // example of returning out of band information and use it on the client (of it can be more useful than it)
-            queryResult.extraInfo = new { test = "ReadProduct Extra Info: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") };
+            queryResult.ExtraInfo = new { test = "ReadProduct Extra Info: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") };
             return queryResult;
         }
 

@@ -43,7 +43,12 @@ namespace RIAppDemo.Utils
     /// </summary>
     public class Serializer : ISerializer
     {
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions();
+        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+            PropertyNameCaseInsensitive = false,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
         static Serializer()
         {

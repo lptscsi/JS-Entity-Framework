@@ -15,8 +15,8 @@ namespace RIAPP.DataService.Core.Types
             return dbSetInfo.GetInResultFields().Select(fi =>
                             new Column
                             {
-                                name = fi.fieldName,
-                                nested = fi.fieldType == FieldType.Object ? fi.GetNames() : null
+                                Name = fi.fieldName,
+                                Nested = fi.fieldType == FieldType.Object ? fi.GetNames() : null
                             }).ToArray();
         }
 

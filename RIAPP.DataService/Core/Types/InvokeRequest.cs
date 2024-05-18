@@ -4,9 +4,9 @@
     public class InvokeRequest : IUseCaseRequest<InvokeResponse>
     {
 
-        public string methodName { get; set; }
+        public string MethodName { get; set; }
 
 
-        public MethodParameters paramInfo { get; set; } = new MethodParameters();
+        public MethodParameters ParamInfo { get; set; } = new MethodParameters();
     }
 }

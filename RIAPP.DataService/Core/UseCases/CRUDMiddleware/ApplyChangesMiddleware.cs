@@ -29,10 +29,10 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
                     dbSetInfo.dbSetName));
             }
 
-            if (rowInfo.changeType == ChangeType.None)
+            if (rowInfo.ChangeType == ChangeType.None)
             {
                 throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_CHANGETYPE_INVALID,
-                                dbSetInfo.GetEntityType().Name, rowInfo.changeType));
+                                dbSetInfo.GetEntityType().Name, rowInfo.ChangeType));
             }
         }
 

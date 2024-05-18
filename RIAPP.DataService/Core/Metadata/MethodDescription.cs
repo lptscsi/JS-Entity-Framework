@@ -52,7 +52,7 @@ namespace RIAPP.DataService.Core.Metadata
             for (int i = 0; i < paramsInfo.Length; ++i)
             {
                 ParamMetadata param = ParamMetadata.FromParamInfo(paramsInfo[i], valueConverter);
-                param.ordinal = i;
+                param.Ordinal = i;
                 methDescription.parameters.Add(param);
             }
             return methDescription;

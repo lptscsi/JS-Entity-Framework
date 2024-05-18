@@ -48,10 +48,10 @@ namespace RIAPP.DataService.Core
         public async Task InsertEntity(RunTimeMetadata metadata, RowInfo rowInfo)
         {
             DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
-            if (rowInfo.changeType != ChangeType.Added)
+            if (rowInfo.ChangeType != ChangeType.Added)
             {
                 throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_CHANGETYPE_INVALID,
-                    dbSetInfo.GetEntityType().Name, rowInfo.changeType));
+                    dbSetInfo.GetEntityType().Name, rowInfo.ChangeType));
             }
 
             MethodInfoData methodData = metadata.GetOperationMethodInfo(dbSetInfo.dbSetName, MethodType.Insert);
@@ -75,10 +75,10 @@ namespace RIAPP.DataService.Core
         public async Task UpdateEntity(RunTimeMetadata metadata, RowInfo rowInfo)
         {
             DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
-            if (rowInfo.changeType != ChangeType.Updated)
+            if (rowInfo.ChangeType != ChangeType.Updated)
             {
                 throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_CHANGETYPE_INVALID,
-                    dbSetInfo.GetEntityType().Name, rowInfo.changeType));
+                    dbSetInfo.GetEntityType().Name, rowInfo.ChangeType));
             }
 
             MethodInfoData methodData = metadata.GetOperationMethodInfo(dbSetInfo.dbSetName, MethodType.Update);
@@ -105,10 +105,10 @@ namespace RIAPP.DataService.Core
         public async Task DeleteEntity(RunTimeMetadata metadata, RowInfo rowInfo)
         {
             DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
-            if (rowInfo.changeType != ChangeType.Deleted)
+            if (rowInfo.ChangeType != ChangeType.Deleted)
             {
                 throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_CHANGETYPE_INVALID,
-                    dbSetInfo.GetEntityType().Name, rowInfo.changeType));
+                    dbSetInfo.GetEntityType().Name, rowInfo.ChangeType));
             }
 
             MethodInfoData methodData = metadata.GetOperationMethodInfo(dbSetInfo.dbSetName, MethodType.Delete);
@@ -139,7 +139,7 @@ namespace RIAPP.DataService.Core
             LinkedList<string> mustBeChecked = new LinkedList<string>();
             LinkedList<string> skipCheckList = new LinkedList<string>();
 
-            if (rowInfo.changeType == ChangeType.Added)
+            if (rowInfo.ChangeType == ChangeType.Added)
             {
                 foreach (ParentChildNode pn in rowInfo.GetChangeState().ParentRows)
                 {
@@ -166,7 +166,7 @@ namespace RIAPP.DataService.Core
 
                     string value = _dataHelper.SerializeField(rowInfo.GetChangeState().Entity, fullName, f);
 
-                    switch (rowInfo.changeType)
+                    switch (rowInfo.ChangeType)
                     {
                         case ChangeType.Added:
                             {

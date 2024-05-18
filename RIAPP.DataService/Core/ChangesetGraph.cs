@@ -68,40 +68,40 @@ namespace RIAPP.DataService.Core
         private int DbSetComparison(DbSet dbSet1, DbSet dbSet2)
         {
             HashSet<string> parentDbNames = new HashSet<string>();
-            GetAllParentDbSets(parentDbNames, dbSet1.dbSetName);
-            if (parentDbNames.Contains(dbSet2.dbSetName))
+            GetAllParentDbSets(parentDbNames, dbSet1.DbSetName);
+            if (parentDbNames.Contains(dbSet2.DbSetName))
             {
                 return 1;
             }
 
             parentDbNames.Clear();
-            GetAllParentDbSets(parentDbNames, dbSet2.dbSetName);
-            if (parentDbNames.Contains(dbSet1.dbSetName))
+            GetAllParentDbSets(parentDbNames, dbSet2.DbSetName);
+            if (parentDbNames.Contains(dbSet1.DbSetName))
             {
                 return -1;
             }
 
-            return string.Compare(dbSet1.dbSetName, dbSet2.dbSetName);
+            return string.Compare(dbSet1.DbSetName, dbSet2.DbSetName);
         }
 
         private static string GetKey(RowInfo rowInfo)
         {
-            return string.Format("{0}:{1}", rowInfo.GetDbSetInfo().dbSetName, rowInfo.clientKey);
+            return string.Format("{0}:{1}", rowInfo.GetDbSetInfo().dbSetName, rowInfo.ClientKey);
         }
 
         private Dictionary<string, RowInfo> GetRowsMap()
         {
             Dictionary<string, RowInfo> result = new Dictionary<string, RowInfo>();
-            foreach (DbSet dbSet in ChangeSet.dbSets)
+            foreach (DbSet dbSet in ChangeSet.DbSets)
             {
-                DbSetInfo dbSetInfo = _metadata.DbSets[dbSet.dbSetName];
+                DbSetInfo dbSetInfo = _metadata.DbSets[dbSet.DbSetName];
                 if (dbSetInfo.GetEntityType() == null)
                 {
                     throw new DomainServiceException(string.Format(ErrorStrings.ERR_DB_ENTITYTYPE_INVALID,
                         dbSetInfo.dbSetName));
                 }
 
-                foreach (RowInfo rowInfo in dbSet.rows)
+                foreach (RowInfo rowInfo in dbSet.Rows)
                 {
                     rowInfo.SetDbSetInfo(dbSetInfo);
                     result.Add(GetKey(rowInfo), rowInfo);
@@ -114,11 +114,11 @@ namespace RIAPP.DataService.Core
         {
             Dictionary<string, RowInfo> rowsMap = GetRowsMap();
 
-            foreach (TrackAssoc trackAssoc in ChangeSet.trackAssocs)
+            foreach (TrackAssoc trackAssoc in ChangeSet.TrackAssocs)
             {
-                Association assoc = _metadata.Associations[trackAssoc.assocName];
-                string pkey = string.Format("{0}:{1}", assoc.parentDbSetName, trackAssoc.parentKey);
-                string ckey = string.Format("{0}:{1}", assoc.childDbSetName, trackAssoc.childKey);
+                Association assoc = _metadata.Associations[trackAssoc.AssocName];
+                string pkey = string.Format("{0}:{1}", assoc.parentDbSetName, trackAssoc.ParentKey);
+                string ckey = string.Format("{0}:{1}", assoc.childDbSetName, trackAssoc.ChildKey);
                 RowInfo parent = rowsMap[pkey];
                 RowInfo child = rowsMap[ckey];
                 ParentChildNode childNode = new ParentChildNode(child)
@@ -132,11 +132,11 @@ namespace RIAPP.DataService.Core
 
             foreach (DbSet dbSet in GetSortedDbSets())
             {
-                foreach (RowInfo rowInfo in dbSet.rows)
+                foreach (RowInfo rowInfo in dbSet.Rows)
                 {
                     DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
                     _allList.AddLast(rowInfo);
-                    switch (rowInfo.changeType)
+                    switch (rowInfo.ChangeType)
                     {
                         case ChangeType.Added:
                             _insertList.AddLast(rowInfo);
@@ -149,7 +149,7 @@ namespace RIAPP.DataService.Core
                             break;
                         default:
                             throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_CHANGETYPE_INVALID,
-                                dbSetInfo.GetEntityType().Name, rowInfo.changeType));
+                                dbSetInfo.GetEntityType().Name, rowInfo.ChangeType));
                     }
                 }
             }
@@ -159,7 +159,7 @@ namespace RIAPP.DataService.Core
         {
             if (sortedDbSets == null)
             {
-                DbSet[] array = ChangeSet.dbSets.ToArray();
+                DbSet[] array = ChangeSet.DbSets.ToArray();
                 Array.Sort(array, DbSetComparison);
                 sortedDbSets = array;
             }

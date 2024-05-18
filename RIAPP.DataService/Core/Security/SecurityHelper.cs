@@ -187,7 +187,7 @@ namespace RIAPP.DataService.Core.Security
         public static MethodInfoData GetCRUDMethodInfo(this RowInfo rowInfo, RunTimeMetadata metadata, string dbSetName)
         {
             MethodInfoData method = null;
-            switch (rowInfo.changeType)
+            switch (rowInfo.ChangeType)
             {
                 case ChangeType.Added:
                     method = metadata.GetOperationMethodInfo(dbSetName, MethodType.Insert);
@@ -200,7 +200,7 @@ namespace RIAPP.DataService.Core.Security
                     break;
                 default:
                     throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_CHANGETYPE_INVALID, dbSetName,
-                        rowInfo.changeType));
+                        rowInfo.ChangeType));
             }
             return method;
         }
@@ -215,11 +215,11 @@ namespace RIAPP.DataService.Core.Security
         {
             return new DbSetPermit()
             {
-                dbSetName = dbSetName,
-                canAddRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Insert),
-                canEditRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Update),
-                canDeleteRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Delete),
-                canRefreshRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Refresh)
+                DbSetName = dbSetName,
+                CanAddRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Insert),
+                CanEditRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Update),
+                CanDeleteRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Delete),
+                CanRefreshRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Refresh)
             };
         }
     }

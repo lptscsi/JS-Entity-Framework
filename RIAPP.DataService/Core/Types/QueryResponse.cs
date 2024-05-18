@@ -8,39 +8,39 @@ namespace RIAPP.DataService.Core.Types
         /// <summary>
         /// Field names returned in the rows
         /// </summary>
-        public IEnumerable<Column> columns { get; set; }
+        public IEnumerable<Column> Columns { get; set; }
 
 
-        public IEnumerable<Row> rows { get; set; }
+        public IEnumerable<Row> Rows { get; set; }
 
 
-        public int? pageIndex { get; set; }
+        public int? PageIndex { get; set; }
 
 
-        public int? pageCount { get; set; }
+        public int? PageCount { get; set; }
 
 
-        public string dbSetName { get; set; }
+        public string DbSetName { get; set; }
 
         /// <summary>
         /// Client can ask to return rows totalcount (in paging scenarios)
         /// </summary>
-        public int? totalCount { get; set; }
+        public int? TotalCount { get; set; }
 
 
-        public object extraInfo { get; set; }
+        public object ExtraInfo { get; set; }
 
         /// <summary>
         ///  Client must first check this field
         ///  if all ok, then error is empty
         ///  otherwise it contains error message
         /// </summary>
-        public ErrorInfo error { get; set; }
+        public ErrorInfo Error { get; set; }
 
 
         /// <summary>
         /// related child entities (from navigation properties) included in the main result
         /// </summary>
-        public IEnumerable<Subset> subsets { get; set; }
+        public IEnumerable<Subset> Subsets { get; set; }
     }
 }

@@ -216,11 +216,11 @@ namespace RIAPP.DataService.Core.CodeGen
 
         private string _CreateParamSignature(ParamMetadata paramInfo, DotNet2TS dotNet2TS)
         {
-            return string.Format("{0}{1}: {2}{3};", paramInfo.name, paramInfo.isNullable ? "?" : "",
-                paramInfo.dataType == DataType.None
+            return string.Format("{0}{1}: {2}{3};", paramInfo.Name, paramInfo.IsNullable ? "?" : "",
+                paramInfo.DataType == DataType.None
                     ? dotNet2TS.RegisterType(paramInfo.GetParameterType())
-                    : DotNet2TS.DataTypeToTypeName(paramInfo.dataType),
-                paramInfo.dataType != DataType.None && paramInfo.isArray ? "[]" : "");
+                    : DotNet2TS.DataTypeToTypeName(paramInfo.DataType),
+                paramInfo.DataType != DataType.None && paramInfo.IsArray ? "[]" : "");
         }
 
         private void ProcessMethodArgs(DotNet2TS dotNet2TS)
@@ -232,7 +232,7 @@ namespace RIAPP.DataService.Core.CodeGen
                     methodInfo.parameters.ForEach(paramInfo =>
                     {
                         //if this is complex type parse parameter to create its typescript interface
-                        if (paramInfo.dataType == DataType.None)
+                        if (paramInfo.DataType == DataType.None)
                         {
                             dotNet2TS.RegisterType(paramInfo.GetParameterType());
                         }
