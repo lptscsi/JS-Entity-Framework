@@ -10,7 +10,6 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using JetBrains.Annotations;
 #if WINDOWS_APP
 using System.Linq;
 #endif

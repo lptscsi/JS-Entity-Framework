@@ -55,7 +55,7 @@ namespace RIAPP.DataService.Core.Metadata
             MethodMap svcMethods = new MethodMap();
             OperationalMethods operMethods = new OperationalMethods();
 
-            foreach (var dbSet in  designTimeMetadata.DbSets)
+            foreach (var dbSet in designTimeMetadata.DbSets)
             {
                 Type handlerType = dbSet.GetHandlerType();
                 if (handlerType != null)
@@ -91,7 +91,7 @@ namespace RIAPP.DataService.Core.Metadata
             svcMethods.MakeReadOnly();
 
             List<DbSetRec> dbSetList = new List<DbSetRec>();
-   
+
             foreach (var dbSet in designTimeMetadata.DbSets)
             {
                 FieldsList fieldList = new FieldsList(dbSet.fieldInfos);
@@ -271,7 +271,7 @@ namespace RIAPP.DataService.Core.Metadata
         }
 
         private void ProcessDataServiceMethodDescriptions(
-            Type serviceType, 
+            Type serviceType,
             MethodMap svcMethods,
             OperationalMethods operMethods,
             HashSet<string> dbSetNames,
@@ -405,7 +405,7 @@ namespace RIAPP.DataService.Core.Metadata
 
         private void InitHandlerOperMethods(IEnumerable<MethodInfoData> methods, OperationalMethods operMethods, string dbSetName)
         {
-            foreach(MethodInfoData methodData in methods)
+            foreach (MethodInfoData methodData in methods)
             {
                 operMethods.Add(dbSetName, methodData);
             }

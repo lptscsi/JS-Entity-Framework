@@ -40,7 +40,8 @@ namespace RIAPP.DataService.Core.Config
 
             services.TryAddScoped<IServiceOperationsHelper<TService>, ServiceOperationsHelper<TService>>();
 
-            services.TryAddScoped<IEntityVersionHelper<TService>>(sp => {
+            services.TryAddScoped<IEntityVersionHelper<TService>>(sp =>
+            {
                 return (IEntityVersionHelper<TService>)sp.GetRequiredService<IServiceOperationsHelper<TService>>();
             });
 

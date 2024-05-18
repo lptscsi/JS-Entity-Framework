@@ -1803,10 +1803,10 @@ namespace System.Linq.Dynamic.Core
             LambdaExpression lambda = DynamicExpressionParser.ParseLambda(config, createParameterCtor, source.ElementType, typeof(TResult), selector, args);
 
             var methodCallExpression = Expression.Call(
-                typeof(Queryable), 
+                typeof(Queryable),
                 nameof(Queryable.Select),
                 new[] { source.ElementType, typeof(TResult) },
-                source.Expression, 
+                source.Expression,
                 Expression.Quote(lambda)
             );
 

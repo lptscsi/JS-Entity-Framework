@@ -19,7 +19,7 @@ namespace RIAPP.DataService.Core.Types
                                 nested = fi.fieldType == FieldType.Object ? fi.GetNames() : null
                             }).ToArray();
         }
-     
+
         /// <summary>
         /// Returns true if tracking changes (diffgram) is enabled 
         /// </summary>

@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using RIAppDemo.BLL.DataManagers;
 using RIAppDemo.BLL.Models;
 using RIAppDemo.BLL.Utils;
-using RIAppDemo.BLL.Validators;
 using RIAppDemo.DAL.EF;
 using System;
 using System.Data.Common;
@@ -38,7 +36,7 @@ namespace RIAppDemo.BLL.DataServices.Config
             services.AddEFDomainService<RIAppDemoServiceEF, AdventureWorksLT2012Context>((options) =>
             {
                 options.ClientTypes = () => new[] { typeof(TestModel),
-                    typeof(KeyVal), typeof(StrKeyVal), 
+                    typeof(KeyVal), typeof(StrKeyVal),
                     typeof(RadioVal), typeof(HistoryItem), typeof(TestEnum2) };
 
 

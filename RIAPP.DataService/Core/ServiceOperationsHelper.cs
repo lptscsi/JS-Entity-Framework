@@ -33,7 +33,7 @@ namespace RIAPP.DataService.Core
             _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
             _dataManagers = new ConcurrentDictionary<string, object>();
         }
-        
+
         #region Private methods
 
         private void ApplyValue(object entity, RowInfo rowInfo, string fullName, Field fieldInfo, ValueChange val,
@@ -165,7 +165,8 @@ namespace RIAPP.DataService.Core
 
             // different DbSets can have the same entity type, but the instances of data managers (aka handlers) should be different
             // so we use dbSet Name indexing for them
-            object handlerInstance = _dataManagers.GetOrAdd(dbSetName, name => {
+            object handlerInstance = _dataManagers.GetOrAdd(dbSetName, name =>
+            {
                 IServiceProvider sp = _domainService.ServiceContainer.ServiceProvider;
                 return ActivatorUtilities.CreateInstance(sp, methodData.OwnerType);
             });

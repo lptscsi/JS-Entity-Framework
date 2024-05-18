@@ -2,9 +2,7 @@
 using RIAPP.DataService.Resources;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace RIAPP.DataService.Utils
@@ -51,12 +49,12 @@ namespace RIAPP.DataService.Utils
         }
 
         public static string GetDiffGram(
-            IDictionary<string, object> d1, 
-            IDictionary<string, object> d2, 
-            Type t, 
+            IDictionary<string, object> d1,
+            IDictionary<string, object> d2,
+            Type t,
             string[] pkNames,
-            IDictionary<string, object> dpk, 
-            ChangeType changeType, 
+            IDictionary<string, object> dpk,
+            ChangeType changeType,
             string dbSetName)
         {
             LinkedList<Vals> lst = new LinkedList<Vals>();

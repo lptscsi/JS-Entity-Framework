@@ -5,7 +5,6 @@ using RIAPP.DataService.Utils.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Reflection;
 
 namespace RIAPP.DataService.Utils
 {
@@ -33,7 +32,7 @@ namespace RIAPP.DataService.Utils
         public virtual object DeserializeField(Field fieldInfo, string value)
         {
             Type propType = TypeFromDataType(fieldInfo.dataType);
-    
+
             return DeserializeValue(propType, fieldInfo.dataType, fieldInfo.dateConversion, value);
         }
 

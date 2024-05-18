@@ -32,7 +32,7 @@ namespace RIAPP.DataService.Core
             IValidationHelper<TService> validation)
         {
             _domainService = domainService ?? throw new ArgumentNullException(nameof(domainService));
-            _operations = operations?? throw new ArgumentNullException(nameof(operations));
+            _operations = operations ?? throw new ArgumentNullException(nameof(operations));
             _entityVersion = entityVersion ?? throw new ArgumentNullException(nameof(entityVersion));
             _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
             _validation = validation ?? throw new ArgumentNullException(nameof(validation));
@@ -221,7 +221,7 @@ namespace RIAPP.DataService.Core
                 }
                 finally
                 {
-                    if (validator is IDisposable disposable) {  disposable.Dispose(); }
+                    if (validator is IDisposable disposable) { disposable.Dispose(); }
                 }
             }
 

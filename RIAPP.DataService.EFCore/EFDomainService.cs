@@ -104,11 +104,11 @@ namespace RIAPP.DataService.EFCore
                 IEnumerable<IProperty> edmProps = entityInfo.GetProperties().Where(p => !p.IsShadowProperty()).ToArray();
                 // IEnumerable<string> edmProps1 = entityInfo.GetNavigations().Select(n => n.ForeignKey.DeclaringEntityType.Name).ToArray();
                 IEnumerable<INavigation> ownedTypes = entityInfo.GetNavigations().Where(n => ownedTypesMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name)).ToArray();
-              
+
                 FieldsList fields = GenerateFieldInfos(edmProps, ownedTypes, ownedTypesMap);
 
                 DbSetInfo dbSetInfo = new DbSetInfo(entityInfo.ClrType.Name, fields);
- 
+
                 dbSetInfo.SetEntityType(entityInfo.ClrType);
                 metadata.DbSets.Add(dbSetInfo);
                 GenerateAssociations(metadata, entityInfo, dbSetInfo);

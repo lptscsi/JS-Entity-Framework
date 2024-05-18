@@ -1,11 +1,11 @@
 ﻿#if !(NET35 || NET40)
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Dynamic.Core.Validation;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace System.Linq.Dynamic.Core;
 

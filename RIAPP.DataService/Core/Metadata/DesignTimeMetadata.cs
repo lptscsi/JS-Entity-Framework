@@ -451,7 +451,7 @@ namespace RIAPP.DataService.Core.Metadata
 
         private static Type _GetTypeFromXType(string xType, XDocument xdoc)
         {
-            if (string.IsNullOrEmpty(xType)) {  return null; }
+            if (string.IsNullOrEmpty(xType)) { return null; }
 
             if (!(xType.StartsWith("{") && xType.EndsWith("}")))
             {

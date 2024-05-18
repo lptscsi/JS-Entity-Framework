@@ -135,7 +135,7 @@ namespace RIAPP.DataService.Core.CodeGen
 
                 _dbSets.ForEach(dbSetInfo =>
                 {
-                    foreach(var fieldInfo in dbSetInfo.fieldInfos)
+                    foreach (var fieldInfo in dbSetInfo.fieldInfos)
                     {
                         if (fieldInfo.fieldType == FieldType.Object)
                         {
@@ -521,7 +521,7 @@ namespace RIAPP.DataService.Core.CodeGen
             string entityInterfaceName = GetEntityInterfaceName(dbSetInfo.dbSetName);
             StringBuilder sb = new StringBuilder(256);
 
-            foreach(var fieldInfo in dbSetInfo.fieldInfos)
+            foreach (var fieldInfo in dbSetInfo.fieldInfos)
             {
                 _dataHelper.ForEachFieldInfo("", fieldInfo, (fullName, f) =>
                 {
@@ -635,7 +635,7 @@ namespace RIAPP.DataService.Core.CodeGen
 
             return TrimEnd(_entityIntfTemplate.ToString(dic));
         }
-  
+
         private EntityDefinition CreateEntityType(DbSetInfo dbSetInfo, DotNet2TS dotNet2TS)
         {
             EntityDefinition entityDef = new EntityDefinition();
@@ -692,7 +692,7 @@ namespace RIAPP.DataService.Core.CodeGen
             Action<Field> AddComplexTypeField = f =>
             {
                 string dataType = GetFieldDataType(f);
-               
+
                 sbFields.AppendFormat("\tget {0}(): {1} {{ if (!this._{0}) {{this._{0} = new {1}('{0}', this._aspect);}} return this._{0}; }}",
                     f.fieldName, dataType);
                 sbFields.AppendLine();
@@ -722,7 +722,7 @@ namespace RIAPP.DataService.Core.CodeGen
                 sbValsFields.AppendLine();
             };
 
-            foreach(var fieldInfo in fieldInfos)
+            foreach (var fieldInfo in fieldInfos)
             {
                 if (fieldInfo.fieldType == FieldType.Calculated)
                 {

@@ -7,7 +7,7 @@ namespace RIAPP.DataService.Core
     public interface IServiceOperations
     {
         Task DeleteEntity(RunTimeMetadata metadata, RowInfo rowInfo);
-      
+
         Task InsertEntity(RunTimeMetadata metadata, RowInfo rowInfo);
 
         Task UpdateEntity(RunTimeMetadata metadata, RowInfo rowInfo);

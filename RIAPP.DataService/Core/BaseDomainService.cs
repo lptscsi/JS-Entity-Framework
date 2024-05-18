@@ -165,7 +165,7 @@ namespace RIAPP.DataService.Core
             {
                 await Task.CompletedTask;
                 RunTimeMetadata metadata = GetMetadata();
-                Permissions result = new Permissions() {};
+                Permissions result = new Permissions() { };
                 IAuthorizer authorizer = ServiceContainer.Authorizer;
                 foreach (DbSetInfo dbInfo in metadata.DbSets.Values)
                 {

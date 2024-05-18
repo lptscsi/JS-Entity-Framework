@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace RIAPP.DataService.Core.Types
 {
-    public interface IFieldsList: IReadOnlyList<Field>
+    public interface IFieldsList : IReadOnlyList<Field>
     {
         public Field[] GetInResultFields();
 
@@ -26,7 +26,8 @@ namespace RIAPP.DataService.Core.Types
         private readonly Lazy<Field> _timestampField;
         private bool _isInitialized = false;
 
-        public FieldsList() {
+        public FieldsList()
+        {
             _inResultFields = new Lazy<Field[]>(
               () => this.Where(f => f.GetIsIncludeInResult()).OrderBy(f => f.GetOrdinal()).ToArray(), true);
             _pkFields = new Lazy<Field[]>(
@@ -38,7 +39,7 @@ namespace RIAPP.DataService.Core.Types
         public FieldsList(IFieldsList other)
             : this()
         {
-           this.AddRange(other);
+            this.AddRange(other);
         }
 
         public Field[] GetInResultFields()
@@ -71,7 +72,7 @@ namespace RIAPP.DataService.Core.Types
             {
                 throw new InvalidOperationException("The FieldList is already initialized");
             }
-   
+
             static void SetOrdinal(Field[] fieldInfos)
             {
                 int cnt = fieldInfos.Length;

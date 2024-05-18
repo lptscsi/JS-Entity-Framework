@@ -17,7 +17,7 @@ namespace RIAPP.DataService.Utils
         }
         public static object GetValue(object obj, string propertyName, bool throwErrors)
         {
-           return _GetValue((dynamic)obj, propertyName, throwErrors);
+            return _GetValue((dynamic)obj, propertyName, throwErrors);
         }
 
         public static bool SetValue(object obj, string propertyName, object value, bool throwErrors)
@@ -155,7 +155,7 @@ namespace RIAPP.DataService.Utils
                 {
                     obj.Add(propertyName, value);
                 }
-    
+
                 return true;
             }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using AnyOfTypes;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -11,7 +12,6 @@ using System.Linq.Dynamic.Core.TypeConverters;
 using System.Linq.Dynamic.Core.Validation;
 using System.Linq.Expressions;
 using System.Reflection;
-using AnyOfTypes;
 
 namespace System.Linq.Dynamic.Core.Parser;
 
@@ -920,7 +920,7 @@ public class ExpressionParser
             stringValue += _textParser.CurrentToken.Text;
             _textParser.NextToken();
         }
-        
+
         return ConstantExpressionHelper.CreateLiteral(stringValue, stringValue);
     }
 

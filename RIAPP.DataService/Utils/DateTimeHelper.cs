@@ -28,7 +28,7 @@ namespace RIAPP.DataService.Utils
         }
 
         public static string DateToString(DateTime dt, DateConversion dateConversion)
-        { 
+        {
             if (dateConversion == DateConversion.UtcToClientLocal)
             {
                 DateTime d = DateTime.SpecifyKind(dt, DateTimeKind.Utc);

@@ -121,14 +121,14 @@ namespace RIAPP.DataService.Utils
             {
                 if (fieldInfo.fieldType == FieldType.Object)
                 {
-                    return DeSerializeObjectField(typeof(Expando), fieldInfo, (object[]) value);
+                    return DeSerializeObjectField(typeof(Expando), fieldInfo, (object[])value);
                 }
                 else
                 {
                     return _valueConverter.DeserializeField(fieldInfo, (string)value);
                 }
             }
- 
+
         }
 
         private IEnumerable ToEnumerable(Type elementType, ParamMetadata pinfo, string[] arr)
