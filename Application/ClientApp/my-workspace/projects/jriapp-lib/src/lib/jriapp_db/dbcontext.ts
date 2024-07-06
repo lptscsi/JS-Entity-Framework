@@ -7,10 +7,10 @@ import {
     IAbortablePromise, IBaseObject, IIndexer, IPromise, IStatefulPromise, Lazy,
     TErrorHandler, TEventHandler, Utils, WaitQueue
 } from "../jriapp_shared";
-import { COLL_CHANGE_REASON, DATA_TYPE } from "../jriapp_shared/collection/const";
+import { COLL_CHANGE_REASON } from "../jriapp_shared/collection/const";
 import { ValueUtils } from "../jriapp_shared/collection/utils";
 import { Association } from "./association";
-import { DATA_OPER, REFRESH_MODE } from "./const";
+import { DATA_OPER } from "./const";
 import { TDataQuery } from "./dataquery";
 import { DbSet } from "./dbset";
 import { DbSets, TDbSetCreatingArgs } from "./dbsets";
@@ -210,7 +210,7 @@ export abstract class DbContext<TMethods extends {
           err => reject(err) // error path
         );
       });
-      self._addRequestPromise(reqPromise, DATA_OPER.Init);
+      self._addRequestPromise(reqPromise, 'Init');
 
       metadata = await reqPromise;
     }
@@ -271,10 +271,10 @@ export abstract class DbContext<TMethods extends {
         if (!res) {
           throw new Error(format(ERRS.ERR_UNEXPECTED_SVC_ERROR!, "operation result is empty"));
         }
-        fn_checkError(res.error, DATA_OPER.Invoke);
+        fn_checkError(res.error, 'Invoke');
         return res.result;
       }).catch((err) => {
-        self._onDataOperError(err, DATA_OPER.Invoke);
+        self._onDataOperError(err, 'Invoke');
         ERROR.throwDummy(err);
       });
     };
@@ -317,7 +317,7 @@ export abstract class DbContext<TMethods extends {
 
     for (const pinfo of paramInfos) {
       let val = args[pinfo.name];
-      if (!pinfo.isNullable && !pinfo.isArray && !(pinfo.dataType === DATA_TYPE.String || pinfo.dataType === DATA_TYPE.Binary) && isNt(val)) {
+      if (!pinfo.isNullable && !pinfo.isArray && !(pinfo.dataType === 'String' || pinfo.dataType === 'Binary') && isNt(val)) {
         throw new Error(format(ERRS.ERR_SVC_METH_PARAM_INVALID!, pinfo.name, val, methodInfo.methodName));
       }
       if (isFunc(val)) {
@@ -329,7 +329,7 @@ export abstract class DbContext<TMethods extends {
 
       let value: string | null = null;
       // byte arrays are optimized for serialization
-      if (pinfo.dataType === DATA_TYPE.Binary && isArray(val)) {
+      if (pinfo.dataType === 'Binary' && isArray(val)) {
         value = JSON.stringify(val);
       } else if (isArray(val)) {
         const arr: string[] = [];
@@ -364,7 +364,7 @@ export abstract class DbContext<TMethods extends {
         );
       });
 
-      self._addRequestPromise(reqPromise, DATA_OPER.Invoke);
+      self._addRequestPromise(reqPromise, 'Invoke');
 
       return reqPromise;
     });
@@ -403,7 +403,7 @@ export abstract class DbContext<TMethods extends {
       if (isNt(dbSet)) {
         throw new Error(format(ERRS.ERR_DBSET_NAME_INVALID!, dbSetName));
       }
-      fn_checkError(response.error, DATA_OPER.Query);
+      fn_checkError(response.error, 'Query');
       const isClearAll = (!!query && query.isClearPrevData);
       return dbSet._getInternal().fillFromService(
         {
@@ -418,7 +418,7 @@ export abstract class DbContext<TMethods extends {
     const self = this;
     try {
       try {
-        fn_checkError(response.error, DATA_OPER.Submit);
+        fn_checkError(response.error, 'Submit');
       } catch (ex) {
         const submitted: IEntityItem[] = [], notvalid: IEntityItem[] = [];
         response.dbSets.forEach((jsDB) => {
@@ -486,7 +486,7 @@ export abstract class DbContext<TMethods extends {
     this.objEvents.raise(DBCTX_EVENTS.SUBMIT_ERROR, args);
     if (!args.isHandled) {
       // this.rejectChanges();
-      this._onDataOperError(error, DATA_OPER.Submit);
+      this._onDataOperError(error, 'Submit');
     }
   }
   protected _onSubmitting(context: IIndexer<any>): boolean {
@@ -581,7 +581,7 @@ export abstract class DbContext<TMethods extends {
         );
       });
 
-      self._addRequestPromise(reqPromise, DATA_OPER.Query, requestInfo.dbSetName);
+      self._addRequestPromise(reqPromise, 'Query', requestInfo.dbSetName);
 
       return reqPromise.then((response: IQueryResponse) => {
         self._checkDisposed();
@@ -596,16 +596,16 @@ export abstract class DbContext<TMethods extends {
   }
   protected _onItemRefreshed(res: IRefreshResponse, item: IEntityItem): void {
     try {
-      fn_checkError(res.error, DATA_OPER.Refresh);
+      fn_checkError(res.error, 'Refresh');
       if (!res.rowInfo) {
         item._aspect.dbSet.removeItem(item);
         item.dispose();
         throw new Error(ERRS.ERR_ITEM_DELETED_BY_ANOTHER_USER);
       } else {
-        item._aspect._refreshValues(res.rowInfo, REFRESH_MODE.MergeIntoCurrent);
+        item._aspect._refreshValues(res.rowInfo, 'MergeIntoCurrent');
       }
     } catch (ex) {
-      this._onDataOperError(ex, DATA_OPER.Refresh);
+      this._onDataOperError(ex, 'Refresh');
       ERROR.throwDummy(ex);
     }
   }
@@ -637,7 +637,7 @@ export abstract class DbContext<TMethods extends {
         );
       });
 
-      self._addRequestPromise(reqPromise, DATA_OPER.Refresh);
+      self._addRequestPromise(reqPromise, 'Refresh');
       return reqPromise;
     }).then((res: IRefreshResponse) => {
       self._checkDisposed();
@@ -662,7 +662,7 @@ export abstract class DbContext<TMethods extends {
       fn_onErr: (ex: any) => {
         try {
           context.fn_onEnd();
-          self._onDataOperError(ex, DATA_OPER.Refresh);
+          self._onDataOperError(ex, 'Refresh');
         } finally {
           deferred.reject();
         }
@@ -748,7 +748,7 @@ export abstract class DbContext<TMethods extends {
       fn_onErr: (ex: any) => {
         try {
           context.fn_onEnd();
-          self._onDataOperError(ex, DATA_OPER.Query);
+          self._onDataOperError(ex, 'Query');
         } finally {
           deferred.reject();
         }
@@ -756,7 +756,7 @@ export abstract class DbContext<TMethods extends {
     };
 
     if (query.isClearPrevData) {
-      self._tryAbortRequest([DATA_OPER.Query, DATA_OPER.Refresh], context.dbSetName);
+      self._tryAbortRequest(['Query', 'Refresh'], context.dbSetName);
     }
 
     context.dbSet.waitForNotBusy(() => {
@@ -795,7 +795,7 @@ export abstract class DbContext<TMethods extends {
           err => reject(err) // error path
         );
       });
-      self._addRequestPromise(reqPromise, DATA_OPER.Submit);
+      self._addRequestPromise(reqPromise, 'Submit');
       return reqPromise;
     }).then((res: IChangeResponse) => {
       self._checkDisposed();
@@ -939,7 +939,7 @@ export abstract class DbContext<TMethods extends {
     return submitState.promise;
   }
   load(query: TDataQuery): IStatefulPromise<IQueryResult<IEntityItem>> {
-    return this._load(query, COLL_CHANGE_REASON.None);
+    return this._load(query, 'None');
   }
   acceptChanges(): void {
     const arr = this._dbSets!.arrDbSets;
@@ -955,10 +955,10 @@ export abstract class DbContext<TMethods extends {
   }
   abortRequests(reason?: string, operType?: DATA_OPER): void {
     if (isNt(operType)) {
-      operType = DATA_OPER.None;
+      operType = 'None';
     }
     const arr: IRequestPromise[] = this._requests.filter((a) => {
-      return operType === DATA_OPER.None ? true : (a.operType === operType);
+      return operType === 'None' ? true : (a.operType === operType);
     });
 
     for (let i = 0; i < arr.length; i += 1) {

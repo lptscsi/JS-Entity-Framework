@@ -47,7 +47,11 @@ namespace RIAppDemo.Utils
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.Never,
             PropertyNameCaseInsensitive = false,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters =
+            {
+                new JsonStringEnumConverter()
+            }
         };
 
         static Serializer()

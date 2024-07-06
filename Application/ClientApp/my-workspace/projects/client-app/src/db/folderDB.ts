@@ -1,5 +1,5 @@
 /*
-  Generated from: /FolderBrowserService/typescript on 2024-01-03 at 20:13
+  Generated from: /FolderBrowserService/typescript on 2024-07-06 at 13:45
   Don't make manual changes here, they will be lost when this interface will be regenerated!
 */
 

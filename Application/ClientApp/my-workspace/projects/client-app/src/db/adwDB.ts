@@ -1,5 +1,5 @@
 /*
-  Generated from: /RIAppDemoServiceEF/typescript on 2024-01-03 at 20:11
+  Generated from: /RIAppDemoServiceEF/typescript on 2024-07-06 at 13:36
   Don't make manual changes here, they will be lost when this interface will be regenerated!
 */
 
@@ -119,7 +119,7 @@ export class TestModelListItem extends RIAPP.ListItem {
 
 export class TestDictionary extends RIAPP.BaseDictionary<TestModelListItem> {
   constructor() {
-    super('Key', [{ name: 'Key', dtype: 1 }, { name: 'SomeProperty1', dtype: 1 }, { name: 'SomeProperty2', dtype: 10 }, { name: 'SomeProperty3', dtype: 0 }, { name: 'MoreComplexProperty', dtype: 0 }, { name: 'EnumProperty', dtype: 0 }]);
+    super('Key', [{ name: 'Key', dtype: 'String' }, { name: 'SomeProperty1', dtype: 'String' }, { name: 'SomeProperty2', dtype: 'Binary' }, { name: 'SomeProperty3', dtype: 'None' }, { name: 'MoreComplexProperty', dtype: 'None' }, { name: 'EnumProperty', dtype: 'None' }]);
   }
   override itemFactory(aspect: RIAPP.ListItemAspect): TestModelListItem {
     return new TestModelListItem(aspect);
@@ -134,7 +134,7 @@ export class TestDictionary extends RIAPP.BaseDictionary<TestModelListItem> {
 
 export class TestList extends RIAPP.BaseList<TestModelListItem> {
   constructor() {
-    super([{ name: 'Key', dtype: 1 }, { name: 'SomeProperty1', dtype: 1 }, { name: 'SomeProperty2', dtype: 10 }, { name: 'SomeProperty3', dtype: 0 }, { name: 'MoreComplexProperty', dtype: 0 }, { name: 'EnumProperty', dtype: 0 }]);
+    super([{ name: 'Key', dtype: 'String' }, { name: 'SomeProperty1', dtype: 'String' }, { name: 'SomeProperty2', dtype: 'Binary' }, { name: 'SomeProperty3', dtype: 'None' }, { name: 'MoreComplexProperty', dtype: 'None' }, { name: 'EnumProperty', dtype: 'None' }]);
   }
   override itemFactory(aspect: RIAPP.ListItemAspect): TestModelListItem {
     return new TestModelListItem(aspect);
@@ -156,7 +156,7 @@ export class KeyValListItem extends RIAPP.ListItem {
 
 export class KeyValDictionary extends RIAPP.BaseDictionary<KeyValListItem> {
   constructor() {
-    super('key', [{ name: 'key', dtype: 3 }, { name: 'val', dtype: 1 }]);
+    super('key', [{ name: 'key', dtype: 'Integer' }, { name: 'val', dtype: 'String' }]);
   }
   override itemFactory(aspect: RIAPP.ListItemAspect): KeyValListItem {
     return new KeyValListItem(aspect);
@@ -181,7 +181,7 @@ export class StrKeyValListItem extends RIAPP.ListItem {
 
 export class StrKeyValDictionary extends RIAPP.BaseDictionary<StrKeyValListItem> {
   constructor() {
-    super('key', [{ name: 'key', dtype: 1 }, { name: 'val', dtype: 1 }]);
+    super('key', [{ name: 'key', dtype: 'String' }, { name: 'val', dtype: 'String' }]);
   }
   override itemFactory(aspect: RIAPP.ListItemAspect): StrKeyValListItem {
     return new StrKeyValListItem(aspect);
@@ -208,7 +208,7 @@ export class RadioValListItem extends RIAPP.ListItem {
 
 export class RadioValDictionary extends RIAPP.BaseDictionary<RadioValListItem> {
   constructor() {
-    super('key', [{ name: 'key', dtype: 1 }, { name: 'value', dtype: 1 }, { name: 'comment', dtype: 1 }]);
+    super('key', [{ name: 'key', dtype: 'String' }, { name: 'value', dtype: 'String' }, { name: 'comment', dtype: 'String' }]);
   }
   override itemFactory(aspect: RIAPP.ListItemAspect): RadioValListItem {
     return new RadioValListItem(aspect);
@@ -233,7 +233,7 @@ export class HistoryItemListItem extends RIAPP.ListItem {
 
 export class HistoryList extends RIAPP.BaseList<HistoryItemListItem> {
   constructor() {
-    super([{ name: 'radioValue', dtype: 1 }, { name: 'time', dtype: 6 }]);
+    super([{ name: 'radioValue', dtype: 'String' }, { name: 'time', dtype: 'DateTime' }]);
   }
   override itemFactory(aspect: RIAPP.ListItemAspect): HistoryItemListItem {
     return new HistoryItemListItem(aspect);

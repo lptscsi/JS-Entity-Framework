@@ -219,13 +219,17 @@ namespace RIAPP.DataService.Core.CodeGen
             }
 
             CommentAttribute commentAttr =
-                t.GetCustomAttributes(typeof(CommentAttribute), false).OfType<CommentAttribute>().FirstOrDefault();
+                t.GetCustomAttributes(typeof(CommentAttribute), false)
+                .OfType<CommentAttribute>()
+                .FirstOrDefault();
 
             StringBuilder sb = new StringBuilder();
+
             if (commentAttr != null && !string.IsNullOrWhiteSpace(commentAttr.Text))
             {
                 AddComment(sb, commentAttr.Text);
             }
+
             sb.AppendFormat("export enum {0}", name);
             sb.AppendLine();
             sb.AppendLine("{");

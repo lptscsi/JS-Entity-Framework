@@ -11,7 +11,6 @@ import { BaseCollection, Errors } from "../jriapp_shared/collection/base";
 import {
     COLL_CHANGE_OPER,
     COLL_CHANGE_REASON,
-    COLL_CHANGE_TYPE,
     SORT_ORDER
 } from "../jriapp_shared/collection/const";
 import {
@@ -83,15 +82,15 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   // override
   protected override _onAddNew(item: TItem): void {
     const args = {
-      changeType: COLL_CHANGE_TYPE.Add,
-      reason: COLL_CHANGE_REASON.None,
-      oper: COLL_CHANGE_OPER.AddNew,
+      changeType: 'Add',
+      reason: 'None',
+      oper: 'AddNew',
       items: [item],
       new_key: item._key
-    };
+    } as const;
     this._onCollectionChanged(args);
   }
-  protected _filterForPaging(items: TItem[]): TItem[] {
+  protected _filterForPaging(items: ReadonlyArray<TItem>): TItem[] {
     // let taken = 0, skipped = 0;
     const len = items.length, skip = this.pageSize * this.pageIndex, take = this.pageSize;
     const start = skip, end = len > (start + take) ? (start + take) : len;
@@ -157,14 +156,14 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
     }
   }
   protected _fillItems(data: {
-    items: TItem[];
+    items: ReadonlyArray<TItem>;
     reason: COLL_CHANGE_REASON;
     clear: boolean;
     isAppend: boolean;
   }): TItem[] {
     data = extend({
       items: [],
-      reason: COLL_CHANGE_REASON.Refresh,
+      reason: 'Refresh',
       clear: true,
       isAppend: false
     }, data);
@@ -172,7 +171,7 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
     const self = this, newItems: TItem[] = [], items: TItem[] = [], isClearAll = !!data.clear;
 
     if (!!isClearAll) {
-      this._clear(data.reason, COLL_CHANGE_OPER.Fill);
+      this._clear(data.reason, 'Fill');
     }
 
     const _items = (this.isPagingEnabled && !data.isAppend) ? this._filterForPaging(data.items) : data.items;
@@ -199,9 +198,9 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
     }
 
     this._onCollectionChanged({
-      changeType: COLL_CHANGE_TYPE.Reset,
+      changeType: 'Reset',
       reason: data.reason,
-      oper: COLL_CHANGE_OPER.Fill,
+      oper: 'Fill',
       items: newItems
     });
 
@@ -220,20 +219,20 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   protected _onDSCollectionChanged(_: any, args: ICollChangedArgs<TItem>): void {
     const self = this;
     switch (args.changeType) {
-      case COLL_CHANGE_TYPE.Reset:
-        this._refresh(COLL_CHANGE_REASON.Refresh);
+      case 'Reset':
+        this._refresh('Refresh');
         break;
-      case COLL_CHANGE_TYPE.Add:
+      case 'Add':
         {
           if (!this._isAddingNew) {
-            const items: TItem[] = (!self._fn_filter) ? args.items : args.items.filter(self._fn_filter);
+            const items: ReadonlyArray<TItem> = (!self._fn_filter) ? args.items : args.items.filter(self._fn_filter);
             if (items.length > 0) {
               self.appendItems(items);
             }
           }
         }
         break;
-      case COLL_CHANGE_TYPE.Remove:
+      case 'Remove':
         {
           for (const item of args.items) {
             const _item = self.getItemByKey(item._key);
@@ -243,7 +242,7 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
           }
         }
         break;
-      case COLL_CHANGE_TYPE.Remap:
+      case 'Remap':
         {
           const item = self.getItemByKey(args.old_key);
           if (!!item) {
@@ -355,14 +354,14 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
     }
   }
   protected override _onPageChanged(): void {
-    this._refresh(COLL_CHANGE_REASON.PageChange);
+    this._refresh('PageChange');
   }
-  protected override _clear(reason: COLL_CHANGE_REASON, oper: COLL_CHANGE_OPER = COLL_CHANGE_OPER.None): void {
+  protected override _clear(reason: COLL_CHANGE_REASON, oper: COLL_CHANGE_OPER = 'None'): void {
     super._clear(reason, oper);
-    if (reason !== COLL_CHANGE_REASON.PageChange) {
+    if (reason !== 'PageChange') {
       this.pageIndex = 0;
     }
-    if (reason !== COLL_CHANGE_REASON.PageChange && reason !== COLL_CHANGE_REASON.Sorting) {
+    if (reason !== 'PageChange' && reason !== 'Sorting') {
       this.totalCount = 0;
     }
   }
@@ -399,11 +398,11 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   offOnViewRefreshed(nmspace?: string): void {
     this.objEvents.off(VIEW_EVENTS.refreshed, nmspace);
   }
-  appendItems(items: TItem[]): TItem[] {
+  appendItems(items: ReadonlyArray<TItem>): TItem[] {
     if (this.getIsStateDirty()) {
       return [];
     }
-    return this._fillItems({ items: items, reason: COLL_CHANGE_REASON.None, clear: false, isAppend: true });
+    return this._fillItems({ items: items, reason: 'None', clear: false, isAppend: true });
   }
   override addNew(): TItem {
     let item: TItem = null;
@@ -433,16 +432,16 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   }
   override sortLocal(fieldNames: string[], sortOrder: SORT_ORDER): IPromise<any> {
     this._fn_sort = this._getSortFn(fieldNames, sortOrder);
-    return utils.async.delay(() => this._refreshSync(COLL_CHANGE_REASON.Sorting));
+    return utils.async.delay(() => this._refreshSync('Sorting'));
   }
   override clear(): void {
-    this._clear(COLL_CHANGE_REASON.Refresh, COLL_CHANGE_OPER.None);
+    this._clear('Refresh', 'None');
   }
   refresh(): void {
-    this._refresh(COLL_CHANGE_REASON.Refresh);
+    this._refresh('Refresh');
   }
   syncRefresh(): void {
-    this._refreshSync(COLL_CHANGE_REASON.Refresh);
+    this._refreshSync('Refresh');
   }
   override get errors(): Errors<TItem> {
     return (<BaseCollection<TItem>>this._dataSource).errors;
@@ -457,7 +456,7 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
     if (this.options.enablePaging !== v) {
       this.options.enablePaging = v;
       this.objEvents.raiseProp("isPagingEnabled");
-      this._refresh(COLL_CHANGE_REASON.None);
+      this._refresh('None');
     }
   }
   override get permissions(): IPermissions {
@@ -469,7 +468,7 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   set fn_filter(v) {
     if (this._fn_filter !== v) {
       this._fn_filter = v;
-      this._refresh(COLL_CHANGE_REASON.None);
+      this._refresh('None');
     }
   }
   get fn_sort(): (item1: TItem, item2: TItem) => number {
@@ -478,7 +477,7 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   set fn_sort(v) {
     if (this._fn_sort !== v) {
       this._fn_sort = v;
-      this._refresh(COLL_CHANGE_REASON.Sorting);
+      this._refresh('Sorting');
     }
   }
   get fn_itemsProvider(): (ds: ICollection<TItem>) => TItem[] {
@@ -487,7 +486,7 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   set fn_itemsProvider(v) {
     if (this._fn_itemsProvider !== v) {
       this._fn_itemsProvider = v;
-      this._refresh(COLL_CHANGE_REASON.Refresh);
+      this._refresh('Refresh');
     }
   }
   get fn_sortHandler(): (this: DataView<TItem>, fieldNames: string[], sortOrder: SORT_ORDER) => IPromise<any> | null {
@@ -496,7 +495,7 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   set fn_sortHandler(v) {
     if (this._fn_sortHandler !== v) {
       this._fn_sortHandler = v;
-      this._refresh(COLL_CHANGE_REASON.Refresh);
+      this._refresh('Refresh');
     }
   }
   override toString(): string {

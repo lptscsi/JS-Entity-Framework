@@ -1,10 +1,9 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { Utils } from "../jriapp_shared";
-import { COLL_CHANGE_REASON } from "../jriapp_shared/collection/const";
 import { ICollection } from "../jriapp_shared/collection/int";
-import { IEntityItem } from "./int";
 import { Association } from "./association";
 import { DataView, IDataViewOptions } from "./dataview";
+import { IEntityItem } from "./int";
 
 const utils = Utils, coreUtils = utils.core;
 
@@ -64,7 +63,7 @@ export class ChildDataView<TItem extends IEntityItem = IEntityItem> extends Data
           self._onViewRefreshed({});
         }
 
-        self._refresh(COLL_CHANGE_REASON.Refresh);
+        self._refresh('Refresh');
         self.objEvents.raiseProp("parentItem");
       }
     };
@@ -72,7 +71,7 @@ export class ChildDataView<TItem extends IEntityItem = IEntityItem> extends Data
     if (!!parentItem && !options.explicitRefresh) {
       const queue = utils.async.getTaskQueue();
       queue.enque(() => {
-        self._refreshSync(COLL_CHANGE_REASON.None);
+        self._refreshSync('None');
       });
     }
   }

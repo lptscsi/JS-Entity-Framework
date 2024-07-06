@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Optional, SkipSelf } from '@angular/core';
-import { IPromise, IQueryResult, IStatefulPromise, SORT_ORDER, Utils } from 'jriapp-lib';
+import { IPromise, IQueryResult, IStatefulPromise, Utils } from 'jriapp-lib';
 import { DbContext, Product } from "../db/adwDB";
 
 const utils = Utils;
@@ -61,7 +61,7 @@ export class AdwService {
     query.pageSize = pageSize;
     query
       .orderBy('Name')
-      .thenBy('SellStartDate', SORT_ORDER.DESC);
+      .thenBy('SellStartDate', 'DESC');
     let promise = query.load();
     return promise;
   }
@@ -77,13 +77,13 @@ export class AdwService {
     if (!!field) {
       query.clearSort();
       query.pageIndex = 0;
-      query.orderBy(field, order > 0 ? SORT_ORDER.DESC : SORT_ORDER.ASC);
+      query.orderBy(field, order > 0 ? 'DESC' : 'ASC');
       // console.log(query.sortInfo);
     }
     else {
       query
         .orderBy('Name')
-        .thenBy('SellStartDate', SORT_ORDER.DESC);
+        .thenBy('SellStartDate', 'DESC');
     }
     return query.load();
   }

@@ -8,14 +8,14 @@ import {
     IValidationInfo, TEventHandler, TPriority, Utils
 } from "../jriapp_shared";
 import { BaseCollection } from "../jriapp_shared/collection/base";
-import { COLL_CHANGE_OPER, COLL_CHANGE_REASON, COLL_CHANGE_TYPE, FIELD_TYPE, ITEM_STATUS, SORT_ORDER } from "../jriapp_shared/collection/const";
+import { COLL_CHANGE_OPER, COLL_CHANGE_REASON, ITEM_STATUS, SORT_ORDER } from "../jriapp_shared/collection/const";
 import { IFieldInfo, IInternalCollMethods } from "../jriapp_shared/collection/int";
 import { CollUtils, ValueUtils, WalkFieldCB } from "../jriapp_shared/collection/utils";
 import { REFRESH_MODE } from "./const";
 import { DataQuery, TDataQuery } from "./dataquery";
 import { DbContext } from "./dbcontext";
 import { EntityAspect } from "./entity_aspect";
-import { IAssociationInfo, ICalcFieldImpl, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, IColumn, INavFieldImpl, IQueryResponse, IQueryResult, IRowData, IRowInfo, ITrackAssoc } from "./int";
+import { IAssociationInfo, ICalcFieldImpl, IColumn, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, INavFieldImpl, IQueryResponse, IQueryResult, IRowData, IRowInfo, ITrackAssoc } from "./int";
 
 const utils = Utils, { isArray, isNt } = utils.check, { format } = utils.str,
   { getValue, setValue, merge, forEach, Indexer } = utils.core, ERROR = utils.err,
@@ -147,10 +147,10 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     }
 
     walkFields(fieldInfos, (fld, fullName) => {
-      if (fld.fieldType === FIELD_TYPE.Navigation) {
+      if (fld.fieldType === 'Navigation') {
         // navigation fields can NOT be on nested fields
         setValue(self._navfldMap, fullName, self._doNavigationField(opts, fld), true);
-      } else if (fld.fieldType === FIELD_TYPE.Calculated) {
+      } else if (fld.fieldType === 'Calculated') {
         // calculated fields can be on nested fields
         setValue(self._calcfldMap, fullName, self._doCalculatedField(fld), true);
       }
@@ -355,7 +355,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
         throw new Error(format(ERRS.ERR_DBSET_INVALID_FIELDNAME!, self.dbSetName, fieldName));
       }
 
-      if (fld.fieldType === FIELD_TYPE.Object) {
+      if (fld.fieldType === 'Object') {
         // for object fields the value should be an array of values - recursive processing
         self._refreshValues(fieldName + ".", item, <any[]>value, name.nested!, rm);
       } else {
@@ -375,7 +375,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
         throw new Error(format(ERRS.ERR_DBSET_INVALID_FIELDNAME!, self.dbSetName, fieldName));
       }
 
-      if (fld.fieldType === FIELD_TYPE.Object) {
+      if (fld.fieldType === 'Object') {
         // for object fields the value should be an array of values - recursive processing
         self._applyFieldVals(vals, fieldName + ".", <any[]>value, name.nested!);
       } else {
@@ -432,7 +432,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     }
     self.query.pageIndex = self.pageIndex;
     self._pageDebounce?.enque(() => {
-      self.dbContext._getInternal().load(self.query as unknown as DataQuery<IEntityItem>, COLL_CHANGE_REASON.PageChange);
+      self.dbContext._getInternal().load(self.query as unknown as DataQuery<IEntityItem>, 'PageChange');
     });
   }
   protected override _onPageSizeChanged(): void {
@@ -541,10 +541,10 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
     //create field accessor descriptor for each field
     fldInfos.forEach(function (f) {
-      if (f.fieldType === FIELD_TYPE.Calculated) {
+      if (f.fieldType === 'Calculated') {
         calcFldBuilder(f);
       }
-      else if (f.fieldType === FIELD_TYPE.Navigation) {
+      else if (f.fieldType === 'Navigation') {
         navFldBuilder(f);
       }
       else {
@@ -639,9 +639,9 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     }
 
     this._onCollectionChanged({
-      changeType: !isClearAll ? COLL_CHANGE_TYPE.Add : COLL_CHANGE_TYPE.Reset,
+      changeType: !isClearAll ? 'Add' : 'Reset',
       reason: result.reason,
-      oper: COLL_CHANGE_OPER.Fill,
+      oper: 'Fill',
       items: result.newItems
     });
 
@@ -668,7 +668,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
         query._getInternal().clearCache();
       }
       if (isClearAll) {
-        this._clear(info.reason, COLL_CHANGE_OPER.Fill);
+        this._clear(info.reason, 'Fill');
       }
     }
 
@@ -683,7 +683,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
       if (!item) {
         item = self.createEntityFromData(row, columns);
       } else {
-        self._refreshValues("", item, row.v, columns, REFRESH_MODE.RefreshCurrent);
+        self._refreshValues("", item, row.v, columns, 'RefreshCurrent');
       }
 
       return item;
@@ -746,7 +746,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     }
     const dataCache = query._getInternal().getCache(), arr = <TItem[]>dataCache.getPageItems(query.pageIndex);
 
-    this._replaceItems(args.reason, COLL_CHANGE_OPER.Fill, arr);
+    this._replaceItems(args.reason, 'Fill', arr);
 
     const items: TItem[] = [];
 
@@ -779,14 +779,14 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
       }
       const itemStatus = item._aspect.status;
       item._aspect._acceptChanges(rowInfo);
-      if (itemStatus === ITEM_STATUS.Added) {
+      if (itemStatus === 'Added') {
         // on insert
         item._aspect._updateKeys(rowInfo.serverKey);
         self._remapItem(oldKey, newKey, item);
         self._onCollectionChanged({
-          changeType: COLL_CHANGE_TYPE.Remap,
-          reason: COLL_CHANGE_REASON.None,
-          oper: COLL_CHANGE_OPER.Commit,
+          changeType: 'Remap',
+          reason: 'None',
+          oper: 'Commit',
           items: [item],
           old_key: oldKey,
           new_key: newKey
@@ -895,14 +895,14 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
   protected _getNames(): IColumn[] {
     const fieldInfos = this.getFieldInfos(), names: IColumn[] = [];
     const callback = (fld: IFieldInfo, _fullName: string, arr: IColumn[]) => {
-      if (fld.fieldType === FIELD_TYPE.Object) {
+      if (fld.fieldType === 'Object') {
         const res: IColumn[] = [];
         arr?.push({
           name: fld.fieldName, nested: res
         });
         return res;
       } else {
-        const isOK = fld.fieldType === FIELD_TYPE.None || fld.fieldType === FIELD_TYPE.RowTimeStamp || fld.fieldType === FIELD_TYPE.ServerCalculated;
+        const isOK = fld.fieldType === 'None' || fld.fieldType === 'RowTimeStamp' || fld.fieldType === 'ServerCalculated';
         if (isOK) {
           arr?.push({
             name: fld.fieldName, nested: null
@@ -950,7 +950,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
       let item = this.getItemByKey(key);
       if (!!item) {
-        this._refreshValues("", item, row.v, data.columns, REFRESH_MODE.RefreshCurrent);
+        this._refreshValues("", item, row.v, data.columns, 'RefreshCurrent');
       }
     }
   }
@@ -959,11 +959,11 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     columns: IColumn[];
     rows: IRowData[];
   }, isAppend?: boolean): IQueryResult<TItem> {
-    const self = this, reason = COLL_CHANGE_REASON.None;
+    const self = this, reason: COLL_CHANGE_REASON = 'None';
     this._destroyQuery();
     const isClearAll = !isAppend;
     if (isClearAll) {
-      self._clear(reason, COLL_CHANGE_OPER.Fill);
+      self._clear(reason, 'Fill');
     }
 
     const fetchedItems = data.rows.map((row) => {
@@ -977,7 +977,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
       if (!item) {
         item = self.createEntityFromData(row, data.columns);
       } else {
-        self._refreshValues("", item, row.v, data.columns, REFRESH_MODE.RefreshCurrent);
+        self._refreshValues("", item, row.v, data.columns, 'RefreshCurrent');
       }
       return item;
     });
@@ -1005,7 +1005,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
       newItems: newItems,
       fetchedItems: fetchedItems,
       items: items,
-      reason: COLL_CHANGE_REASON.None,
+      reason: 'None',
       outOfBandData: null
     };
 
@@ -1014,11 +1014,11 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
   }
   // manually fill items for an array of objects
   fillItems(data: object[], isAppend?: boolean): IQueryResult<TItem> {
-    const self = this, reason = COLL_CHANGE_REASON.None;
+    const self = this, reason: COLL_CHANGE_REASON = 'None';
     this._destroyQuery();
     const isClearAll = !isAppend;
     if (isClearAll) {
-      self._clear(reason, COLL_CHANGE_OPER.Fill);
+      self._clear(reason, 'Fill');
     }
 
     const fetchedItems = data.map((obj) => {
@@ -1048,7 +1048,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
       newItems: newItems,
       fetchedItems: fetchedItems,
       items: items,
-      reason: COLL_CHANGE_REASON.None,
+      reason: 'None',
       outOfBandData: null
     };
 
@@ -1073,12 +1073,12 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     if (parts.length === 1) {
       return fld;
     }
-    if (fld.fieldType === FIELD_TYPE.Object) {
+    if (fld.fieldType === 'Object') {
       for (let i = 1; i < parts.length; i += 1) {
         fld = getObjectField(parts[i], fld.nested!);
       }
       return fld;
-    } else if (fld.fieldType === FIELD_TYPE.Navigation) {
+    } else if (fld.fieldType === 'Navigation') {
       // for example Customer.Name
       const assoc = this._childAssocMap[fld.fieldName];
       if (!!assoc) {
@@ -1106,7 +1106,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
       query.isClearPrevData = true;
       query.pageIndex = 0;
-      return self.dbContext._getInternal().load(query as unknown as DataQuery<IEntityItem>, COLL_CHANGE_REASON.Sorting);
+      return self.dbContext._getInternal().load(query as unknown as DataQuery<IEntityItem>, 'Sorting');
     } else {
       return super.sort(fieldNames, sortOrder);
     }

@@ -41,7 +41,7 @@ namespace RIAPP.DataService.Core
         {
             if (isOriginal)
             {
-                if ((val.Flags & ValueFlags.Setted) == ValueFlags.Setted)
+                if ((val.Flags & (int)ValueFlags.Setted) == (int)ValueFlags.Setted)
                 {
                     _dataHelper.SetFieldValue(entity, fullName, fieldInfo, val.Orig);
                 }
@@ -53,7 +53,7 @@ namespace RIAPP.DataService.Core
                     case ChangeType.Deleted:
                         {
                             // for delete fill only original values
-                            if ((val.Flags & ValueFlags.Setted) == ValueFlags.Setted)
+                            if ((val.Flags & (int)ValueFlags.Setted) == (int)ValueFlags.Setted)
                             {
                                 _dataHelper.SetFieldValue(entity, fullName, fieldInfo, val.Orig);
                             }
@@ -61,7 +61,7 @@ namespace RIAPP.DataService.Core
                         break;
                     case ChangeType.Added:
                         {
-                            if ((val.Flags & ValueFlags.Changed) == ValueFlags.Changed)
+                            if ((val.Flags & (int)ValueFlags.Changed) == (int)ValueFlags.Changed)
                             {
                                 if (fieldInfo.isReadOnly && val.Val != null && !fieldInfo.allowClientDefault)
                                 {
@@ -81,7 +81,7 @@ namespace RIAPP.DataService.Core
                         break;
                     case ChangeType.Updated:
                         {
-                            if ((val.Flags & ValueFlags.Changed) == ValueFlags.Changed)
+                            if ((val.Flags & (int)ValueFlags.Changed) == (int)ValueFlags.Changed)
                             {
                                 if (fieldInfo.isReadOnly)
                                 {
@@ -97,7 +97,7 @@ namespace RIAPP.DataService.Core
 
                                 _dataHelper.SetFieldValue(entity, fullName, fieldInfo, val.Val);
                             }
-                            else if ((val.Flags & ValueFlags.Setted) == ValueFlags.Setted)
+                            else if ((val.Flags & (int)ValueFlags.Setted) == (int)ValueFlags.Setted)
                             {
                                 // when not changed then original value must be the same as current
                                 if ((fieldInfo.isPrimaryKey > 0 || fieldInfo.fieldType == FieldType.RowTimeStamp || fieldInfo.isNeedOriginal) && val.Val != val.Orig)
@@ -256,7 +256,7 @@ namespace RIAPP.DataService.Core
                 else
                 {
                     val.Val = _dataHelper.SerializeField(entity, fullName, fieldInfo);
-                    val.Flags = val.Flags | ValueFlags.Refreshed;
+                    val.Flags = val.Flags | (int)ValueFlags.Refreshed;
                 }
             });
         }
@@ -282,7 +282,7 @@ namespace RIAPP.DataService.Core
                     if (IsEntityValueChanged(rowInfo, fullName, fieldInfo, out string newVal))
                     {
                         val.Val = newVal;
-                        val.Flags = val.Flags | ValueFlags.Refreshed;
+                        val.Flags = val.Flags | (int)ValueFlags.Refreshed;
                     }
                 }
             });

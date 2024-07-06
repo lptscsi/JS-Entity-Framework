@@ -1,6 +1,9 @@
-﻿namespace RIAPP.DataService.Core.Types
+﻿using System;
+
+namespace RIAPP.DataService.Core.Types
 {
-    public enum ValueFlags
+    [Flags]
+    public enum ValueFlags: int
     {
         None = 0,
         Changed = 1,

@@ -7,7 +7,7 @@
         {
             Val = null;
             Orig = null;
-            Flags = ValueFlags.None;
+            Flags = (int)ValueFlags.None;
             FieldName = string.Empty;
         }
 
@@ -17,7 +17,10 @@
 
         public string FieldName { get; set; }
 
-        public ValueFlags Flags { get; set; }
+        /// <summary>
+        /// Flags has the type <see cref="ValueFlags"/> 
+        /// </summary>
+        public int Flags { get; set; }
 
         /// <summary>
         /// Nested values used for object field

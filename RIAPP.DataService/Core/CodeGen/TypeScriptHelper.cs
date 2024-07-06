@@ -247,7 +247,11 @@ namespace RIAPP.DataService.Core.CodeGen
             sbISvcMeth.AppendLine("export interface ISvcMethods");
             sbISvcMeth.AppendLine("{");
             StringBuilder sbArgs = new StringBuilder(255);
-            List<MethodDescription> svcMethods = _metadata.GetInvokeMethods().OrderBy(m => m.methodName).ToList();
+            List<MethodDescription> svcMethods = _metadata
+                .GetInvokeMethods()
+                .OrderBy(m => m.methodName)
+                .ToList();
+
             svcMethods.ForEach(methodInfo =>
             {
                 sbArgs.Length = 0;
@@ -434,7 +438,7 @@ namespace RIAPP.DataService.Core.CodeGen
                     }
 
                     sbProps.Append("{");
-                    sbProps.Append(string.Format("name:'{0}',dtype:{1}", propInfo.Name, (int)dataType));
+                    sbProps.Append(string.Format("name:'{0}',dtype:'{1}'", propInfo.Name, Enum.GetName(dataType)));
                     sbProps.Append("}");
                     isFirst = false;
                 });

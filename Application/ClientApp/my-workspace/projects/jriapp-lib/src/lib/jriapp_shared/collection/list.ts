@@ -5,7 +5,7 @@ import { IIndexer, IValidationError } from "../int";
 import { Utils } from "../utils/utils";
 import { ItemAspect } from "./aspect";
 import { BaseCollection } from "./base";
-import { COLL_CHANGE_OPER, COLL_CHANGE_REASON, COLL_CHANGE_TYPE, VALS_VERSION } from "./const";
+import { COLL_CHANGE_OPER, COLL_CHANGE_REASON } from "./const";
 import { ICollectionItem, IFieldInfo, IPropInfo } from "./int";
 import { CollectionItem } from "./item";
 import { CollUtils } from "./utils";
@@ -30,7 +30,7 @@ export class ListItemAspect extends ItemAspect {
         if (fieldInfo.isReadOnly && !(this.isNew && fieldInfo.allowClientDefault)) {
           throw new Error(ERRS.ERR_FIELD_READONLY);
         }
-        this._setValue(name, val, VALS_VERSION.Current);
+        this._setValue(name, val, 'Current');
         sys.raiseProp(item, name);
         errors.removeError(item, name);
         const validationInfo = this._validateField(name);
@@ -51,7 +51,7 @@ export class ListItemAspect extends ItemAspect {
     }
   }
   _getProp(name: string): any {
-    return this._getValue(name, VALS_VERSION.Current);
+    return this._getValue(name, 'Current');
   }
   override toString(): string {
     if (!this.item) {
@@ -167,15 +167,15 @@ export abstract class BaseList<TItem extends IListItem = IListItem> extends Base
       }
     } finally {
       this._onCollectionChanged({
-        changeType: COLL_CHANGE_TYPE.Reset,
-        reason: COLL_CHANGE_REASON.None,
-        oper: COLL_CHANGE_OPER.Fill,
+        changeType: 'Reset',
+        reason: 'None',
+        oper: 'Fill',
         items: items
       });
       this._onFillEnd({
         items: items,
         newItems: newItems,
-        reason: COLL_CHANGE_REASON.None
+        reason: 'None'
       });
     }
     if (!!clearAll) {

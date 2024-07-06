@@ -1,6 +1,6 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { BaseObject, LocaleERRS as ERRS, IIndexer, IStatefulPromise, Utils } from "../jriapp_shared";
-import { DATA_TYPE, FILTER_TYPE, SORT_ORDER } from "../jriapp_shared/collection/const";
+import { FILTER_TYPE, SORT_ORDER } from "../jriapp_shared/collection/const";
 import { IFieldInfo } from "../jriapp_shared/collection/int";
 import { ValueUtils } from "../jriapp_shared/collection/utils";
 import { DataCache } from "./datacache";
@@ -81,13 +81,13 @@ export class DataQuery<TItem extends IEntityItem = IEntityItem> extends BaseObje
     super.dispose();
   }
   private _addSort(fieldName: string, sortOrder: SORT_ORDER): void {
-    const ord = !isNt(sortOrder) ? sortOrder : SORT_ORDER.ASC;
+    const ord = !isNt(sortOrder) ? sortOrder : 'ASC';
     const sortItem = { fieldName: fieldName, sortOrder: ord };
     this._sortInfo.sortItems.push(sortItem);
     this._cacheInvalidated = true;
   }
   private _addFilterItem(fieldName: string, operand: FILTER_TYPE, value: any[], checkFieldName = true): void {
-    let fkind = FILTER_TYPE.Equals, vals: any[] = [];
+    let fkind: FILTER_TYPE = 'Equals', vals: any[] = [];
     if (!isArray(value)) {
       vals = [value];
     } else {
@@ -103,22 +103,22 @@ export class DataQuery<TItem extends IEntityItem = IEntityItem> extends BaseObje
     if (!!fld) {
       vals = tmpVals.map((v) => valUtils.stringifyValue(v, fld.dataType));
     } else {
-      vals = tmpVals.map((v) => valUtils.stringifyValue(v,isDate(v) ? DATA_TYPE.Date : DATA_TYPE.None));
+      vals = tmpVals.map((v) => valUtils.stringifyValue(v, isDate(v) ? 'Date' : 'None'));
     }
 
     switch (operand) {
-      case FILTER_TYPE.Equals:
-      case FILTER_TYPE.NotEq:
-      case FILTER_TYPE.StartsWith:
-      case FILTER_TYPE.EndsWith:
-      case FILTER_TYPE.Contains:
-      case FILTER_TYPE.Gt:
-      case FILTER_TYPE.GtEq:
-      case FILTER_TYPE.Lt:
-      case FILTER_TYPE.LtEq:
+      case 'Equals':
+      case 'NotEq':
+      case 'StartsWith':
+      case 'EndsWith':
+      case 'Contains':
+      case 'Gt':
+      case 'GtEq':
+      case 'Lt':
+      case 'LtEq':
         fkind = operand;
         break;
-      case FILTER_TYPE.Between:
+      case 'Between':
         fkind = operand;
         if (value.length !== 2) {
           throw new Error(ERRS.ERR_QUERY_BETWEEN);
@@ -128,7 +128,7 @@ export class DataQuery<TItem extends IEntityItem = IEntityItem> extends BaseObje
         throw new Error(format(ERRS.ERR_QUERY_OPERATOR_INVALID, operand));
     }
 
-    const filterItem = { fieldName: fieldName, kind: fkind, values: vals };
+    const filterItem = { fieldName: fieldName, kind: fkind, values: vals } as const;
     this._filterInfo.filterItems.push(filterItem);
     this._cacheInvalidated = true;
   }
