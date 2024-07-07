@@ -24,6 +24,10 @@ export class AppComponent implements OnInit {
             route: '/db'
           },
           {
+            label: 'Tree Sample',
+            route: '/tree'
+          },
+          {
             label: 'About',
             route: '/about'
           }

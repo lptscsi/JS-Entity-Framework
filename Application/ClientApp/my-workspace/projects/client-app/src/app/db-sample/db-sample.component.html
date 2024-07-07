@@ -1,20 +1,4 @@
 <div class="content" *ngIf="initialized$ | async as ok; else loading">
-  <div>
-    <div style="padding: 5px; background-color:aqua;">
-      folders count: {{count$ | async}}
-    </div>
-    <ul>
-      <li *ngFor='let item of  items$ | async'>
-        <span [ngClass]="{ 'hasSubDirs' : item.HasSubDirs }" (click)="onItemClicked(item)">{{item.Name}}</span>
-        <ul>
-          <li *ngFor='let child of item.exProp.items$ | async'>
-            <span (click)="onItemClicked(child)">{{child.Name}}</span>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-
   <form [formGroup]="productForm" [datasource]="currentProduct">
     <label for="name">Product Name: </label>
     <input id="name" class="input-control" type="text" bind="Name" bindMode="TwoWay" formControlName="Name" />
@@ -108,8 +92,6 @@
                  [rowsPerPageOptions]="[25, 50, 100]">
     </p-paginator>
   </div>
-
-  <router-outlet></router-outlet>
 </div>
   
   <ng-template #loading>

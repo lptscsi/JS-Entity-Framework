@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { DbSampleComponent } from './db-sample/db-sample.component';
+import { TreeSampleComponent } from './tree-sample/tree-sample.component';
 import { AboutComponent } from './about/about.component';
 
 import { TableModule } from 'primeng/table';
@@ -38,6 +39,7 @@ import {
     TableRowJriapDirective,
     PageNotFoundComponent,
     DbSampleComponent,
+    TreeSampleComponent,
     AboutComponent
   ],
   imports: [

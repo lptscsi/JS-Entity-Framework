@@ -1,17 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
 import { DbSet, Utils } from "jriapp-lib";
 import { SortEvent } from 'primeng/api';
 import { PaginatorState } from 'primeng/paginator';
 import { Table } from 'primeng/table';
 import { Product } from 'projects/client-app/src/db/adwDB';
 import { BehaviorSubject, Observable } from 'rxjs';
-import * as FOLDER_DB from "../../db/folderDB";
 import { dateConverter, dateTimeConverter, decimalConverter } from "../../logic/converter";
 import { AdwService } from '../../services/adw.service';
-import { FolderService, IFileSystemObject } from '../../services/folder.service';
-
 
 const utils = Utils;
 
@@ -34,8 +30,6 @@ export class DbSampleComponent implements OnInit {
 
   @ViewChild('dt') dt: Table;
 
-  items$: Observable<IFileSystemObject[]>;
-  count$: Observable<number>;
   initialized$: Observable<boolean>;
 
   metaKey: boolean = true;
@@ -57,8 +51,6 @@ export class DbSampleComponent implements OnInit {
   }
 
   constructor(
-    private router: Router,
-    private folderService: FolderService,
     private adwService: AdwService,
     readonly fb: UntypedFormBuilder
     // private cdRef: ChangeDetectorRef
@@ -72,13 +64,9 @@ export class DbSampleComponent implements OnInit {
     });
     const initialized = new BehaviorSubject<boolean>(false);
     this.initialized$ = initialized;
-    await this.folderService.initPromise;
     await this.adwService.initPromise;
     initialized.next(true);
 
-    this.items$ = this.folderService.items$;
-    this.count$ = this.folderService.count$;
-    this.folderService.loadRootFolder();
     this.adwService.load(0, this.pageSize);
   }
 
@@ -127,12 +115,6 @@ export class DbSampleComponent implements OnInit {
     return utils.dates.strToDate(str, 'YYYY-MM-DD');
   }
   */
-
-  onItemClicked(item: FOLDER_DB.IFileSystemObject) {
-    (item as any).exProp.click();
-    // alert("Clicked: " + item.Key);
-    event.preventDefault();
-  }
 
   get currentProduct(): Product {
     return this.adwService.currentItem;

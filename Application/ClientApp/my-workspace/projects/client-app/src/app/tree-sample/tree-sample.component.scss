@@ -1,0 +1,53 @@
+:host {
+  width: 100%;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+footer {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  line-height: 20px;
+}
+
+footer a {
+  display: flex;
+  align-items: center;
+}
+
+.hasSubDirs {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+}
+
+.actions
+{
+    margin-top: 1em;
+    text-align: center;
+}
+
+.input-control{
+    margin: 3px 6px;
+    min-width: 15em;
+}
+
+.button{
+    margin: 3px 6px;
+}
+
+form > label {
+    display: inline-block;
+    min-width: 10em;
+}
+
+.ng-invalid {
+    outline: 2px solid red;
+}
+
+
