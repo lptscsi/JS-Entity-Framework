@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Optional, SkipSelf } from '@angular/core';
-import { IPromise, IQueryResult, IStatefulPromise, Utils } from 'jriapp-lib';
+import { IPromise, IQueryResult, IStatefulPromise, Utils, IRowData, IColumn } from 'jriapp-lib';
 import { DbContext, Product } from "../db/adwDB";
 
 const utils = Utils;
@@ -8,6 +8,18 @@ const utils = Utils;
 export interface IOptions {
   service_url: string;
 }
+
+type IQueryResponse = {
+  columns: IColumn[];
+  rows: IRowData[];
+  dbSetName: string;
+  totalCount: string | null;
+};
+
+type IStaticData = {
+  productModelData: IQueryResponse;
+  productCategoryData: IQueryResponse;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +43,7 @@ export class AdwService {
     const self = this, options: IOptions = { service_url: "/RIAppDemoServiceEF" };
     self._uniqueID = utils.core.getNewID();
     self._dbContext = new DbContext();
+
     self._initPromise = self.dbContext.initialize({
       serviceUrl: options.service_url,
       http: http
@@ -51,6 +64,21 @@ export class AdwService {
         console.error(args.error);
       }, self.uniqueID);
     });
+  }
+
+  async loadStaticData() {
+    const url = this.dbContext.getUrl('static');
+    const promise = new Promise<IStaticData>((resolve, reject) => {
+      this.http.get(url).subscribe(
+        (res) => resolve(res as unknown as IStaticData), // success path
+        err => reject(err) // error path
+      );
+    });
+    const staticData = await promise;
+    this.dbContext.dbSets.ProductModel.fillData(staticData.productModelData);
+    this.dbContext.dbSets.ProductCategory.fillData(staticData.productCategoryData);
+
+    console.log("productModel", this.dbContext.dbSets.ProductModel.items);
   }
 
   load(pageIndex: number = 0, pageSize: number): IStatefulPromise<IQueryResult<Product>> {

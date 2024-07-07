@@ -67,7 +67,8 @@ export class DbSampleComponent implements OnInit {
     await this.adwService.initPromise;
     initialized.next(true);
 
-    this.adwService.load(0, this.pageSize);
+    await this.adwService.loadStaticData();
+    await this.adwService.load(0, this.pageSize);
   }
 
   pageIndex: number = 0;

@@ -202,7 +202,7 @@ export abstract class DbContext<TMethods extends {
       throw new Error(ERRS.ERR_DOMAIN_CONTEXT_INITIALIZED);
     }
     if (!metadata) {
-      const self = this, invokeUrl = self._getUrl(DATA_SVC_METH.Metadata);
+      const self = this, invokeUrl = self.getUrl(DATA_SVC_METH.Metadata);
 
       const reqPromise = new AbortablePromise<IMetadata>((resolve, reject, token) => {
         self.http.get<IMetadata>(invokeUrl).subscribe(
@@ -356,7 +356,7 @@ export abstract class DbContext<TMethods extends {
       return data;
     }).then((postData) => {
       self._checkDisposed();
-      const invokeUrl = this._getUrl(DATA_SVC_METH.Invoke);
+      const invokeUrl = this.getUrl(DATA_SVC_METH.Invoke);
       const reqPromise = new AbortablePromise<IInvokeResponse>((resolve, reject, token) => {
         self.http.post<IInvokeResponse>(invokeUrl, postData).subscribe(
           (res) => resolve(res), // success path
@@ -463,14 +463,6 @@ export abstract class DbContext<TMethods extends {
     });
     return request;
   }
-  protected _getUrl(action: string): string {
-    let loadUrl = this.serviceUrl;
-    if (!endsWith(loadUrl, "/")) {
-      loadUrl = loadUrl + "/";
-    }
-    loadUrl = loadUrl + [action, ""].join("/");
-    return loadUrl;
-  }
   protected _onDataOperError(ex: any, oper: DATA_OPER): boolean {
     if (ERROR.checkIsDummy(ex)) {
       return true;
@@ -573,7 +565,7 @@ export abstract class DbContext<TMethods extends {
         queryName: context.query.queryName
       };
 
-      const invokeUrl = self._getUrl(DATA_SVC_METH.Query);
+      const invokeUrl = self.getUrl(DATA_SVC_METH.Query);
       const reqPromise = new AbortablePromise<IQueryResponse>((resolve, reject, token) => {
         self.http.post<IQueryResponse>(invokeUrl, requestInfo).subscribe(
           (res) => resolve(res), // success path
@@ -629,7 +621,7 @@ export abstract class DbContext<TMethods extends {
       };
 
       args.item._aspect._checkCanRefresh();
-      const invokeUrl = self._getUrl(DATA_SVC_METH.Refresh);
+      const invokeUrl = self.getUrl(DATA_SVC_METH.Refresh);
       const reqPromise = new AbortablePromise<IRefreshResponse>((resolve, reject, token) => {
         self.http.post<IRefreshResponse>(invokeUrl, request).subscribe(
           (res) => resolve(res), // success path
@@ -788,7 +780,7 @@ export abstract class DbContext<TMethods extends {
       }
       return res;
     }).then((changes) => {
-      const invokeUrl = self._getUrl(DATA_SVC_METH.Submit);
+      const invokeUrl = self.getUrl(DATA_SVC_METH.Submit);
       const reqPromise = new AbortablePromise<IChangeResponse>((resolve, reject, token) => {
         self.http.post<IChangeResponse>(invokeUrl, changes).subscribe(
           (res) => resolve(res), // success path
@@ -867,6 +859,14 @@ export abstract class DbContext<TMethods extends {
   }
   offOnDbSetCreating(nmspace?: string): void {
     this.objEvents.off(DBCTX_EVENTS.DBSET_CREATING, nmspace);
+  }
+  getUrl(action: string): string {
+    let loadUrl = this.serviceUrl;
+    if (!endsWith(loadUrl, "/")) {
+      loadUrl = loadUrl + "/";
+    }
+    loadUrl = loadUrl + [action, ""].join("/");
+    return loadUrl;
   }
   getDbSet(name: string): DbSet {
     return this._dbSets!.getDbSet(name);
