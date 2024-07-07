@@ -4,13 +4,17 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { DbSampleComponent } from './db-sample/db-sample.component';
+import { AboutComponent } from './about/about.component';
+
 import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextareaModule } from 'primeng/inputtextarea';
-
+import { MenubarModule } from 'primeng/menubar';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -31,7 +35,10 @@ import {
     BindDirective,
     DataSourceDirective,
     TableJriapDirective,
-    TableRowJriapDirective
+    TableRowJriapDirective,
+    PageNotFoundComponent,
+    DbSampleComponent,
+    AboutComponent
   ],
   imports: [
     BrowserModule,
@@ -45,7 +52,8 @@ import {
     ButtonModule,
     InputTextModule,
     InputNumberModule,
-    InputTextareaModule
+    InputTextareaModule,
+    MenubarModule
   ],
   providers: [],
   bootstrap: [AppComponent]
