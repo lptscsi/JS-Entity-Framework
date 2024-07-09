@@ -693,10 +693,7 @@ export abstract class BaseCollection<TItem extends ICollectionItem = ICollection
     return self.getItemByKey(key);
   }
   moveFirst(skipDeleted?: boolean): boolean {
-    const pos = 0, old = this._currentPos;
-    if (old === pos) {
-      return false;
-    }
+    const pos = 0;
     const item = this.getItemByPos(pos);
     if (!item) {
       return false;

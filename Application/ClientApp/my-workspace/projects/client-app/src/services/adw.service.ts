@@ -1,10 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Optional, SkipSelf } from '@angular/core';
 import {
-  IPromise, IQueryResult, IStatefulPromise, Utils,
-  IRowData, IColumn, DataView, BaseObject
+    BaseObject,
+    DataView,
+    IColumn,
+    IPromise, IQueryResult,
+    IRowData,
+    IStatefulPromise, Utils
 } from 'jriapp-lib';
-import { DbContext, Product, ProductCategory, ProductCategoryDb } from "../db/adwDB";
+import { DbContext, KeyValDictionary, KeyValListItem, Product, ProductCategory } from "../db/adwDB";
 
 const utils = Utils;
 
@@ -32,10 +36,41 @@ export class Filter extends BaseObject {
   private _parentCategories: DataView<ProductCategory>;
   private _childCategories: DataView<ProductCategory>;
 
+  private _testDict: KeyValDictionary;
+  private _testDictVw: DataView<KeyValListItem>;
+
   constructor(dbContext: DbContext) {
     super();
     this.dbContext = dbContext;
     const self = this;
+
+    this._testDict = new KeyValDictionary();
+
+    self._testDict.fillItems([
+      { key: 0, val: 'Legal entity' },
+      { key: 1, val: 'Mother' },
+      { key: 2, val: 'Father' },
+      { key: 3, val: 'Daugher' },
+      { key: 4, val: 'Son' },
+      { key: 5, val: 'Legal representative' },
+      { key: 6, val: 'Other individual' }
+    ], true);
+
+    // dataview has the same structure as a dataset or a dictionary
+    // but it has its own current row position, and optionally - sorting and a filter
+    this._testDictVw = new DataView<KeyValListItem>(
+      {
+        dataSource: this._testDict,
+        fn_sort: function (a, b) { return a.val.localeCompare(b.val); },
+
+        fn_filter: function (item) {
+          return item.key < 6;
+        }
+      });
+
+    // need to refresh it (because the dictionary was already filled, and the data is not changed)
+    this._testDictVw.refreshSync();
+
 
     //filters top level product categories
     this._parentCategories = new DataView<ProductCategory>(
@@ -80,6 +115,9 @@ export class Filter extends BaseObject {
   get childCategories() { return this._childCategories; }
   get productModels() { return this.dbSets.ProductModel; }
   get productCategories() { return this.dbSets.ProductCategory; }
+
+  get testDict() { return this._testDict; }
+  get testDictVw() { return this._testDictVw; }
 }
 
 @Injectable({
@@ -128,11 +166,12 @@ export class AdwService {
   }
 
   async loadStaticData() {
-    const self = this;
-
     this._filter = new Filter(this.dbContext);
-   
 
+    console.log("dictionary", this.filter.testDict.items);
+    console.log("dataview", this.filter.testDictVw.items);
+
+    
     const url = this.dbContext.getUrl('static');
     const promise = new Promise<IStaticData>((resolve, reject) => {
       this.http.get(url).subscribe(
@@ -142,9 +181,9 @@ export class AdwService {
     });
     const staticData = await promise;
 
-    // subscribe to the view refreshed event
+    // subscribe to the dataview refreshed event
     this.filter.parentCategories.addOnViewRefreshed((_s, args) => {
-      if (this.filter.parentCategories.currentItem) {
+      if (this.filter.parentCategories.moveFirst()) {
         do {
           const parentItem = this.filter.parentCategories.currentItem;
           this.filter.parentCategoryId = parentItem.ProductCategoryId;
@@ -156,6 +195,7 @@ export class AdwService {
     }, this.uniqueID);
 
     this.dbContext.dbSets.ProductModel.fillData(staticData.productModelData);
+    // when we fill the data (when data changed), the dataview based on this dataset is automatically refreshed
     this.dbContext.dbSets.ProductCategory.fillData(staticData.productCategoryData);
   }
 
