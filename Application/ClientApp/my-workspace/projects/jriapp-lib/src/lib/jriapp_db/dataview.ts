@@ -118,8 +118,8 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   protected _onViewRefreshed(args: {}): void {
     this.objEvents.raise(VIEW_EVENTS.refreshed, args);
   }
-  protected _refresh(reason: COLL_CHANGE_REASON): void {
-    this._refreshDebounce.enque(() => {
+  protected _refresh(reason: COLL_CHANGE_REASON): Promise<void> {
+    return this._refreshDebounce.enque(() => {
       this._refreshSync(reason);
     });
   }
@@ -437,10 +437,10 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   override clear(): void {
     this._clear('Refresh', 'None');
   }
-  refresh(): void {
-    this._refresh('Refresh');
+  refresh(): Promise<void> {
+    return this._refresh('Refresh');
   }
-  syncRefresh(): void {
+  refreshSync(): void {
     this._refreshSync('Refresh');
   }
   override get errors(): Errors<TItem> {

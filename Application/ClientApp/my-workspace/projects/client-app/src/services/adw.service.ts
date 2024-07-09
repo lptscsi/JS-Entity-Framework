@@ -64,7 +64,7 @@ export class Filter extends BaseObject {
     if (this._parentCategoryId != v) {
       this._parentCategoryId = v;
       this.objEvents.raiseProp('parentCategoryId');
-      this._childCategories.syncRefresh();
+      this._childCategories.refreshSync();
     }
   }
   get childCategoryId() { return this._childCategoryId; }

@@ -95,7 +95,7 @@ export class ExProps extends RIAPP.BaseObject {
     });
 
     //explicit refresh with no async
-    dvw.syncRefresh();
+    dvw.refreshSync();
     return dvw;
   }
   loadChildren() {
