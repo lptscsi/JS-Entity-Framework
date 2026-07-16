@@ -3,13 +3,8 @@
 namespace RIAPP.DataService.Annotations
 {
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public class DbSetNameAttribute : Attribute
+    public class DbSetNameAttribute(string name) : Attribute
     {
-        public DbSetNameAttribute(string name)
-        {
-            this.DbSetName = name;
-        }
-
-        public string DbSetName { get; }
+        public string DbSetName { get; } = name;
     }
 }

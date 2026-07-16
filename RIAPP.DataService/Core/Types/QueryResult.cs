@@ -10,7 +10,7 @@ namespace RIAPP.DataService.Core.Types
 
         public QueryResult()
         {
-            _subResults = new Lazy<SubResultList>(() => new SubResultList(), true);
+            _subResults = new Lazy<SubResultList>(() => [], true);
         }
 
         public int? TotalCount { get; set; }

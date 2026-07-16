@@ -3,14 +3,9 @@ using System.Security.Claims;
 
 namespace RIAPP.DataService.Core.Security
 {
-    public class UserProvider : IUserProvider
+    public class UserProvider(Func<ClaimsPrincipal> userFactory) : IUserProvider
     {
-        private readonly Lazy<ClaimsPrincipal> _user;
-
-        public UserProvider(Func<ClaimsPrincipal> userFactory)
-        {
-            _user = new Lazy<ClaimsPrincipal>(userFactory, true);
-        }
+        private readonly Lazy<ClaimsPrincipal> _user = new Lazy<ClaimsPrincipal>(userFactory, true);
 
         public ClaimsPrincipal User => _user.Value;
     }

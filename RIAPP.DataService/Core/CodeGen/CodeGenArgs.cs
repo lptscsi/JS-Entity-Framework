@@ -1,17 +1,12 @@
 ﻿namespace RIAPP.DataService.Core.CodeGen
 {
-    public class CodeGenArgs
+    public class CodeGenArgs(string lang)
     {
-        public CodeGenArgs(string lang)
-        {
-            this.lang = lang;
-        }
-
         public string lang
         {
             get;
             private set;
-        }
+        } = lang;
 
         public string comment
         {

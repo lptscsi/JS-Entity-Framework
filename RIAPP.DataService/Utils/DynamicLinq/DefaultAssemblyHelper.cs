@@ -54,7 +54,7 @@ internal class DefaultAssemblyHelper : IAssemblyHelper
             }
         }
 
-        return loadedAssemblies.ToArray();
+        return [.. loadedAssemblies];
 #endif
     }
 }

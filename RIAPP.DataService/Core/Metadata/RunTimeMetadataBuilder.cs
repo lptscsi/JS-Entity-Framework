@@ -13,31 +13,23 @@ using System.Text;
 
 namespace RIAPP.DataService.Core.Metadata
 {
-    public class RunTimeMetadataBuilder
+    public class RunTimeMetadataBuilder(Type domainServiceType,
+        DesignTimeMetadata designTimeMetadata,
+        IDataHelper dataHelper,
+        IValueConverter valueConverter)
     {
         #region Fields
 
-        private readonly Type domainServiceType;
-        private readonly DesignTimeMetadata designTimeMetadata;
-        private readonly IDataHelper dataHelper;
-        private readonly IValueConverter valueConverter;
+        private readonly Type domainServiceType = domainServiceType;
+        private readonly DesignTimeMetadata designTimeMetadata = designTimeMetadata;
+        private readonly IDataHelper dataHelper = dataHelper;
+        private readonly IValueConverter valueConverter = valueConverter;
 
         #endregion
 
-        public RunTimeMetadataBuilder(Type domainServiceType,
-            DesignTimeMetadata designTimeMetadata,
-            IDataHelper dataHelper,
-            IValueConverter valueConverter)
-        {
-            this.domainServiceType = domainServiceType;
-            this.designTimeMetadata = designTimeMetadata;
-            this.dataHelper = dataHelper;
-            this.valueConverter = valueConverter;
-        }
-
         public RunTimeMetadata Build()
         {
-            HashSet<string> dbSetNames = new HashSet<string>();
+            HashSet<string> dbSetNames = [];
 
             foreach (DbSetInfo dbSetInfo in designTimeMetadata.DbSets)
             {
@@ -52,8 +44,8 @@ namespace RIAPP.DataService.Core.Metadata
             ILookup<Type, string> dbSetsByTypeLookUp = designTimeMetadata.DbSets
                 .ToLookup(v => v.GetEntityType(), v => v.dbSetName);
 
-            MethodMap svcMethods = new MethodMap();
-            OperationalMethods operMethods = new OperationalMethods();
+            MethodMap svcMethods = new();
+            OperationalMethods operMethods = new();
 
             foreach (var dbSet in designTimeMetadata.DbSets)
             {
@@ -90,30 +82,30 @@ namespace RIAPP.DataService.Core.Metadata
             operMethods.MakeReadOnly();
             svcMethods.MakeReadOnly();
 
-            List<DbSetRec> dbSetList = new List<DbSetRec>();
+            List<DbSetRec> dbSetList = [];
 
             foreach (var dbSet in designTimeMetadata.DbSets)
             {
-                FieldsList fieldList = new FieldsList(dbSet.fieldInfos);
+                FieldsList fieldList = new(dbSet.fieldInfos);
                 fieldList.Initialize(dataHelper);
                 dbSetList.Add(new DbSetRec(dbSet, fieldList));
             }
 
             IDictionary<string, DbSetRec> dbSetRecMap = dbSetList.ToDictionary(v => v.dbSetInfo.dbSetName);
 
-            AssociationMap associations = new AssociationMap();
+            AssociationMap associations = [];
 
             foreach (Association assoc in designTimeMetadata.Associations)
             {
                 ProcessAssociation(assoc, dbSetRecMap, associations);
             }
 
-            DbSetInfoMap dbSets = new DbSetInfoMap(dbSetRecMap);
+            DbSetInfoMap dbSets = new(dbSetRecMap);
 
-            return new RunTimeMetadata(dbSets, associations, svcMethods, operMethods, designTimeMetadata.TypeScriptImports.ToArray());
+            return new RunTimeMetadata(dbSets, associations, svcMethods, operMethods, [.. designTimeMetadata.TypeScriptImports]);
         }
 
-        private static readonly Dictionary<Type, MethodType> _attributeMap = new Dictionary<Type, MethodType>()
+        private static readonly Dictionary<Type, MethodType> _attributeMap = new()
         {
             { typeof(QueryAttribute), MethodType.Query },
             { typeof(InvokeAttribute), MethodType.Invoke },
@@ -151,7 +143,8 @@ namespace RIAPP.DataService.Core.Metadata
                         IsInDataManager = true
                     });
                 }
-            };
+            }
+            ;
 
             void AddMethod(MethodInfo method)
             {
@@ -170,7 +163,8 @@ namespace RIAPP.DataService.Core.Metadata
                         AddMethodInfoData(MethodType.Delete, method);
                         break;
                 }
-            };
+            }
+            ;
 
             MethodInfo[] methods = handlerType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
@@ -214,7 +208,8 @@ namespace RIAPP.DataService.Core.Metadata
                         yield return item;
                     }
                 }
-            };
+            }
+            ;
 
             IEnumerable<MethodInfoData> result;
 
@@ -222,11 +217,11 @@ namespace RIAPP.DataService.Core.Metadata
             if (isDataManager)
             {
                 IDictionary<MethodType, MethodInfoData> crudMethods = GetHandlerCRUDMethods(fromType);
-                result = UnionMethods(allList, crudMethods).ToArray();
+                result = [.. UnionMethods(allList, crudMethods)];
             }
             else
             {
-                result = allList.ToArray();
+                result = [.. allList];
             }
 
             foreach (MethodInfoData data in result)
@@ -354,13 +349,13 @@ namespace RIAPP.DataService.Core.Metadata
 
             if (!string.IsNullOrEmpty(assoc.childToParentName))
             {
-                StringBuilder sb = new StringBuilder(120);
+                StringBuilder sb = new(120);
                 string dependentOn =
                     assoc.fieldRels.Aggregate(sb, (a, b) => a.Append((a.Length == 0 ? "" : ",") + b.childField),
                         a => a).ToString();
 
                 //add navigation field to dbSet's field collection
-                Field field = new Field
+                Field field = new()
                 {
                     fieldName = assoc.childToParentName,
                     fieldType = FieldType.Navigation,
@@ -374,8 +369,8 @@ namespace RIAPP.DataService.Core.Metadata
 
             if (!string.IsNullOrEmpty(assoc.parentToChildrenName))
             {
-                StringBuilder sb = new StringBuilder(120);
-                Field field = new Field
+                StringBuilder sb = new(120);
+                Field field = new()
                 {
                     fieldName = assoc.parentToChildrenName,
                     fieldType = FieldType.Navigation,
@@ -463,7 +458,7 @@ namespace RIAPP.DataService.Core.Metadata
 
         private void InitOperMethods(IEnumerable<MethodInfoData> methods, OperationalMethods operMethods, HashSet<string> dbSetNames, ILookup<Type, string> dbSetsByTypeLookUp)
         {
-            MethodInfoData[] otherMethods = methods.ToArray();
+            MethodInfoData[] otherMethods = [.. methods];
 
             Array.ForEach(otherMethods, methodData =>
             {

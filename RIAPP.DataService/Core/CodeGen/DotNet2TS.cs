@@ -2,7 +2,6 @@
 using RIAPP.DataService.Core.Exceptions;
 using RIAPP.DataService.Core.Types;
 using RIAPP.DataService.Utils;
-using RIAPP.DataService.Utils.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,19 +10,13 @@ using System.Text;
 
 namespace RIAPP.DataService.Core.CodeGen
 {
-    public class DotNet2TS : IDisposable
+    public class DotNet2TS(IValueConverter valueConverter, Action<Type> onClientTypeAdded) : IDisposable
     {
         // a container for available services (something like dependency injection container)
         // maps type name to its definition
-        private readonly Dictionary<string, string> _tsTypes = new Dictionary<string, string>();
-        private readonly IValueConverter _valueConverter;
-        private readonly Action<Type> _onClientTypeAdded;
-
-        public DotNet2TS(IValueConverter valueConverter, Action<Type> onClientTypeAdded)
-        {
-            _valueConverter = valueConverter ?? throw new ArgumentNullException(nameof(valueConverter));
-            _onClientTypeAdded = onClientTypeAdded == null ? delegate { } : onClientTypeAdded;
-        }
+        private readonly Dictionary<string, string> _tsTypes = [];
+        private readonly IValueConverter _valueConverter = valueConverter ?? throw new ArgumentNullException(nameof(valueConverter));
+        private readonly Action<Type> _onClientTypeAdded = onClientTypeAdded == null ? delegate { } : onClientTypeAdded;
 
         /// <summary>
         /// Registers type
@@ -175,7 +168,7 @@ namespace RIAPP.DataService.Core.CodeGen
 
             CommentAttribute commentAttr = t.GetCustomAttributes(typeof(CommentAttribute), false).OfType<CommentAttribute>().FirstOrDefault();
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             if (commentAttr != null && !string.IsNullOrWhiteSpace(commentAttr.Text))
             {
                 AddComment(sb, commentAttr.Text);
@@ -223,7 +216,7 @@ namespace RIAPP.DataService.Core.CodeGen
                 .OfType<CommentAttribute>()
                 .FirstOrDefault();
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             if (commentAttr != null && !string.IsNullOrWhiteSpace(commentAttr.Text))
             {
@@ -233,7 +226,7 @@ namespace RIAPP.DataService.Core.CodeGen
             sb.AppendFormat("export enum {0}", name);
             sb.AppendLine();
             sb.AppendLine("{");
-            int[] enumVals = Enum.GetValues(t).Cast<int>().ToArray();
+            int[] enumVals = [.. Enum.GetValues(t).Cast<int>()];
             bool isFirst = true;
             Array.ForEach(enumVals, val =>
             {
@@ -256,7 +249,7 @@ namespace RIAPP.DataService.Core.CodeGen
         public string GetInterfaceDeclarations()
         {
             Dictionary<string, string>.ValueCollection vals = _tsTypes.Values;
-            StringBuilder sb = new StringBuilder(4096);
+            StringBuilder sb = new(4096);
             foreach (string str in vals)
             {
                 sb.Append(str);

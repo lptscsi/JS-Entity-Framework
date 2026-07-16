@@ -10,15 +10,10 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 {
-    public class AuthorizeMiddleware<TService>
+    public class AuthorizeMiddleware<TService>(RequestDelegate<CRUDContext<TService>> next, CRUDMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<CRUDContext<TService>> _next;
-
-        public AuthorizeMiddleware(RequestDelegate<CRUDContext<TService>> next, CRUDMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<CRUDContext<TService>> _next = next;
 
         public async Task Invoke(CRUDContext<TService> ctx)
         {
@@ -28,7 +23,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
             foreach (DbSet dbSet in ctx.Request.DbSets)
             {
                 //methods on domain service which are attempted to be executed by client (SaveChanges triggers their execution)
-                Dictionary<string, MethodInfoData> domainServiceMethods = new Dictionary<string, MethodInfoData>();
+                Dictionary<string, MethodInfoData> domainServiceMethods = [];
                 DbSetInfo dbInfo = metadata.DbSets[dbSet.DbSetName];
 
                 dbSet.Rows.Aggregate<RowInfo, Dictionary<string, MethodInfoData>>(domainServiceMethods, (dict, rowInfo) =>

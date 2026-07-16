@@ -2,14 +2,9 @@
 
 namespace System.Linq.Dynamic.Core.Parser;
 
-internal class WrappedValue<TValue>
+internal class WrappedValue<TValue>(TValue value)
 {
-    public TValue Value { get; }
-
-    public WrappedValue(TValue value)
-    {
-        Value = value;
-    }
+    public TValue Value { get; } = value;
 
     public static bool operator ==(WrappedValue<TValue>? left, WrappedValue<TValue>? right)
     {

@@ -27,8 +27,8 @@ namespace RIAPP.DataService.Core.Metadata
         /// <returns></returns>
         public static MethodsList GetSvcMethods(this IEnumerable<MethodInfoData> allList, IValueConverter valueConverter, MethodType methodTypes)
         {
-            MethodInfoData[] queryAndInvokes = allList.GetMethods(methodTypes).ToArray();
-            MethodsList methodList = new MethodsList();
+            MethodInfoData[] queryAndInvokes = [.. allList.GetMethods(methodTypes)];
+            MethodsList methodList = [];
 
             Array.ForEach(queryAndInvokes, info =>
             {

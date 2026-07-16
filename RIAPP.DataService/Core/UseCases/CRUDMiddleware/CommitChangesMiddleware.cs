@@ -7,15 +7,10 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 {
-    public class CommitChangesMiddleware<TService>
+    public class CommitChangesMiddleware<TService>(RequestDelegate<CRUDContext<TService>> next, CRUDMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<CRUDContext<TService>> _next;
-
-        public CommitChangesMiddleware(RequestDelegate<CRUDContext<TService>> next, CRUDMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<CRUDContext<TService>> _next = next;
 
         public async Task Invoke(CRUDContext<TService> ctx)
         {
@@ -28,7 +23,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
             RequestContext req = CRUDContext<TService>.CreateRequestContext(ctx.Service, changeSet);
 
-            using (RequestCallContext callContext = new RequestCallContext(req))
+            using (RequestCallContext callContext = new(req))
             {
                 await serviceMethods.ExecuteChangeSet();
                 await serviceHelper.AfterExecuteChangeSet(changeSet);
@@ -42,11 +37,11 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
                     }
                 }
 
-                SubResultList subResults = new SubResultList();
+                SubResultList subResults = [];
                 await serviceHelper.AfterChangeSetCommited(changeSet, subResults);
                 await serviceMethods.AfterChangeSetCommited(subResults);
 
-                SubsetsGenerator subsetsGenerator = new SubsetsGenerator(metadata, dataHelper);
+                SubsetsGenerator subsetsGenerator = new(metadata, dataHelper);
                 ctx.Response.Subsets = subsetsGenerator.CreateSubsets(subResults);
             }
 

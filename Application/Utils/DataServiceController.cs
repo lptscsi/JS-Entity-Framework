@@ -7,28 +7,32 @@ using System;
 using System.Net.Mime;
 using System.Threading.Tasks;
 
+#nullable enable
+
 namespace RIAppDemo.Utils
 {
-    [Route("[controller]/[action]")]
+    /// <summary>
+    /// Базовый контроллер для реализации специализированного контроллера для сервиса данных
+    /// </summary>
+    /// <typeparam name="TService"></typeparam>
+    /// <param name="domainService"></param>
     [ApiController]
-    public abstract class DataServiceController<TService> : ControllerBase
+    public abstract class DataServiceController<TService>(TService domainService) : ControllerBase
         where TService : BaseDomainService
     {
-
-        public DataServiceController(TService domainService)
-        {
-            DomainService = domainService;
-        }
-
-        protected TService DomainService
-        {
-            get;
-        }
+        /// <summary>
+        /// Экземпляр сервиса данных
+        /// </summary>
+        protected TService DomainService => domainService;
 
 
         #region CodeGen
 
-        [ActionName("typescript")]
+        /// <summary>
+        /// Возвращает реализацию сервиса на языке typescript
+        /// </summary>
+        /// <returns></returns>
+        [Route("ts")]
         [HttpGet]
         public ActionResult GetTypeScript()
         {
@@ -44,12 +48,16 @@ namespace RIAppDemo.Utils
             return res;
         }
 
-        [ActionName("xaml")]
+        /// <summary>
+        /// Возвращает конфигурацию сервиса в формате xml
+        /// </summary>
+        /// <returns></returns>
+        [Route("xaml")]
         [HttpGet]
         public ActionResult GetXAML(bool isDraft = true)
         {
             string content = DomainService.ServiceCodeGen(new CodeGenArgs("xaml") { isDraft = isDraft });
-            ContentResult res = new ContentResult
+            ContentResult res = new()
             {
                 ContentType = MediaTypeNames.Text.Plain,
                 Content = content
@@ -57,7 +65,11 @@ namespace RIAppDemo.Utils
             return res;
         }
 
-        [ActionName("csharp")]
+        /// <summary>
+        /// Возвращает реализацию сервиса на языке C#
+        /// </summary>
+        /// <returns></returns>
+        [Route("csharp")]
         [HttpGet]
         public ActionResult GetCSharp()
         {
@@ -70,34 +82,37 @@ namespace RIAppDemo.Utils
             return res;
         }
 
-        [ActionName("code")]
-        [HttpGet("{lang?}")]
-        public ActionResult GetCode(string lang)
+        /// <summary>
+        /// Возвращает результат сформированный в зависимости от параметра lang
+        /// </summary>
+        /// <param name="lang"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        [Route("code/{lang?}")]
+        [HttpGet]
+        public ActionResult GetCode(string? lang)
         {
             if (string.IsNullOrEmpty(lang))
             {
                 lang = Request.Query["lang"];
             }
 
-            switch (lang?.ToLowerInvariant())
+            return (lang?.ToLowerInvariant()) switch
             {
-                case "ts":
-                case "typescript":
-                    return GetTypeScript();
-                case "xml":
-                case "xaml":
-                    return GetXAML();
-                case "cs":
-                case "csharp":
-                    return GetCSharp();
-                default:
-                    throw new Exception(string.Format("Unknown lang argument: {0}", lang));
-            }
+                "ts" or "typescript" => GetTypeScript(),
+                "xml" or "xaml" => GetXAML(),
+                "cs" or "csharp" => GetCSharp(),
+                _ => throw new Exception(string.Format("Unknown lang argument: {0}", lang)),
+            };
         }
 
         #endregion
 
-        [ActionName("metadata")]
+        /// <summary>
+        /// Возвращает метаданные
+        /// </summary>
+        /// <returns></returns>
+        [Route("metadata")]
         [HttpGet]
         public ActionResult GetMetadata()
         {
@@ -105,7 +120,11 @@ namespace RIAppDemo.Utils
             return new ChunkedResult<MetadataResult>(res, DomainService.Serializer);
         }
 
-        [ActionName("permissions")]
+        /// <summary>
+        /// Возвращает разрешения
+        /// </summary>
+        /// <returns></returns>
+        [Route("permissions")]
         [HttpGet]
         public async Task<ActionResult> GetPermissions()
         {
@@ -113,49 +132,54 @@ namespace RIAppDemo.Utils
             return new ChunkedResult<Permissions>(res, DomainService.Serializer);
         }
 
-        [ActionName("query")]
+        /// <summary>
+        /// Выполняет запрос
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Route("query")]
         [HttpPost]
-        public async Task<ActionResult> PerformQuery()
+        public async Task<ActionResult> PerformQuery([FromBody] QueryRequest request)
         {
-            try
-            {
-                string body = await Request.GetRawBodyAsync();
-                QueryRequest request = (QueryRequest)DomainService.Serializer.DeSerialize(body, typeof(QueryRequest));
-                QueryResponse res = await DomainService.ServiceGetData(request);
-                return new ChunkedResult<QueryResponse>(res, DomainService.Serializer);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            QueryResponse res = await DomainService.ServiceGetData(request);
+            return new ChunkedResult<QueryResponse>(res, DomainService.Serializer);
         }
 
-        [ActionName("save")]
+        /// <summary>
+        /// Выполняет сохранение изменений
+        /// </summary>
+        /// <param name="changeSet"></param>
+        /// <returns></returns>
+        [Route("save")]
         [HttpPost]
-        public async Task<ActionResult> Save()
+        public async Task<ActionResult> Save([FromBody] ChangeSetRequest changeSet)
         {
-            string body = await Request.GetRawBodyAsync();
-            ChangeSetRequest changeSet = (ChangeSetRequest)DomainService.Serializer.DeSerialize(body, typeof(ChangeSetRequest));
             ChangeSetResponse res = await DomainService.ServiceApplyChangeSet(changeSet);
             return new ChunkedResult<ChangeSetResponse>(res, DomainService.Serializer);
         }
 
-        [ActionName("refresh")]
+        /// <summary>
+        /// Выполняет обновление
+        /// </summary>
+        /// <param name="refreshInfo"></param>
+        /// <returns></returns>
+        [Route("refresh")]
         [HttpPost]
-        public async Task<ActionResult> Refresh()
+        public async Task<ActionResult> Refresh([FromBody] RefreshRequest refreshInfo)
         {
-            string body = await Request.GetRawBodyAsync();
-            RefreshRequest refreshInfo = (RefreshRequest)DomainService.Serializer.DeSerialize(body, typeof(RefreshRequest));
             RefreshResponse res = await DomainService.ServiceRefreshRow(refreshInfo);
             return new ChunkedResult<RefreshResponse>(res, DomainService.Serializer);
         }
 
-        [ActionName("invoke")]
+        /// <summary>
+        /// Вызывает метод сервиса
+        /// </summary>
+        /// <param name="invokeInfo"></param>
+        /// <returns></returns>
+        [Route("invoke")]
         [HttpPost]
-        public async Task<ActionResult> Invoke()
+        public async Task<ActionResult> Invoke([FromBody] InvokeRequest invokeInfo)
         {
-            string body = await Request.GetRawBodyAsync();
-            InvokeRequest invokeInfo = (InvokeRequest)DomainService.Serializer.DeSerialize(body, typeof(InvokeRequest));
             InvokeResponse res = await DomainService.ServiceInvokeMethod(invokeInfo);
             return new ChunkedResult<InvokeResponse>(res, DomainService.Serializer);
         }

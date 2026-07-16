@@ -17,12 +17,12 @@ namespace RIAPP.DataService.Core.Metadata
         private static readonly XNamespace NS_XAML = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public DbSetInfoList DbSets { get; } = new DbSetInfoList();
+        public DbSetInfoList DbSets { get; } = [];
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public AssocList Associations { get; } = new AssocList();
+        public AssocList Associations { get; } = [];
 
-        public List<string> TypeScriptImports = new List<string>();
+        public List<string> TypeScriptImports = [];
 
 
         public string ToXML()
@@ -31,7 +31,7 @@ namespace RIAPP.DataService.Core.Metadata
 
             XNamespace ns_dal = $"clr-namespace:{dbSetType.Namespace};assembly={dbSetType.Assembly.GetName().Name}";
 
-            XElement xElement = new XElement(NS_DATA + "Metadata",
+            XElement xElement = new(NS_DATA + "Metadata",
                 new XAttribute(XNamespace.Xmlns + "x", NS_XAML.ToString()),
                 new XAttribute(XNamespace.Xmlns + "data", NS_DATA.ToString()),
                 new XAttribute(XNamespace.Xmlns + "dal", ns_dal.ToString()),
@@ -81,7 +81,7 @@ namespace RIAPP.DataService.Core.Metadata
 
         public static DesignTimeMetadata FromXML(string xml)
         {
-            DesignTimeMetadata metadata = new DesignTimeMetadata();
+            DesignTimeMetadata metadata = new();
             XDocument xdoc = XDocument.Parse(xml);
             XElement xmetadata = xdoc.Element(NS_DATA + "Metadata");
             XElement xdbSets = xmetadata.Element(NS_DATA + "Metadata.DbSets");
@@ -111,9 +111,9 @@ namespace RIAPP.DataService.Core.Metadata
                     string xType3 = xdbSet.Attribute("ValidatorType")?.Value;
                     Type validatorType = _GetTypeFromXType(xType3, xdoc);
 
-                    DbSetInfo dbSetInfo = new DbSetInfo(dbSetName);
+                    DbSetInfo dbSetInfo = new(dbSetName);
 
-                    FieldsList fieldsList = new FieldsList();
+                    FieldsList fieldsList = [];
 
                     dbSetInfo.SetEntityType(entityType);
                     if (handlerType != null)
@@ -153,7 +153,7 @@ namespace RIAPP.DataService.Core.Metadata
             {
                 foreach (XElement xAssoc in xAssocs.Elements(NS_DATA + "Association"))
                 {
-                    Association assoc = new Association
+                    Association assoc = new()
                     {
                         name = (string)xAssoc.Attribute("name")
                     };
@@ -188,7 +188,7 @@ namespace RIAPP.DataService.Core.Metadata
                     {
                         foreach (XElement xFieldRel in xFieldRels.Elements(NS_DATA + "FieldRel"))
                         {
-                            FieldRel fldRel = new FieldRel
+                            FieldRel fldRel = new()
                             {
                                 parentField = (string)xFieldRel.Attribute("parentField"),
                                 childField = (string)xFieldRel.Attribute("childField")
@@ -212,7 +212,7 @@ namespace RIAPP.DataService.Core.Metadata
         public static string ClassTypesToXML(IEnumerable<Type> classTypes)
         {
             classTypes = classTypes.Where(t => t.IsClass && !t.IsArray);
-            Dictionary<Type, string> dic_types = new Dictionary<Type, string>();
+            Dictionary<Type, string> dic_types = [];
 
             foreach (Type classType in classTypes)
             {
@@ -220,8 +220,8 @@ namespace RIAPP.DataService.Core.Metadata
                 dic_types.Add(classType, ns_dal);
             }
 
-            Dictionary<string, string> dic_ns_prefix = new Dictionary<string, string>();
-            LinkedList<XAttribute> dal_ns_attributes = new LinkedList<XAttribute>();
+            Dictionary<string, string> dic_ns_prefix = [];
+            LinkedList<XAttribute> dal_ns_attributes = new();
             int i = 0;
 
             foreach (string ns in dic_types.Values)
@@ -235,7 +235,7 @@ namespace RIAPP.DataService.Core.Metadata
                 }
             }
 
-            XElement xElement = new XElement(NS_DATA + "Metadata",
+            XElement xElement = new(NS_DATA + "Metadata",
                 new XAttribute(XNamespace.Xmlns + "x", NS_XAML.ToString()),
                 new XAttribute(XNamespace.Xmlns + "data", NS_DATA.ToString()),
                 dal_ns_attributes.ToArray(),
@@ -283,13 +283,15 @@ namespace RIAPP.DataService.Core.Metadata
                 }
 
                 return res;
-            };
+            }
+            ;
 
             bool isComplexType(Type propType)
             {
                 return propType.IsClass && propType != typeof(string) && !propType.IsArray &&
                        propType.GetProperties().Any();
-            };
+            }
+            ;
 
             return from prop in props
                    select new XElement(NS_DATA + "Field",
@@ -359,11 +361,11 @@ namespace RIAPP.DataService.Core.Metadata
 
         private static FieldsList _XElementsToFieldList(IEnumerable<XElement> xFields)
         {
-            FieldsList fields = new FieldsList();
+            FieldsList fields = [];
 
             foreach (XElement xField in xFields)
             {
-                Field field = new Field
+                Field field = new()
                 {
                     fieldName = (string)xField.Attribute("fieldName")
                 };
@@ -464,8 +466,8 @@ namespace RIAPP.DataService.Core.Metadata
                 throw new Exception(string.Format("Invalid entity type: {0}", xType));
             }
 
-            string[] typeParts1 = typeParts[0].Split(':').Select(s => s.Trim()).ToArray();
-            string[] typeParts2 = typeParts[1].Split(':').Select(s => s.Trim()).ToArray();
+            string[] typeParts1 = [.. typeParts[0].Split(':').Select(s => s.Trim())];
+            string[] typeParts2 = [.. typeParts[1].Split(':').Select(s => s.Trim())];
 
             XNamespace xaml_ns = xdoc.Root.GetNamespaceOfPrefix(typeParts1[0]);
             if (xaml_ns != NS_XAML)
@@ -503,9 +505,7 @@ namespace RIAPP.DataService.Core.Metadata
 
         private static string RemoveWhitespace(string input)
         {
-            return new string(input.ToCharArray()
-                .Where(c => !char.IsWhiteSpace(c))
-                .ToArray());
+            return new string([.. input.ToCharArray().Where(c => !char.IsWhiteSpace(c))]);
         }
 
         #endregion

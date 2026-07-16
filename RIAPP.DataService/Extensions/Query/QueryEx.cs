@@ -45,7 +45,7 @@ namespace RIAPP.DataService.Core.Query
             }
 
             bool first = true;
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             foreach (SortItem si in sort.SortItems)
             {
                 string fldName = si.FieldName;
@@ -78,8 +78,8 @@ namespace RIAPP.DataService.Core.Query
             }
 
             int cnt = 0;
-            StringBuilder sb = new StringBuilder();
-            LinkedList<object> filterParams = new LinkedList<object>();
+            StringBuilder sb = new();
+            LinkedList<object> filterParams = new();
             foreach (FilterItem filterItem in filter.FilterItems)
             {
                 Field field = dbInfo.fieldInfos.Where(finf => finf.fieldName == filterItem.FieldName).FirstOrDefault();
@@ -152,7 +152,7 @@ namespace RIAPP.DataService.Core.Query
                 }
             }
 
-            result = entities.Where(sb.ToString(), filterParams.ToArray());
+            result = entities.Where(sb.ToString(), [.. filterParams]);
             return result;
         }
 

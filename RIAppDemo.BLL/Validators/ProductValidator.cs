@@ -13,7 +13,7 @@ namespace RIAppDemo.BLL.Validators
             Expando product,
             string[] modifiedField)
         {
-            LinkedList<ValidationErrorInfo> errors = new LinkedList<ValidationErrorInfo>();
+            LinkedList<ValidationErrorInfo> errors = new();
             if (Array.IndexOf(modifiedField, "Name") > -1 && product["Name"] != null)
             {
                 string name = (product["Name"] as string);

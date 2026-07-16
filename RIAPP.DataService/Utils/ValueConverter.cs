@@ -178,7 +178,20 @@ namespace RIAPP.DataService.Utils
 
         protected virtual object ConvertToNumber(string value, bool IsNullableType, Type propType, Type propMainType)
         {
-            return value == null ? null : Convert.ChangeType(value, propMainType, CultureInfo.InvariantCulture);
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (propMainType.IsEnum)
+            {
+                object enumVal = Convert.ChangeType(value, propMainType.GetEnumUnderlyingType(), CultureInfo.InvariantCulture);
+                return enumVal;
+            }
+            else
+            {
+                return Convert.ChangeType(value, propMainType, CultureInfo.InvariantCulture);
+            }
 
             // commented, because no need to create nullable type here - on boxing it turns into ordinary value anyway
             // return (IsNullableType)? CreateGenericInstance(propType, propMainType, new[] { typedVal }): typedVal;

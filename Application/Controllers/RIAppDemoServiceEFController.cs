@@ -1,21 +1,21 @@
 ﻿using Application.Models;
 using Microsoft.AspNetCore.Mvc;
-using RIAPP.DataService.Core.Types;
 using RIAppDemo.BLL.DataServices;
 using RIAppDemo.Utils;
 using System.Threading.Tasks;
 
 namespace RIAppDemo.Controllers
 {
-    public class RIAppDemoServiceEFController : DataServiceController<RIAppDemoServiceEF>
+    /// <summary>
+    /// Контроллер сервиса данных
+    /// </summary>
+    /// <param name="domainService"></param>
+    [Route("api/demo")]
+    [ApiController]
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public class RIAppDemoServiceEFController(RIAppDemoServiceEF domainService) : DataServiceController<RIAppDemoServiceEF>(domainService)
     {
-        public RIAppDemoServiceEFController(RIAppDemoServiceEF domainService) :
-            base(domainService)
-        {
-
-        }
-
-        [ActionName("static")]
+        [Route("static")]
         [HttpGet]
         public async Task<ActionResult> PreloadData()
         {

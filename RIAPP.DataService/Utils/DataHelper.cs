@@ -11,17 +11,11 @@ using System.Reflection;
 
 namespace RIAPP.DataService.Utils
 {
-    public class DataHelper<TService> : IDataHelper<TService>
+    public class DataHelper<TService>(ISerializer serializer, IValueConverter<TService> valueConverter) : IDataHelper<TService>
         where TService : BaseDomainService
     {
-        private readonly IValueConverter<TService> _valueConverter;
-        private readonly ISerializer _serializer;
-
-        public DataHelper(ISerializer serializer, IValueConverter<TService> valueConverter)
-        {
-            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer), ErrorStrings.ERR_NO_SERIALIZER);
-            _valueConverter = valueConverter ?? throw new ArgumentNullException(nameof(valueConverter));
-        }
+        private readonly IValueConverter<TService> _valueConverter = valueConverter ?? throw new ArgumentNullException(nameof(valueConverter));
+        private readonly ISerializer _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer), ErrorStrings.ERR_NO_SERIALIZER);
 
         protected T Deserialize<T>(string val)
         {

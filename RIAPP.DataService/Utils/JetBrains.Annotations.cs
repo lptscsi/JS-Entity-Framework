@@ -97,20 +97,15 @@ namespace JetBrains.Annotations
     ///   ShowError("Failed: {0}"); // Warning: Non-existing argument in format string
     /// }
     /// </code></example>
+    /// <param name="formatParameterName">
+    /// Specifies which parameter of an annotated method should be treated as format-string
+    /// </param>
     [AttributeUsage(
       AttributeTargets.Constructor | AttributeTargets.Method |
       AttributeTargets.Property | AttributeTargets.Delegate)]
-    internal sealed class StringFormatMethodAttribute : Attribute
+    internal sealed class StringFormatMethodAttribute([NotNull] string formatParameterName) : Attribute
     {
-        /// <param name="formatParameterName">
-        /// Specifies which parameter of an annotated method should be treated as format-string
-        /// </param>
-        public StringFormatMethodAttribute([NotNull] string formatParameterName)
-        {
-            FormatParameterName = formatParameterName;
-        }
-
-        [NotNull] public string FormatParameterName { get; private set; }
+        [NotNull] public string FormatParameterName { get; private set; } = formatParameterName;
     }
 
     /// <summary>
@@ -120,14 +115,9 @@ namespace JetBrains.Annotations
     [AttributeUsage(
       AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Field,
       AllowMultiple = true)]
-    internal sealed class ValueProviderAttribute : Attribute
+    internal sealed class ValueProviderAttribute([NotNull] string name) : Attribute
     {
-        public ValueProviderAttribute([NotNull] string name)
-        {
-            Name = name;
-        }
-
-        [NotNull] public string Name { get; private set; }
+        [NotNull] public string Name { get; private set; } = name;
     }
 
     /// <summary>
@@ -239,20 +229,14 @@ namespace JetBrains.Annotations
     /// </code></item>
     /// </list></examples>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    internal sealed class ContractAnnotationAttribute : Attribute
+    internal sealed class ContractAnnotationAttribute([NotNull] string contract, bool forceFullStates) : Attribute
     {
         public ContractAnnotationAttribute([NotNull] string contract)
           : this(contract, false) { }
 
-        public ContractAnnotationAttribute([NotNull] string contract, bool forceFullStates)
-        {
-            Contract = contract;
-            ForceFullStates = forceFullStates;
-        }
+        [NotNull] public string Contract { get; private set; } = contract;
 
-        [NotNull] public string Contract { get; private set; }
-
-        public bool ForceFullStates { get; private set; }
+        public bool ForceFullStates { get; private set; } = forceFullStates;
     }
 
     /// <summary>
@@ -265,16 +249,11 @@ namespace JetBrains.Annotations
     /// }
     /// </code></example>
     [AttributeUsage(AttributeTargets.All)]
-    internal sealed class LocalizationRequiredAttribute : Attribute
+    internal sealed class LocalizationRequiredAttribute(bool required) : Attribute
     {
         public LocalizationRequiredAttribute() : this(true) { }
 
-        public LocalizationRequiredAttribute(bool required)
-        {
-            Required = required;
-        }
-
-        public bool Required { get; private set; }
+        public bool Required { get; private set; } = required;
     }
 
     /// <summary>
@@ -313,14 +292,9 @@ namespace JetBrains.Annotations
     /// </code></example>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     [BaseTypeRequired(typeof(Attribute))]
-    internal sealed class BaseTypeRequiredAttribute : Attribute
+    internal sealed class BaseTypeRequiredAttribute([NotNull] Type baseType) : Attribute
     {
-        public BaseTypeRequiredAttribute([NotNull] Type baseType)
-        {
-            BaseType = baseType;
-        }
-
-        [NotNull] public Type BaseType { get; private set; }
+        [NotNull] public Type BaseType { get; private set; } = baseType;
     }
 
     /// <summary>
@@ -328,7 +302,7 @@ namespace JetBrains.Annotations
     /// so this symbol will not be marked as unused (as well as by other usage inspections).
     /// </summary>
     [AttributeUsage(AttributeTargets.All)]
-    internal sealed class UsedImplicitlyAttribute : Attribute
+    internal sealed class UsedImplicitlyAttribute(ImplicitUseKindFlags useKindFlags, ImplicitUseTargetFlags targetFlags) : Attribute
     {
         public UsedImplicitlyAttribute()
           : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Default) { }
@@ -339,15 +313,9 @@ namespace JetBrains.Annotations
         public UsedImplicitlyAttribute(ImplicitUseTargetFlags targetFlags)
           : this(ImplicitUseKindFlags.Default, targetFlags) { }
 
-        public UsedImplicitlyAttribute(ImplicitUseKindFlags useKindFlags, ImplicitUseTargetFlags targetFlags)
-        {
-            UseKindFlags = useKindFlags;
-            TargetFlags = targetFlags;
-        }
+        public ImplicitUseKindFlags UseKindFlags { get; private set; } = useKindFlags;
 
-        public ImplicitUseKindFlags UseKindFlags { get; private set; }
-
-        public ImplicitUseTargetFlags TargetFlags { get; private set; }
+        public ImplicitUseTargetFlags TargetFlags { get; private set; } = targetFlags;
     }
 
     /// <summary>
@@ -355,7 +323,7 @@ namespace JetBrains.Annotations
     /// as unused (as well as by other usage inspections)
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.GenericParameter)]
-    internal sealed class MeansImplicitUseAttribute : Attribute
+    internal sealed class MeansImplicitUseAttribute(ImplicitUseKindFlags useKindFlags, ImplicitUseTargetFlags targetFlags) : Attribute
     {
         public MeansImplicitUseAttribute()
           : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Default) { }
@@ -366,15 +334,9 @@ namespace JetBrains.Annotations
         public MeansImplicitUseAttribute(ImplicitUseTargetFlags targetFlags)
           : this(ImplicitUseKindFlags.Default, targetFlags) { }
 
-        public MeansImplicitUseAttribute(ImplicitUseKindFlags useKindFlags, ImplicitUseTargetFlags targetFlags)
-        {
-            UseKindFlags = useKindFlags;
-            TargetFlags = targetFlags;
-        }
+        [UsedImplicitly] public ImplicitUseKindFlags UseKindFlags { get; private set; } = useKindFlags;
 
-        [UsedImplicitly] public ImplicitUseKindFlags UseKindFlags { get; private set; }
-
-        [UsedImplicitly] public ImplicitUseTargetFlags TargetFlags { get; private set; }
+        [UsedImplicitly] public ImplicitUseTargetFlags TargetFlags { get; private set; } = targetFlags;
     }
 
     [Flags]
@@ -582,69 +544,39 @@ namespace JetBrains.Annotations
     }
 
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
-    internal sealed class AspMvcAreaMasterLocationFormatAttribute : Attribute
+    internal sealed class AspMvcAreaMasterLocationFormatAttribute([NotNull] string format) : Attribute
     {
-        public AspMvcAreaMasterLocationFormatAttribute([NotNull] string format)
-        {
-            Format = format;
-        }
-
-        [NotNull] public string Format { get; private set; }
+        [NotNull] public string Format { get; private set; } = format;
     }
 
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
-    internal sealed class AspMvcAreaPartialViewLocationFormatAttribute : Attribute
+    internal sealed class AspMvcAreaPartialViewLocationFormatAttribute([NotNull] string format) : Attribute
     {
-        public AspMvcAreaPartialViewLocationFormatAttribute([NotNull] string format)
-        {
-            Format = format;
-        }
-
-        [NotNull] public string Format { get; private set; }
+        [NotNull] public string Format { get; private set; } = format;
     }
 
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
-    internal sealed class AspMvcAreaViewLocationFormatAttribute : Attribute
+    internal sealed class AspMvcAreaViewLocationFormatAttribute([NotNull] string format) : Attribute
     {
-        public AspMvcAreaViewLocationFormatAttribute([NotNull] string format)
-        {
-            Format = format;
-        }
-
-        [NotNull] public string Format { get; private set; }
+        [NotNull] public string Format { get; private set; } = format;
     }
 
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
-    internal sealed class AspMvcMasterLocationFormatAttribute : Attribute
+    internal sealed class AspMvcMasterLocationFormatAttribute([NotNull] string format) : Attribute
     {
-        public AspMvcMasterLocationFormatAttribute([NotNull] string format)
-        {
-            Format = format;
-        }
-
-        [NotNull] public string Format { get; private set; }
+        [NotNull] public string Format { get; private set; } = format;
     }
 
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
-    internal sealed class AspMvcPartialViewLocationFormatAttribute : Attribute
+    internal sealed class AspMvcPartialViewLocationFormatAttribute([NotNull] string format) : Attribute
     {
-        public AspMvcPartialViewLocationFormatAttribute([NotNull] string format)
-        {
-            Format = format;
-        }
-
-        [NotNull] public string Format { get; private set; }
+        [NotNull] public string Format { get; private set; } = format;
     }
 
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
-    internal sealed class AspMvcViewLocationFormatAttribute : Attribute
+    internal sealed class AspMvcViewLocationFormatAttribute([NotNull] string format) : Attribute
     {
-        public AspMvcViewLocationFormatAttribute([NotNull] string format)
-        {
-            Format = format;
-        }
-
-        [NotNull] public string Format { get; private set; }
+        [NotNull] public string Format { get; private set; } = format;
     }
 
     /// <summary>
@@ -807,14 +739,9 @@ namespace JetBrains.Annotations
     }
 
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property)]
-    internal sealed class HtmlAttributeValueAttribute : Attribute
+    internal sealed class HtmlAttributeValueAttribute([NotNull] string name) : Attribute
     {
-        public HtmlAttributeValueAttribute([NotNull] string name)
-        {
-            Name = name;
-        }
-
-        [NotNull] public string Name { get; private set; }
+        [NotNull] public string Name { get; private set; } = name;
     }
 
     /// <summary>
@@ -830,14 +757,9 @@ namespace JetBrains.Annotations
     /// over collection type affects content of the collection.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Property)]
-    internal sealed class CollectionAccessAttribute : Attribute
+    internal sealed class CollectionAccessAttribute(CollectionAccessType collectionAccessType) : Attribute
     {
-        public CollectionAccessAttribute(CollectionAccessType collectionAccessType)
-        {
-            CollectionAccessType = collectionAccessType;
-        }
-
-        public CollectionAccessType CollectionAccessType { get; private set; }
+        public CollectionAccessType CollectionAccessType { get; private set; } = collectionAccessType;
     }
 
     [Flags]
@@ -867,14 +789,9 @@ namespace JetBrains.Annotations
     /// the attribute is the assertion type.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    internal sealed class AssertionConditionAttribute : Attribute
+    internal sealed class AssertionConditionAttribute(AssertionConditionType conditionType) : Attribute
     {
-        public AssertionConditionAttribute(AssertionConditionType conditionType)
-        {
-            ConditionType = conditionType;
-        }
-
-        public AssertionConditionType ConditionType { get; private set; }
+        public AssertionConditionType ConditionType { get; private set; } = conditionType;
     }
 
     /// <summary>
@@ -951,17 +868,11 @@ namespace JetBrains.Annotations
     internal sealed class XamlItemBindingOfItemsControlAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    internal sealed class AspChildControlTypeAttribute : Attribute
+    internal sealed class AspChildControlTypeAttribute([NotNull] string tagName, [NotNull] Type controlType) : Attribute
     {
-        public AspChildControlTypeAttribute([NotNull] string tagName, [NotNull] Type controlType)
-        {
-            TagName = tagName;
-            ControlType = controlType;
-        }
+        [NotNull] public string TagName { get; private set; } = tagName;
 
-        [NotNull] public string TagName { get; private set; }
-
-        [NotNull] public Type ControlType { get; private set; }
+        [NotNull] public Type ControlType { get; private set; } = controlType;
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method)]
@@ -974,61 +885,35 @@ namespace JetBrains.Annotations
     internal sealed class AspMethodPropertyAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    internal sealed class AspRequiredAttributeAttribute : Attribute
+    internal sealed class AspRequiredAttributeAttribute([NotNull] string attribute) : Attribute
     {
-        public AspRequiredAttributeAttribute([NotNull] string attribute)
-        {
-            Attribute = attribute;
-        }
-
-        [NotNull] public string Attribute { get; private set; }
+        [NotNull] public string Attribute { get; private set; } = attribute;
     }
 
     [AttributeUsage(AttributeTargets.Property)]
-    internal sealed class AspTypePropertyAttribute : Attribute
+    internal sealed class AspTypePropertyAttribute(bool createConstructorReferences) : Attribute
     {
-        public bool CreateConstructorReferences { get; private set; }
-
-        public AspTypePropertyAttribute(bool createConstructorReferences)
-        {
-            CreateConstructorReferences = createConstructorReferences;
-        }
+        public bool CreateConstructorReferences { get; private set; } = createConstructorReferences;
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    internal sealed class RazorImportNamespaceAttribute : Attribute
+    internal sealed class RazorImportNamespaceAttribute([NotNull] string name) : Attribute
     {
-        public RazorImportNamespaceAttribute([NotNull] string name)
-        {
-            Name = name;
-        }
-
-        [NotNull] public string Name { get; private set; }
+        [NotNull] public string Name { get; private set; } = name;
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    internal sealed class RazorInjectionAttribute : Attribute
+    internal sealed class RazorInjectionAttribute([NotNull] string type, [NotNull] string fieldName) : Attribute
     {
-        public RazorInjectionAttribute([NotNull] string type, [NotNull] string fieldName)
-        {
-            Type = type;
-            FieldName = fieldName;
-        }
+        [NotNull] public string Type { get; private set; } = type;
 
-        [NotNull] public string Type { get; private set; }
-
-        [NotNull] public string FieldName { get; private set; }
+        [NotNull] public string FieldName { get; private set; } = fieldName;
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    internal sealed class RazorDirectiveAttribute : Attribute
+    internal sealed class RazorDirectiveAttribute([NotNull] string directive) : Attribute
     {
-        public RazorDirectiveAttribute([NotNull] string directive)
-        {
-            Directive = directive;
-        }
-
-        [NotNull] public string Directive { get; private set; }
+        [NotNull] public string Directive { get; private set; } = directive;
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]

@@ -1,29 +1,17 @@
 ﻿using RIAPP.DataService.Core.Types;
 using RIAPP.DataService.Utils;
 using System;
-using System.Dynamic;
 using System.Security.Claims;
 
 namespace RIAPP.DataService.Core
 {
-    public class RequestContext : IEntityVersionProvider
+    public class RequestContext(BaseDomainService dataService,
+        DbSet dbSet = null,
+        ChangeSetRequest changeSet = null,
+        RowInfo rowInfo = null,
+        QueryRequest queryInfo = null,
+        ServiceOperationType operation = ServiceOperationType.None) : IEntityVersionProvider
     {
-        public RequestContext(BaseDomainService dataService,
-            DbSet dbSet = null,
-            ChangeSetRequest changeSet = null,
-            RowInfo rowInfo = null,
-            QueryRequest queryInfo = null,
-            ServiceOperationType operation = ServiceOperationType.None)
-        {
-            DataService = dataService ?? throw new ArgumentNullException(nameof(dataService));
-            CurrentDbSet = dbSet;
-            CurrentChangeSet = changeSet;
-            CurrentRowInfo = rowInfo;
-            CurrentQueryInfo = queryInfo;
-            CurrentOperation = operation;
-            _dataBag = null;
-        }
-
         public static RequestContext Current
         {
             get
@@ -40,26 +28,26 @@ namespace RIAPP.DataService.Core
 
         public ClaimsPrincipal User => DataService.User;
 
-        public DbSet CurrentDbSet { get; }
+        public DbSet CurrentDbSet { get; } = dbSet;
 
-        public ChangeSetRequest CurrentChangeSet { get; }
+        public ChangeSetRequest CurrentChangeSet { get; } = changeSet;
 
-        public RowInfo CurrentRowInfo { get; }
+        public RowInfo CurrentRowInfo { get; } = rowInfo;
 
-        public QueryRequest CurrentQueryInfo { get; }
+        public QueryRequest CurrentQueryInfo { get; } = queryInfo;
 
-        public ServiceOperationType CurrentOperation { get; }
+        public ServiceOperationType CurrentOperation { get; } = operation;
 
         public dynamic DataBag => _dataBag.Value;
 
         public BaseDomainService DataService
         {
             get;
-        }
+        } = dataService ?? throw new ArgumentNullException(nameof(dataService));
 
         #region Private Fields
 
-        private readonly Lazy<dynamic> _dataBag = new Lazy<dynamic>(() => new ExpandoObject(), true);
+        private readonly Lazy<dynamic> _dataBag = null;
 
         #endregion
 

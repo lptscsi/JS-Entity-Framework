@@ -7,29 +7,20 @@ using System.Linq;
 
 namespace RIAPP.DataService.Core.Metadata
 {
-    public class RunTimeMetadata
+    public class RunTimeMetadata(
+        DbSetInfoMap dbSets,
+        AssociationMap associations,
+        MethodMap svcMethods,
+        OperationalMethods operMethods,
+        string[] typeScriptImports)
     {
-        private readonly OperationalMethods _operMethods;
-        private readonly MethodMap _svcMethods;
-
-        public RunTimeMetadata(
-            DbSetInfoMap dbSets,
-            AssociationMap associations,
-            MethodMap svcMethods,
-            OperationalMethods operMethods,
-            string[] typeScriptImports)
-        {
-            DbSets = dbSets;
-            Associations = associations;
-            _svcMethods = svcMethods;
-            _operMethods = operMethods;
-            TypeScriptImports = typeScriptImports;
-        }
+        private readonly OperationalMethods _operMethods = operMethods;
+        private readonly MethodMap _svcMethods = svcMethods;
 
         public string[] TypeScriptImports
         {
             get;
-        }
+        } = typeScriptImports;
 
         /// <summary>
         /// Lookup table for <see cref="DbSetInfo"/> indexed by entity type
@@ -74,11 +65,11 @@ namespace RIAPP.DataService.Core.Metadata
             return _operMethods.GetMethod(dbSetName, methodType);
         }
 
-        public DbSetInfoMap DbSets { get; }
+        public DbSetInfoMap DbSets { get; } = dbSets;
 
-        public AssociationMap Associations { get; }
+        public AssociationMap Associations { get; } = associations;
 
-        public MethodsList MethodDescriptions => new MethodsList(_svcMethods.Values);
+        public MethodsList MethodDescriptions => new(_svcMethods.Values);
 
     }
 }

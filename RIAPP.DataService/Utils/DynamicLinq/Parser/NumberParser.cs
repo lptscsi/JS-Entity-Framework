@@ -9,7 +9,11 @@ namespace System.Linq.Dynamic.Core.Parser
     /// <summary>
     /// NumberParser
     /// </summary>
-    public class NumberParser
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="NumberParser"/> class.
+    /// </remarks>
+    /// <param name="config">The ParsingConfig.</param>
+    public class NumberParser(ParsingConfig? config)
     {
         private static readonly Regex RegexBinary32 = new("^[01]{1,32}$", RegexOptions.Compiled);
         private static readonly Regex RegexBinary64 = new("^[01]{1,64}$", RegexOptions.Compiled);
@@ -17,16 +21,7 @@ namespace System.Linq.Dynamic.Core.Parser
         private static readonly char[] QualifiersHex = { 'U', 'u', 'L', 'l' };
         private static readonly string[] QualifiersReal = { "F", "f", "D", "d", "M", "m" };
 
-        private readonly CultureInfo _culture;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NumberParser"/> class.
-        /// </summary>
-        /// <param name="config">The ParsingConfig.</param>
-        public NumberParser(ParsingConfig? config)
-        {
-            _culture = config?.NumberParseCulture ?? CultureInfo.InvariantCulture;
-        }
+        private readonly CultureInfo _culture = config?.NumberParseCulture ?? CultureInfo.InvariantCulture;
 
         /// <summary>
         /// Tries to parse the text into a IntegerLiteral ConstantExpression.

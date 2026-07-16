@@ -3,7 +3,7 @@
 namespace RIAPP.DataService.Core.Types
 {
     [Flags]
-    public enum ValueFlags: int
+    public enum ValueFlags : int
     {
         None = 0,
         Changed = 1,

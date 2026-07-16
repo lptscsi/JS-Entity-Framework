@@ -19,6 +19,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ResourceHelper = RIAppDemo.BLL.Utils.ResourceHelper;
 
+#nullable enable
+
 namespace RIAppDemo.BLL.DataServices
 {
     [Authorize]
@@ -61,12 +63,14 @@ namespace RIAppDemo.BLL.DataServices
             return new AdventureWorksLT2012Context(optionsBuilder.Options);
         }
         */
-        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft)
+        /// <inheritdoc/>
+        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft, List<Type>? dataServiceEntityTypes = null)
         {
             if (isDraft)
             {
-                return base.GetDesignTimeMetadata(true);
+                return base.GetDesignTimeMetadata(true, dataServiceEntityTypes);
             }
+
             //  first the uncorrected metadata was saved into xml file and then edited 
             return DesignTimeMetadata.FromXML(ResourceHelper.GetResourceString("RIAppDemo.BLL.Metadata.MainDemo.xml"));
         }
@@ -186,7 +190,7 @@ namespace RIAppDemo.BLL.DataServices
             IHostAddrService ipAddressService = ServiceContainer.GetRequiredService<IHostAddrService>();
             string userIPaddress = ipAddressService.GetIPAddress();
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             Array.ForEach(param1, item =>
             {
@@ -448,7 +452,7 @@ namespace RIAppDemo.BLL.DataServices
         [Invoke]
         public async Task<DEMOCLS> GetClassifiers()
         {
-            DEMOCLS res = new DEMOCLS
+            DEMOCLS res = new()
             {
                 prodCategory = await DB.ProductCategory.OrderBy(l => l.Name).Select(d => new KeyVal { key = d.ProductCategoryId, val = d.Name }).ToListAsync(),
                 prodDescription = await DB.ProductDescription.OrderBy(l => l.Description).Select(d => new KeyVal { key = d.ProductDescriptionId, val = d.Description }).ToListAsync(),

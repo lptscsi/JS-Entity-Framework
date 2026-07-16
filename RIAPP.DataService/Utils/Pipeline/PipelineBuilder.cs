@@ -5,19 +5,14 @@ using System.Threading.Tasks;
 
 namespace Pipeline
 {
-    public class PipelineBuilder<TService, TContext> : IPipelineBuilder<TService, TContext>
+    public class PipelineBuilder<TService, TContext>(IServiceProvider services) : IPipelineBuilder<TService, TContext>
         where TService : BaseDomainService
         where TContext : IRequestContext
     {
-        public PipelineBuilder(IServiceProvider services)
-        {
-            ApplicationServices = services;
-        }
-
         public IServiceProvider ApplicationServices
         {
             get;
-        }
+        } = services;
 
         public PipelineBuilder<TService, TContext> New()
         {
@@ -83,7 +78,7 @@ namespace Pipeline
 
         public PipelineBuilder<TService, TContext> Use(Func<RequestDelegate<TContext>, RequestDelegate<TContext>> component)
         {
-            MiddlewareComponentNode<TContext> node = new MiddlewareComponentNode<TContext>
+            MiddlewareComponentNode<TContext> node = new()
             {
                 Component = component
             };
@@ -92,6 +87,6 @@ namespace Pipeline
             return this;
         }
 
-        private readonly LinkedList<MiddlewareComponentNode<TContext>> _components = new LinkedList<MiddlewareComponentNode<TContext>>();
+        private readonly LinkedList<MiddlewareComponentNode<TContext>> _components = new();
     }
 }

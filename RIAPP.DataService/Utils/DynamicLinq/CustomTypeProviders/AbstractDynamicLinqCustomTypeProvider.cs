@@ -23,7 +23,7 @@ public abstract class AbstractDynamicLinqCustomTypeProvider
 #if !NET35
         assemblies = assemblies.Where(a => !a.IsDynamic);
 #endif
-        return GetAssemblyTypesWithDynamicLinqTypeAttribute(assemblies).Distinct().ToArray();
+        return [.. GetAssemblyTypesWithDynamicLinqTypeAttribute(assemblies).Distinct()];
     }
 
     /// <summary>
@@ -147,7 +147,7 @@ public abstract class AbstractDynamicLinqCustomTypeProvider
             }
             catch (ReflectionTypeLoadException reflectionTypeLoadException)
             {
-                definedTypes = reflectionTypeLoadException.Types.WhereNotNull().ToArray();
+                definedTypes = [.. reflectionTypeLoadException.Types.WhereNotNull()];
             }
             catch
             {
@@ -171,7 +171,7 @@ public abstract class AbstractDynamicLinqCustomTypeProvider
             }
         }
 
-        return dynamicLinqTypes.Distinct().ToArray();
+        return [.. dynamicLinqTypes.Distinct()];
     }
 #endif
 }

@@ -3,15 +3,9 @@
 namespace RIAPP.DataService.Core.Types
 {
 
-    public class ChangeSetResponse
+    public class ChangeSetResponse(ChangeSetRequest request)
     {
-        public ChangeSetResponse(ChangeSetRequest request)
-        {
-            DbSets = request.DbSets;
-        }
-
-
-        public DbSetList DbSets { get; set; }
+        public DbSetList DbSets { get; set; } = request.DbSets;
 
 
         public ErrorInfo Error { get; set; }

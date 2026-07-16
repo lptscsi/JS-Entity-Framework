@@ -11,15 +11,10 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 {
-    public class ValidateChangesMiddleware<TService>
+    public class ValidateChangesMiddleware<TService>(RequestDelegate<CRUDContext<TService>> next, CRUDMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<CRUDContext<TService>> _next;
-
-        public ValidateChangesMiddleware(RequestDelegate<CRUDContext<TService>> next, CRUDMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<CRUDContext<TService>> _next = next;
 
         private async Task<bool> ValidateRows(CRUDContext<TService> ctx, ChangeSetRequest changeSet, RunTimeMetadata metadata, IEnumerable<RowInfo> rows)
         {
@@ -29,7 +24,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
             foreach (RowInfo rowInfo in rows)
             {
                 RequestContext req = CRUDContext<TService>.CreateRequestContext(service, changeSet, rowInfo);
-                using (RequestCallContext callContext = new RequestCallContext(req))
+                using (RequestCallContext callContext = new(req))
                 {
                     if (!await serviceHelper.ValidateEntity(metadata, req))
                     {

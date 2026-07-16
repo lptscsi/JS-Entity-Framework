@@ -2,15 +2,10 @@
 
 namespace RIAPP.DataService.Core
 {
-    public class InvokeOperationsUseCaseFactory<TService> : IInvokeOperationsUseCaseFactory<TService>
+    public class InvokeOperationsUseCaseFactory<TService>(Func<BaseDomainService, Func<Exception, string>, IInvokeOperationsUseCase<TService>> func) : IInvokeOperationsUseCaseFactory<TService>
         where TService : BaseDomainService
     {
-        private readonly Func<BaseDomainService, Func<Exception, string>, IInvokeOperationsUseCase<TService>> _func;
-
-        public InvokeOperationsUseCaseFactory(Func<BaseDomainService, Func<Exception, string>, IInvokeOperationsUseCase<TService>> func)
-        {
-            _func = func;
-        }
+        private readonly Func<BaseDomainService, Func<Exception, string>, IInvokeOperationsUseCase<TService>> _func = func;
 
         public IInvokeOperationsUseCase Create(BaseDomainService service, Func<Exception, string> onError)
         {

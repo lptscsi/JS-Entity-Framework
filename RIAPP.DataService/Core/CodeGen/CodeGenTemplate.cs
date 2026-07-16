@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RIAPP.DataService.Core.CodeGen
 {
-    public class CodeGenTemplate : TemplateParser
+    public class CodeGenTemplate(string ID) : TemplateParser(ID, () => GetTemplate(ID))
     {
         private const string NAMESPACE = "RIAPP.DataService.Resources";
 
@@ -20,7 +20,7 @@ namespace RIAPP.DataService.Core.CodeGen
                 {
                     throw new Exception("Can not find embedded string resource: \"" + ID + "\"");
                 }
-                StreamReader rd = new StreamReader(stream, Encoding.UTF8);
+                StreamReader rd = new(stream, Encoding.UTF8);
                 string txt = rd.ReadToEnd();
                 return txt;
             }
@@ -29,12 +29,6 @@ namespace RIAPP.DataService.Core.CodeGen
         protected override TemplateParser GetTemplate(string name, IDictionary<string, Func<Context, string>> dic)
         {
             return new CodeGenTemplate(name);
-        }
-
-        public CodeGenTemplate(string ID) :
-            base(ID, () => GetTemplate(ID))
-        {
-
         }
     }
 }

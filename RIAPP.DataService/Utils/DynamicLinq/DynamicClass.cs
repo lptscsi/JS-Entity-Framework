@@ -26,7 +26,7 @@ public abstract class DynamicClass : DynamicObject
         {
             if (_propertiesDictionary == null)
             {
-                _propertiesDictionary = new();
+                _propertiesDictionary = [];
 
                 foreach (PropertyInfo pi in GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {

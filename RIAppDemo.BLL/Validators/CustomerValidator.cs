@@ -13,7 +13,7 @@ namespace RIAppDemo.BLL.Validators
         public override Task<IEnumerable<ValidationErrorInfo>> ValidateModelAsync(Customer customer,
             string[] modifiedField)
         {
-            LinkedList<ValidationErrorInfo> errors = new LinkedList<ValidationErrorInfo>();
+            LinkedList<ValidationErrorInfo> errors = new();
             if (Array.IndexOf(modifiedField, "CustomerName.Contact.Phone") > -1 &&
                 customer.CustomerName.Contact.Phone != null &&
                 customer.CustomerName.Contact.Phone.StartsWith("000", StringComparison.OrdinalIgnoreCase))

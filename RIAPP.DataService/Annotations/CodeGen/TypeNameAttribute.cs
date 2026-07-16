@@ -3,14 +3,8 @@
 namespace RIAPP.DataService.Annotations.CodeGen
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public class TypeNameAttribute : Attribute
+    public class TypeNameAttribute(string name) : Attribute
     {
-        public TypeNameAttribute(string name)
-        {
-            Name = name;
-        }
-
-
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
     }
 }

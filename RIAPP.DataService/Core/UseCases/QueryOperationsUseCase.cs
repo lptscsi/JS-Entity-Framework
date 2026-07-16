@@ -8,25 +8,17 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core
 {
-    public class QueryOperationsUseCase<TService> : IQueryOperationsUseCase<TService>
+    public class QueryOperationsUseCase<TService>(BaseDomainService service, Func<Exception, string> onError, RequestDelegate<QueryContext<TService>> pipeline) : IQueryOperationsUseCase<TService>
          where TService : BaseDomainService
     {
-        private readonly BaseDomainService _service;
-        private readonly IServiceContainer<TService> _serviceContainer;
-        private readonly Func<Exception, string> _onError;
-        private readonly RequestDelegate<QueryContext<TService>> _pipeline;
-
-        public QueryOperationsUseCase(BaseDomainService service, Func<Exception, string> onError, RequestDelegate<QueryContext<TService>> pipeline)
-        {
-            _serviceContainer = (IServiceContainer<TService>)service.ServiceContainer;
-            _service = service;
-            _onError = onError ?? throw new ArgumentNullException(nameof(onError));
-            _pipeline = pipeline;
-        }
+        private readonly BaseDomainService _service = service;
+        private readonly IServiceContainer<TService> _serviceContainer = (IServiceContainer<TService>)service.ServiceContainer;
+        private readonly Func<Exception, string> _onError = onError ?? throw new ArgumentNullException(nameof(onError));
+        private readonly RequestDelegate<QueryContext<TService>> _pipeline = pipeline;
 
         public async Task<bool> Handle(QueryRequest message, IOutputPort<QueryResponse> outputPort)
         {
-            QueryResponse response = new QueryResponse
+            QueryResponse response = new()
             {
                 PageIndex = message.PageIndex,
                 PageCount = message.PageCount,
@@ -44,7 +36,7 @@ namespace RIAPP.DataService.Core
 
                 bool isMultyPageRequest = dbSetInfo.enablePaging && message.PageCount > 1;
 
-                QueryContext<TService> context = new QueryContext<TService>(message,
+                QueryContext<TService> context = new(message,
                     response,
                     (TService)_service,
                     _serviceContainer,

@@ -45,6 +45,6 @@ namespace RIAPP.DataService.Core.Types
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 
-        public FieldRelList fieldRels { get; } = new FieldRelList();
+        public FieldRelList fieldRels { get; } = [];
     }
 }

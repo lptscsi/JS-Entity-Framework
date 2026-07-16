@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace RIAPP.DataService.Core.Types
 {
@@ -14,9 +15,9 @@ namespace RIAPP.DataService.Core.Types
 
         public Field()
         {
-            _nested = new Lazy<FieldsList>(() => fieldType == FieldType.Object ? new FieldsList() : null, true);
+            _nested = new Lazy<FieldsList>(() => fieldType == FieldType.Object ? [] : null, true);
             _nestedInResultFields = new Lazy<Field[]>(() => fieldType == FieldType.Object
-                            ? nested.Where(f => f.GetIsIncludeInResult()).OrderBy(f => f.GetOrdinal()).ToArray()
+                            ? [.. nested.Where(f => f.GetIsIncludeInResult()).OrderBy(f => f.GetOrdinal())]
                             : new Field[0], true);
             isPrimaryKey = 0;
             dataType = DataType.None;
@@ -46,6 +47,8 @@ namespace RIAPP.DataService.Core.Types
 
 
         [Description("Sets value type - None, String, Bool, Integer, Decimal, Float, DateTime, Date, Time, Guid, Binary, Custom")]
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public DataType dataType { get; set; }
 
         [Description("For Custom dataType, for other types it is ignored. It is used for code generation, and not serialized to the client")]
@@ -105,6 +108,8 @@ namespace RIAPP.DataService.Core.Types
         [DefaultValue(FieldType.None)]
 
         [Description("Sets field type - None, ClientOnly, Calculated, Navigation, RowTimeStamp, Object, ServerCalculated")]
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public FieldType fieldType { get; set; }
 
         /// <summary>

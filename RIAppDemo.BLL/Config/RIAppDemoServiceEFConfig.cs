@@ -1,14 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using RIAppDemo.BLL.Config;
 using RIAppDemo.BLL.Models;
 using RIAppDemo.BLL.Utils;
 using RIAppDemo.DAL.EF;
 using System;
-using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace RIAppDemo.BLL.DataServices.Config
 {
@@ -19,12 +15,12 @@ namespace RIAppDemo.BLL.DataServices.Config
         {
             services.AddEFDomainService<RIAppDemoServiceEF, AdventureWorksLT2012Context>((options) =>
             {
-                options.ClientTypes = () => new[] { typeof(TestModel),
+                options.ClientTypes = () => [ typeof(TestModel),
                     typeof(KeyVal), typeof(StrKeyVal),
-                    typeof(RadioVal), typeof(HistoryItem), typeof(TestEnum2) };
+                    typeof(RadioVal), typeof(HistoryItem), typeof(TestEnum2) ];
 
 
-                RIAppDemoServiceEFOptions svcOptions = new RIAppDemoServiceEFOptions();
+                RIAppDemoServiceEFOptions svcOptions = new();
                 configure?.Invoke(svcOptions);
 
                 options.UserFactory = svcOptions.GetUser;

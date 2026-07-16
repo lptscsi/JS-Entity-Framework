@@ -7,25 +7,17 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core
 {
-    public class RefreshOperationsUseCase<TService> : IRefreshOperationsUseCase<TService>
+    public class RefreshOperationsUseCase<TService>(BaseDomainService service, Func<Exception, string> onError, RequestDelegate<RefreshContext<TService>> pipeline) : IRefreshOperationsUseCase<TService>
          where TService : BaseDomainService
     {
-        private readonly BaseDomainService _service;
-        private readonly IServiceContainer<TService> _serviceContainer;
-        private readonly Func<Exception, string> _onError;
-        private readonly RequestDelegate<RefreshContext<TService>> _pipeline;
-
-        public RefreshOperationsUseCase(BaseDomainService service, Func<Exception, string> onError, RequestDelegate<RefreshContext<TService>> pipeline)
-        {
-            _serviceContainer = (IServiceContainer<TService>)service.ServiceContainer;
-            _service = service;
-            _onError = onError ?? throw new ArgumentNullException(nameof(onError));
-            _pipeline = pipeline;
-        }
+        private readonly BaseDomainService _service = service;
+        private readonly IServiceContainer<TService> _serviceContainer = (IServiceContainer<TService>)service.ServiceContainer;
+        private readonly Func<Exception, string> _onError = onError ?? throw new ArgumentNullException(nameof(onError));
+        private readonly RequestDelegate<RefreshContext<TService>> _pipeline = pipeline;
 
         public async Task<bool> Handle(RefreshRequest message, IOutputPort<RefreshResponse> outputPort)
         {
-            RefreshResponse response = new RefreshResponse { RowInfo = message.RowInfo, DbSetName = message.DbSetName };
+            RefreshResponse response = new() { RowInfo = message.RowInfo, DbSetName = message.DbSetName };
 
             try
             {
@@ -34,7 +26,7 @@ namespace RIAPP.DataService.Core
                 message.SetDbSetInfo(dbSetInfo);
                 message.RowInfo.SetDbSetInfo(dbSetInfo);
 
-                RefreshContext<TService> context = new RefreshContext<TService>(message,
+                RefreshContext<TService> context = new(message,
                 response,
                 (TService)_service,
                 _serviceContainer);

@@ -343,6 +343,9 @@ export class DataView<TItem extends ICollectionItem = ICollectionItem> extends B
   }
   protected override _checkCurrentChanging(newCurrent: TItem): void {
     const ds = this._dataSource;
+     if (!ds) {
+      return;
+    }
     try {
       const item = (<BaseCollection<TItem>>ds)._getInternal().getEditingItem();
       if (!!item && newCurrent !== item) {

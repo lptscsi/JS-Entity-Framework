@@ -7,15 +7,10 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
 {
-    public class AuthorizeMiddleware<TService>
+    public class AuthorizeMiddleware<TService>(RequestDelegate<RefreshContext<TService>> next, RefreshMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<RefreshContext<TService>> _next;
-
-        public AuthorizeMiddleware(RequestDelegate<RefreshContext<TService>> next, RefreshMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<RefreshContext<TService>> _next = next;
 
         public async Task Invoke(RefreshContext<TService> ctx)
         {

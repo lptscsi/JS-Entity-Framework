@@ -17,7 +17,7 @@ namespace Extensions.Logging.RollingFile
         private readonly string _fileName;
         private readonly int? _maxFileSize;
         private readonly int? _maxRetainedFiles;
-        private readonly Dictionary<(int Year, int Month, int Day), (int Num, DateTime LastAccess)> _fileNumbers = new Dictionary<(int Year, int Month, int Day), (int Num, DateTime LastAccess)>();
+        private readonly Dictionary<(int Year, int Month, int Day), (int Num, DateTime LastAccess)> _fileNumbers = [];
 
         public FileLoggerProvider(IOptions<FileLoggerOptions> options) : base(options)
         {
@@ -37,7 +37,7 @@ namespace Extensions.Logging.RollingFile
             if (_fileNumbers.Count >= countLimit)
             {
                 // remove half the values - oldest first
-                KeyValuePair<(int Year, int Month, int Day), (int Num, DateTime LastAccess)>[] removalList = _fileNumbers.OrderBy(v => v.Value.LastAccess).Take(countLimit / 2).ToArray();
+                KeyValuePair<(int Year, int Month, int Day), (int Num, DateTime LastAccess)>[] removalList = [.. _fileNumbers.OrderBy(v => v.Value.LastAccess).Take(countLimit / 2)];
                 foreach (KeyValuePair<(int Year, int Month, int Day), (int Num, DateTime LastAccess)> kv in removalList)
                 {
                     _fileNumbers.Remove(kv.Key);

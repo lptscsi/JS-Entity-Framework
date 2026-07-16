@@ -8,15 +8,10 @@ using System.Text.RegularExpressions;
 
 namespace RIAPP.DataService.Utils
 {
-    public class ValidationHelper<TService> : IValidationHelper<TService>
+    public class ValidationHelper<TService>(IValueConverter<TService> valueConverter) : IValidationHelper<TService>
          where TService : BaseDomainService
     {
-        private readonly IValueConverter<TService> valueConverter;
-
-        public ValidationHelper(IValueConverter<TService> valueConverter)
-        {
-            this.valueConverter = valueConverter ?? throw new ArgumentNullException(nameof(valueConverter));
-        }
+        private readonly IValueConverter<TService> valueConverter = valueConverter ?? throw new ArgumentNullException(nameof(valueConverter));
 
         public void CheckString(Field fieldInfo, string val)
         {
@@ -39,7 +34,7 @@ namespace RIAPP.DataService.Utils
 
             if (!string.IsNullOrEmpty(val) && !string.IsNullOrEmpty(fieldInfo.regex))
             {
-                Regex rx = new Regex(fieldInfo.regex, RegexOptions.IgnoreCase);
+                Regex rx = new(fieldInfo.regex, RegexOptions.IgnoreCase);
                 if (!rx.IsMatch(val))
                 {
                     throw new ValidationException(string.Format(ErrorStrings.ERR_VAL_IS_NOT_VALID, fieldInfo.fieldName));

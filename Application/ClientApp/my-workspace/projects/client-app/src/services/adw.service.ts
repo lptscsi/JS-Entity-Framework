@@ -139,7 +139,7 @@ export class AdwService {
       );
     }
 
-    const self = this, options: IOptions = { service_url: "/RIAppDemoServiceEF" };
+    const self = this, options: IOptions = { service_url: "/api/demo" };
     self._uniqueID = utils.core.getNewID();
     self._dbContext = new DbContext();
 

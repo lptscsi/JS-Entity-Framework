@@ -2,11 +2,7 @@
 
 namespace RIAPP.DataService.Utils
 {
-    public sealed class RequestCallContext : CallContext<RequestContext>
+    public sealed class RequestCallContext(RequestContext context) : CallContext<RequestContext>(context)
     {
-        public RequestCallContext(RequestContext context) :
-            base(context)
-        {
-        }
     }
 }

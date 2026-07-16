@@ -30,7 +30,7 @@ namespace RIAppDemo.BLL
         public string GetRIAppDemoConnectionString()
         {
             string connStr = GetConnectionString(CONNECTION_STRING_DEFAULT);
-            SqlConnectionStringBuilder scsb = new SqlConnectionStringBuilder(connStr);
+            SqlConnectionStringBuilder scsb = new(connStr);
             return scsb.ToString();
         }
 

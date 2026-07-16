@@ -23,12 +23,12 @@ namespace RIAPP.DataService.EFCore.Utils
         {
             if (entryList == null)
             {
-                entryList = new List<EntryValue>();
+                entryList = [];
             }
             entryList.Add(entryValue);
 
-            MemberEntry[] members = entryValue.Entry.Members.ToArray();
-            ReferenceEntry[] references = members.OfType<ReferenceEntry>().ToArray();
+            MemberEntry[] members = [.. entryValue.Entry.Members];
+            ReferenceEntry[] references = [.. members.OfType<ReferenceEntry>()];
             foreach (ReferenceEntry _reference in references)
             {
                 object currentEntity = _reference.Metadata.PropertyInfo.GetValue(entryValue.Entity);
@@ -37,7 +37,7 @@ namespace RIAPP.DataService.EFCore.Utils
                 _GetOwnedEntryValues(currentEntryValue, entryList, nextLevel);
             }
 
-            return entryList.ToArray();
+            return [.. entryList];
         }
 
         private static void _SetValuesAtLevel(int lvl, ILookup<int, EntryValue> entryLookUp, int maxLvl, Action<EntityEntry, object> setValuesAction)
@@ -70,7 +70,7 @@ namespace RIAPP.DataService.EFCore.Utils
             setValuesAction(entry, entity);
             EntryValue entryValue = new EntryValue { Level = 0, Entry = entry, Entity = entity, Reference = null, parentEntity = null };
             EntryValue[] entryValues = _GetOwnedEntryValues(entryValue);
-            int[] levels = entryValues.Select(e => e.Level).ToArray();
+            int[] levels = [.. entryValues.Select(e => e.Level)];
             int maxLvl = levels.Max();
             if (maxLvl >= 1)
             {

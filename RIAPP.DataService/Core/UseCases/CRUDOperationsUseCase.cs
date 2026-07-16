@@ -7,31 +7,23 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core
 {
-    public class CRUDOperationsUseCase<TService> : ICRUDOperationsUseCase<TService>
+    public class CRUDOperationsUseCase<TService>(BaseDomainService service,
+        CRUDServiceMethods serviceMethods,
+        RequestDelegate<CRUDContext<TService>> pipeline) : ICRUDOperationsUseCase<TService>
          where TService : BaseDomainService
     {
-        private readonly IServiceContainer<TService> _serviceContainer;
-        private readonly BaseDomainService _service;
-        private readonly CRUDServiceMethods _serviceMethods;
-        private readonly RequestDelegate<CRUDContext<TService>> _pipeline;
-
-        public CRUDOperationsUseCase(BaseDomainService service,
-            CRUDServiceMethods serviceMethods,
-            RequestDelegate<CRUDContext<TService>> pipeline)
-        {
-            _service = service;
-            _serviceContainer = (IServiceContainer<TService>)service.ServiceContainer;
-            _serviceMethods = serviceMethods;
-            _pipeline = pipeline;
-        }
+        private readonly IServiceContainer<TService> _serviceContainer = (IServiceContainer<TService>)service.ServiceContainer;
+        private readonly BaseDomainService _service = service;
+        private readonly CRUDServiceMethods _serviceMethods = serviceMethods;
+        private readonly RequestDelegate<CRUDContext<TService>> _pipeline = pipeline;
 
         public async Task<bool> Handle(ChangeSetRequest message, IOutputPort<ChangeSetResponse> outputPort)
         {
-            ChangeSetResponse response = new ChangeSetResponse(message);
+            ChangeSetResponse response = new(message);
 
             try
             {
-                CRUDContext<TService> context = new CRUDContext<TService>(message, response, (TService)_service, _serviceContainer);
+                CRUDContext<TService> context = new(message, response, (TService)_service, _serviceContainer);
                 context.Properties.Add(CRUDContext<TService>.CHANGE_METHODS_KEY, _serviceMethods);
 
                 await _pipeline(context);

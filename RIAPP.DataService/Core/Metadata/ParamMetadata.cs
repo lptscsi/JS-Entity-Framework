@@ -68,7 +68,7 @@ namespace RIAPP.DataService.Core.Metadata
                 throw new DomainServiceException("Out parameters are not supported in service methods");
             }
 
-            ParamMetadata paramInfo = new ParamMetadata
+            ParamMetadata paramInfo = new()
             {
                 IsNullable = ptype.IsNullableType(),
                 Name = pinfo.Name

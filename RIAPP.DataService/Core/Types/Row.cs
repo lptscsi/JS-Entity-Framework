@@ -5,7 +5,7 @@
     {
         public Row()
         {
-            v = new object[0];
+            v = [];
             k = string.Empty;
         }
 

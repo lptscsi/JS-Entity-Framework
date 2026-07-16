@@ -7,27 +7,17 @@ using System.Runtime.ExceptionServices;
 
 namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 {
-    public class CRUDContext<TService> : IRequestContext
+    public class CRUDContext<TService>(
+        ChangeSetRequest request,
+        ChangeSetResponse response,
+        TService service,
+        IServiceContainer<TService> serviceContainer) : IRequestContext
         where TService : BaseDomainService
     {
         public const string CHANGE_GRAPH_KEY = "change_graph";
         public const string CHANGE_METHODS_KEY = "change_methods";
 
-        private ExceptionDispatchInfo _ExceptionInfo;
-
-        public CRUDContext(
-            ChangeSetRequest request,
-            ChangeSetResponse response,
-            TService service,
-            IServiceContainer<TService> serviceContainer)
-        {
-            _ExceptionInfo = null;
-            Request = request;
-            Response = response;
-            Service = service;
-            ServiceContainer = serviceContainer;
-            Properties = new Expando();
-        }
+        private ExceptionDispatchInfo _ExceptionInfo = null;
 
         public static RequestContext CreateRequestContext(TService service, ChangeSetRequest changeSet, RowInfo rowInfo = null)
         {
@@ -38,14 +28,14 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
 
         // Gets a key/value collection that can be used to share data between middleware.
-        public IDictionary<string, object> Properties { get; }
+        public IDictionary<string, object> Properties { get; } = new Expando();
 
         public void AddLogItem(string str)
         {
         }
 
-        public ChangeSetRequest Request { get; }
-        public ChangeSetResponse Response { get; }
+        public ChangeSetRequest Request { get; } = request;
+        public ChangeSetResponse Response { get; } = response;
         public IServiceProvider RequestServices => ServiceContainer.ServiceProvider;
 
         public void CaptureException(Exception ex)
@@ -55,9 +45,9 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
         public Exception ProcessingException => _ExceptionInfo?.SourceException;
 
-        public IServiceContainer<TService> ServiceContainer { get; }
+        public IServiceContainer<TService> ServiceContainer { get; } = serviceContainer;
 
-        public TService Service { get; }
+        public TService Service { get; } = service;
 
         public void ReThrow()
         {

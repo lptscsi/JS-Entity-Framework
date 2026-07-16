@@ -15,13 +15,23 @@ using System;
 
 namespace RIAPP.DataService.Core.Config
 {
+    /// <summary>
+    /// Методы расширения для регистрации сервисов необходимых для работы <see cref="BaseDomainService"/>
+    /// </summary>
     public static class ServiceConfigureEx
     {
+        /// <summary>
+        /// добавляет сервисы в DI
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="configure"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void AddDomainService<TService>(this IServiceCollection services,
             Action<ServiceOptions> configure)
          where TService : BaseDomainService
         {
-            ServiceOptions options = new ServiceOptions(services);
+            ServiceOptions options = new(services);
             configure?.Invoke(options);
 
             Func<IServiceProvider, System.Security.Claims.ClaimsPrincipal> getUser = options.UserFactory ?? throw new ArgumentNullException(nameof(options.UserFactory), ErrorStrings.ERR_NO_USER);
@@ -40,7 +50,7 @@ namespace RIAPP.DataService.Core.Config
 
             services.TryAddScoped<IServiceOperationsHelper<TService>, ServiceOperationsHelper<TService>>();
 
-            services.TryAddScoped<IEntityVersionHelper<TService>>(sp =>
+            services.TryAddScoped(sp =>
             {
                 return (IEntityVersionHelper<TService>)sp.GetRequiredService<IServiceOperationsHelper<TService>>();
             });
@@ -51,28 +61,28 @@ namespace RIAPP.DataService.Core.Config
 
             services.TryAddSingleton((sp) =>
             {
-                PipelineBuilder<TService, CRUDContext<TService>> builder = new PipelineBuilder<TService, CRUDContext<TService>>(sp);
+                PipelineBuilder<TService, CRUDContext<TService>> builder = new(sp);
                 Configuration.ConfigureCRUD(builder);
                 return builder.Build();
             });
 
             services.TryAddSingleton((sp) =>
             {
-                PipelineBuilder<TService, QueryContext<TService>> builder = new PipelineBuilder<TService, QueryContext<TService>>(sp);
+                PipelineBuilder<TService, QueryContext<TService>> builder = new(sp);
                 Configuration.ConfigureQuery(builder);
                 return builder.Build();
             });
 
             services.TryAddSingleton((sp) =>
             {
-                PipelineBuilder<TService, InvokeContext<TService>> builder = new PipelineBuilder<TService, InvokeContext<TService>>(sp);
+                PipelineBuilder<TService, InvokeContext<TService>> builder = new(sp);
                 Configuration.ConfigureInvoke(builder);
                 return builder.Build();
             });
 
             services.TryAddSingleton((sp) =>
             {
-                PipelineBuilder<TService, RefreshContext<TService>> builder = new PipelineBuilder<TService, RefreshContext<TService>>(sp);
+                PipelineBuilder<TService, RefreshContext<TService>> builder = new(sp);
                 Configuration.ConfigureRefresh(builder);
                 return builder.Build();
             });
@@ -91,7 +101,7 @@ namespace RIAPP.DataService.Core.Config
             services.AddScoped<ICodeGenProviderFactory<TService>>((sp) =>
             {
                 IServiceContainer<TService> sc = sp.GetRequiredService<IServiceContainer<TService>>();
-                return new TypeScriptProviderFactory<TService>(sc, options.ClientTypes);
+                return new TypeScriptProviderFactory<TService>(sc, options.JriappImportPath, options.ClientTypes);
             });
 
             #endregion

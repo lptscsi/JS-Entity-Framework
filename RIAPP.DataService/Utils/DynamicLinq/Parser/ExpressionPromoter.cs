@@ -6,18 +6,13 @@ namespace System.Linq.Dynamic.Core.Parser
     /// <summary>
     /// ExpressionPromoter
     /// </summary>
-    public class ExpressionPromoter : IExpressionPromoter
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="ExpressionPromoter"/> class.
+    /// </remarks>
+    /// <param name="config">The ParsingConfig.</param>
+    public class ExpressionPromoter(ParsingConfig config) : IExpressionPromoter
     {
-        private readonly NumberParser _numberParser;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExpressionPromoter"/> class.
-        /// </summary>
-        /// <param name="config">The ParsingConfig.</param>
-        public ExpressionPromoter(ParsingConfig config)
-        {
-            _numberParser = new NumberParser(config);
-        }
+        private readonly NumberParser _numberParser = new NumberParser(config);
 
         /// <inheritdoc />
         public virtual Expression? Promote(Expression expr, Type type, bool exact, bool convertExpr)

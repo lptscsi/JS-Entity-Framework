@@ -5,7 +5,7 @@
     {
         public DbSet()
         {
-            Rows = new RowsList();
+            Rows = [];
         }
 
 

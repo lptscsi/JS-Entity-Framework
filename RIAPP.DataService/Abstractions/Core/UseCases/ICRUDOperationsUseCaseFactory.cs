@@ -8,25 +8,17 @@ namespace RIAPP.DataService.Core
     public delegate Task AfterChangeSetExecuted();
     public delegate Task AfterChangeSetCommited(SubResultList subResults);
 
-    public class CRUDServiceMethods
+    public class CRUDServiceMethods(Func<Exception, string> onError,
+    Action<RowInfo> trackChanges,
+    ChangeSetExecutor executeChangeSet,
+    AfterChangeSetExecuted afterChangeSetExecuted,
+    AfterChangeSetCommited subResultsExecutor)
     {
-        public CRUDServiceMethods(Func<Exception, string> onError,
-        Action<RowInfo> trackChanges,
-        ChangeSetExecutor executeChangeSet,
-        AfterChangeSetExecuted afterChangeSetExecuted,
-        AfterChangeSetCommited subResultsExecutor)
-        {
-            OnError = onError;
-            TrackChanges = trackChanges;
-            ExecuteChangeSet = executeChangeSet;
-            AfterChangeSetExecuted = afterChangeSetExecuted;
-            AfterChangeSetCommited = subResultsExecutor;
-        }
-        public Func<Exception, string> OnError { get; }
-        public Action<RowInfo> TrackChanges { get; }
-        public ChangeSetExecutor ExecuteChangeSet { get; }
-        public AfterChangeSetExecuted AfterChangeSetExecuted { get; }
-        public AfterChangeSetCommited AfterChangeSetCommited { get; }
+        public Func<Exception, string> OnError { get; } = onError;
+        public Action<RowInfo> TrackChanges { get; } = trackChanges;
+        public ChangeSetExecutor ExecuteChangeSet { get; } = executeChangeSet;
+        public AfterChangeSetExecuted AfterChangeSetExecuted { get; } = afterChangeSetExecuted;
+        public AfterChangeSetCommited AfterChangeSetCommited { get; } = subResultsExecutor;
     }
 
 

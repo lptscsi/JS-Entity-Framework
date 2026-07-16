@@ -21,16 +21,16 @@ namespace RIAppDemo.BLL.DataManagers
             // var queryInfo = RequestContext.CurrentQueryInfo;
             PerformQueryResult<Product> productsResult = PerformQuery<Product>((countQuery) => countQuery.CountAsync());
             int? totalCount = await productsResult.CountAsync();
-            List<Product> productsList = new List<Product>();
+            List<Product> productsList = [];
             if (totalCount > 0)
             {
                 productsList = await productsResult.Data.ToListAsync();
             }
-            int[] productIDs = productsList.Select(p => p.ProductId).Distinct().ToArray();
-            IEnumerable<Expando> expandoList = productsList.Select(p => p.ToDictionary(() => new Expando())).ToList();
-            QueryResult<Expando> queryResult = new QueryResult<Expando>(expandoList, totalCount);
+            int[] productIDs = [.. productsList.Select(p => p.ProductId).Distinct()];
+            IEnumerable<Expando> expandoList = [.. productsList.Select(p => p.ToDictionary(() => new Expando()))];
+            QueryResult<Expando> queryResult = new(expandoList, totalCount);
 
-            SubResult subResult = new SubResult
+            SubResult subResult = new()
             {
                 dbSetName = "SalesOrderDetail",
                 Result = await DB.SalesOrderDetail
@@ -51,7 +51,7 @@ namespace RIAppDemo.BLL.DataManagers
         public async Task<QueryResult<Expando>> ReadProductByIds(int[] productIDs)
         {
             List<Product> productsList = await DB.Product.Where(ca => productIDs.Contains(ca.ProductId)).ToListAsync();
-            IEnumerable<Expando> expandoList = productsList.Select(p => p.ToDictionary(() => new Expando())).ToList();
+            IEnumerable<Expando> expandoList = [.. productsList.Select(p => p.ToDictionary(() => new Expando()))];
 
             return new QueryResult<Expando>(expandoList, totalCount: null);
         }
@@ -59,7 +59,7 @@ namespace RIAppDemo.BLL.DataManagers
         [AuthorizeRoles(new[] { ADMINS_ROLE })]
         public void Insert(Expando expando)
         {
-            Product product = new Product();
+            Product product = new();
 
             Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<Product> entry = DB.Product.Attach(product);
             entry.CurrentValues.SetValues(expando);
@@ -72,7 +72,7 @@ namespace RIAppDemo.BLL.DataManagers
         public void Update(Expando expando)
         {
             expando["ModifiedDate"] = DateTime.Now;
-            Product product = new Product();
+            Product product = new();
             Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<Product> entry = DB.Product.Attach(product);
             var orig = GetOriginal();
             entry.OriginalValues.SetValues(orig);
@@ -87,7 +87,7 @@ namespace RIAppDemo.BLL.DataManagers
         [AuthorizeRoles(new[] { ADMINS_ROLE })]
         public void Delete(Expando expando)
         {
-            Product product = new Product();
+            Product product = new();
             Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<Product> entry = DB.Product.Attach(product);
             var orig = GetOriginal();
             entry.OriginalValues.SetValues(orig);

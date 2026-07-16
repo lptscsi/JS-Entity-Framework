@@ -4,15 +4,9 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.Types
 {
-    public class PerformQueryResult<TData>
+    public class PerformQueryResult<TData>(IQueryable<TData> data, Func<Task<int?>> count)
     {
-        public PerformQueryResult(IQueryable<TData> data, Func<Task<int?>> count)
-        {
-            Data = data;
-            CountAsync = count;
-        }
-
-        public readonly IQueryable<TData> Data;
-        public readonly Func<Task<int?>> CountAsync;
+        public readonly IQueryable<TData> Data = data;
+        public readonly Func<Task<int?>> CountAsync = count;
     }
 }

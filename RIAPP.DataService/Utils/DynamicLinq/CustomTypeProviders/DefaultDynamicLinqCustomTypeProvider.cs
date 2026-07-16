@@ -14,22 +14,17 @@ namespace System.Linq.Dynamic.Core.CustomTypeProviders
     ///
     /// This class is used as default for full .NET Framework, so not for .NET Core
     /// </summary>
-    public class DefaultDynamicLinqCustomTypeProvider : AbstractDynamicLinqCustomTypeProvider, IDynamicLinkCustomTypeProvider
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="DefaultDynamicLinqCustomTypeProvider"/> class.
+    /// </remarks>
+    /// <param name="cacheCustomTypes">Defines whether to cache the CustomTypes (including extension methods) which are found in the Application Domain. Default set to 'true'.</param>
+    public class DefaultDynamicLinqCustomTypeProvider(bool cacheCustomTypes = true) : AbstractDynamicLinqCustomTypeProvider, IDynamicLinkCustomTypeProvider
     {
         private readonly IAssemblyHelper _assemblyHelper = new DefaultAssemblyHelper();
-        private readonly bool _cacheCustomTypes;
+        private readonly bool _cacheCustomTypes = cacheCustomTypes;
 
         private HashSet<Type>? _cachedCustomTypes;
         private Dictionary<Type, List<MethodInfo>>? _cachedExtensionMethods;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultDynamicLinqCustomTypeProvider"/> class.
-        /// </summary>
-        /// <param name="cacheCustomTypes">Defines whether to cache the CustomTypes (including extension methods) which are found in the Application Domain. Default set to 'true'.</param>
-        public DefaultDynamicLinqCustomTypeProvider(bool cacheCustomTypes = true)
-        {
-            _cacheCustomTypes = cacheCustomTypes;
-        }
 
         /// <inheritdoc cref="IDynamicLinqCustomTypeProvider.GetCustomTypes"/>
         public virtual HashSet<Type> GetCustomTypes()

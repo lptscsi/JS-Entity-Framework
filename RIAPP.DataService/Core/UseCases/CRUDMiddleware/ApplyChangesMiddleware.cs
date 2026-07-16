@@ -9,15 +9,10 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 {
-    public class ApplyChangesMiddleware<TService>
+    public class ApplyChangesMiddleware<TService>(RequestDelegate<CRUDContext<TService>> next, CRUDMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<CRUDContext<TService>> _next;
-
-        public ApplyChangesMiddleware(RequestDelegate<CRUDContext<TService>> next, CRUDMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<CRUDContext<TService>> _next = next;
 
         private void CheckRowInfo(RowInfo rowInfo)
         {
@@ -43,7 +38,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
             CheckRowInfo(rowInfo);
 
-            using (RequestCallContext callContext = new RequestCallContext(CRUDContext<TService>.CreateRequestContext(service, changeSet, rowInfo)))
+            using (RequestCallContext callContext = new(CRUDContext<TService>.CreateRequestContext(service, changeSet, rowInfo)))
             {
                 rowInfo.SetChangeState(new EntityChangeState { ParentRows = graph.GetParents(rowInfo) });
                 await serviceHelper.InsertEntity(metadata, rowInfo);
@@ -57,7 +52,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
             CheckRowInfo(rowInfo);
 
-            using (RequestCallContext callContext = new RequestCallContext(CRUDContext<TService>.CreateRequestContext(service, changeSet, rowInfo)))
+            using (RequestCallContext callContext = new(CRUDContext<TService>.CreateRequestContext(service, changeSet, rowInfo)))
             {
                 rowInfo.SetChangeState(new EntityChangeState());
                 await serviceHelper.UpdateEntity(metadata, rowInfo);
@@ -71,7 +66,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
             CheckRowInfo(rowInfo);
 
-            using (RequestCallContext callContext = new RequestCallContext(CRUDContext<TService>.CreateRequestContext(service, changeSet, rowInfo)))
+            using (RequestCallContext callContext = new(CRUDContext<TService>.CreateRequestContext(service, changeSet, rowInfo)))
             {
                 rowInfo.SetChangeState(new EntityChangeState());
                 await serviceHelper.DeleteEntity(metadata, rowInfo); ;
@@ -84,7 +79,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
             ChangeSetRequest changeSet = ctx.Request;
 
-            ChangeSetGraph graph = new ChangeSetGraph(ctx.Request, metadata);
+            ChangeSetGraph graph = new(ctx.Request, metadata);
             graph.Prepare();
             ctx.Properties.Add(CRUDContext<TService>.CHANGE_GRAPH_KEY, graph);
 

@@ -24,7 +24,7 @@ namespace RIAPP.DataService.Core.Types
         {
             DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
             Field[] pkFieldsInfo = dbSetInfo.GetPKFields();
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             for (int i = 0; i < pkFieldsInfo.Length; ++i)
             {
                 if (i > 0)

@@ -16,7 +16,7 @@ namespace RIAppDemo.BLL.DataManagers
         {
             PerformQueryResult<Product> res = PerformQuery<Product>((countQuery) => countQuery.CountAsync());
             int? totalCount = await res.CountAsync();
-            List<LookUpProduct> products = new List<LookUpProduct>();
+            List<LookUpProduct> products = [];
             if (totalCount > 0)
             {
                 products = await res.Data.Select(p => new LookUpProduct { ProductId = p.ProductId, Name = p.Name }).ToListAsync();

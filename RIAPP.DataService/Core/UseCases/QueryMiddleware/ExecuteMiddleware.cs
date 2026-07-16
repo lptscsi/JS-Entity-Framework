@@ -4,20 +4,14 @@ using RIAPP.DataService.Core.Types;
 using RIAPP.DataService.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
 {
-    public class ExecuteMiddleware<TService>
+    public class ExecuteMiddleware<TService>(RequestDelegate<QueryContext<TService>> next, QueryMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<QueryContext<TService>> _next;
-
-        public ExecuteMiddleware(RequestDelegate<QueryContext<TService>> next, QueryMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<QueryContext<TService>> _next = next;
 
         public async Task Invoke(QueryContext<TService> ctx)
         {
@@ -28,7 +22,7 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
 
             MethodDescription method = metadata.GetQueryMethod(ctx.Request.DbSetName, ctx.Request.QueryName);
 
-            LinkedList<object> methParams = new LinkedList<object>();
+            LinkedList<object> methParams = new();
 
             for (int i = 0; i < method.parameters.Count; ++i)
             {
@@ -36,19 +30,19 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
             }
 
             RequestContext req = QueryContext<TService>.CreateRequestContext(ctx.Service, ctx.Request);
-            using (RequestCallContext callContext = new RequestCallContext(req))
+            using (RequestCallContext callContext = new(req))
             {
                 MethodInfoData methodData = method.GetMethodData();
                 object instance = serviceHelper.GetMethodOwner(dbSetInfo.dbSetName, methodData);
-                object invokeRes = methodData.MethodInfo.Invoke(instance, methParams.ToArray());
+                object invokeRes = methodData.MethodInfo.Invoke(instance, [.. methParams]);
                 QueryResult queryResult = (QueryResult)await PropHelper.GetMethodResult(invokeRes);
 
                 IEnumerable<object> entities = queryResult.Result;
                 int? totalCount = queryResult.TotalCount;
-                RowGenerator rowGenerator = new RowGenerator(dbSetInfo, entities, dataHelper);
+                RowGenerator rowGenerator = new(dbSetInfo, entities, dataHelper);
                 IEnumerable<Row> rows = rowGenerator.CreateRows();
 
-                SubsetsGenerator subsetsGenerator = new SubsetsGenerator(metadata, dataHelper);
+                SubsetsGenerator subsetsGenerator = new(metadata, dataHelper);
                 SubsetList subResults = subsetsGenerator.CreateSubsets(queryResult.SubResults);
 
                 ctx.Response.Columns = dbSetInfo.GetColumns();

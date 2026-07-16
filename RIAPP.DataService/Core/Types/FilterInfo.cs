@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace RIAPP.DataService.Core.Types
 {
@@ -8,7 +9,7 @@ namespace RIAPP.DataService.Core.Types
         public FilterItem()
         {
             FieldName = string.Empty;
-            Values = new List<string>();
+            Values = [];
             Kind = FilterType.Equals;
         }
 
@@ -19,6 +20,7 @@ namespace RIAPP.DataService.Core.Types
         public List<string> Values { get; set; }
 
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public FilterType Kind { get; set; }
     }
 
@@ -27,7 +29,7 @@ namespace RIAPP.DataService.Core.Types
     {
         public FilterInfo()
         {
-            FilterItems = new List<FilterItem>();
+            FilterItems = [];
         }
 
 

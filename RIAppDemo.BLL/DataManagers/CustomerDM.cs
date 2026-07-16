@@ -51,21 +51,21 @@ namespace RIAppDemo.BLL.DataManagers
                 }
             }
 
-            QueryResult<Customer> queryRes = new QueryResult<Customer>(customersList, totalCount);
+            QueryResult<Customer> queryRes = new(customersList, totalCount);
 
             if (includeNav == true)
             {
-                int[] customerIDs = customersList.Select(c => c.CustomerId).ToArray();
+                int[] customerIDs = [.. customersList.Select(c => c.CustomerId)];
                 System.Collections.Generic.List<CustomerAddress> customerAddress = await DB.CustomerAddress.AsNoTracking().Where(ca => customerIDs.Contains(ca.CustomerId)).ToListAsync();
-                int[] addressIDs = customerAddress.Select(ca => ca.AddressId).ToArray();
+                int[] addressIDs = [.. customerAddress.Select(ca => ca.AddressId)];
 
-                SubResult subResult1 = new SubResult
+                SubResult subResult1 = new()
                 {
                     dbSetName = "CustomerAddress",
                     Result = customerAddress
                 };
 
-                SubResult subResult2 = new SubResult
+                SubResult subResult2 = new()
                 {
                     dbSetName = "Address",
                     Result = await DB.Address.AsNoTracking().Where(adr => addressIDs.Contains(adr.AddressId)).ToListAsync()
@@ -91,7 +91,7 @@ namespace RIAppDemo.BLL.DataManagers
         public void Insert(Customer customer)
         {
             customer.PasswordHash = Guid.NewGuid().ToString();
-            customer.PasswordSalt = new string(Guid.NewGuid().ToString().ToCharArray().Take(10).ToArray());
+            customer.PasswordSalt = new string([.. Guid.NewGuid().ToString().ToCharArray().Take(10)]);
             DB.Customer.Add(customer);
         }
 

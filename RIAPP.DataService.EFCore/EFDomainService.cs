@@ -18,40 +18,33 @@ using DataType = RIAPP.DataService.Core.Types.DataType;
 
 namespace RIAPP.DataService.EFCore
 {
-    public abstract class EFDomainService<TDB> : BaseDomainService
+    public abstract class EFDomainService<TDB>(IServiceContainer serviceContainer, TDB db = default(TDB)) : BaseDomainService(serviceContainer)
        where TDB : DbContext
     {
-        private TDB _db;
         private bool _ownsDb;
-
-        public EFDomainService(IServiceContainer serviceContainer, TDB db = default(TDB))
-            : base(serviceContainer)
-        {
-            _db = db;
-        }
 
         public TDB DB
         {
             get
             {
-                if (_db == null)
+                if (db == null)
                 {
-                    _db = CreateDataContext();
-                    if (_db != null)
+                    db = CreateDataContext();
+                    if (db != null)
                     {
                         _ownsDb = true;
                     }
                 }
-                return _db;
+                return db;
             }
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            if (_db != null && _ownsDb)
+            if (db != null && _ownsDb)
             {
-                _db.Dispose();
-                _db = null;
+                db.Dispose();
+                db = null;
                 _ownsDb = false;
             }
 
@@ -90,24 +83,36 @@ namespace RIAPP.DataService.EFCore
             }
         }
 
-        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft)
+        /// <summary>
+        /// Возвращает метаданные для работы сервиса
+        /// </summary>
+        /// <param name="isDraft"></param>
+        /// <param name="dataServiceEntityTypes"></param>
+        /// <returns></returns>
+        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft, List<Type> dataServiceEntityTypes = null)
         {
             DesignTimeMetadata metadata = new DesignTimeMetadata();
             IModel dbModel = DB.Model;
-            IEntityType[] allEntities = dbModel.GetEntityTypes().ToArray();
-            IEntityType[] plainEntities = allEntities.Where(t => !t.IsOwned()).ToArray();
+            IEntityType[] allEntities = [.. dbModel.GetEntityTypes()];
+            IEntityType[] plainEntities = [.. allEntities.Where(t => !t.IsOwned())];
 
             Dictionary<string, IEntityType> ownedTypesMap = allEntities.Where(t => t.IsOwned()).ToDictionary(t => t.Name);
+            HashSet<Type> chosenTypes = dataServiceEntityTypes?.ToHashSet();
 
             foreach (IEntityType entityInfo in plainEntities)
             {
-                IEnumerable<IProperty> edmProps = entityInfo.GetProperties().Where(p => !p.IsShadowProperty()).ToArray();
+                if (chosenTypes != null && !chosenTypes.Contains(entityInfo.ClrType))
+                {
+                    continue;
+                }
+
+                IEnumerable<IProperty> edmProps = [.. entityInfo.GetProperties().Where(p => !p.IsShadowProperty())];
                 // IEnumerable<string> edmProps1 = entityInfo.GetNavigations().Select(n => n.ForeignKey.DeclaringEntityType.Name).ToArray();
-                IEnumerable<INavigation> ownedTypes = entityInfo.GetNavigations().Where(n => ownedTypesMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name)).ToArray();
+                IEnumerable<INavigation> ownedTypes = [.. entityInfo.GetNavigations().Where(n => ownedTypesMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name))];
 
                 FieldsList fields = GenerateFieldInfos(edmProps, ownedTypes, ownedTypesMap);
 
-                DbSetInfo dbSetInfo = new DbSetInfo(entityInfo.ClrType.Name, fields);
+                DbSetInfo dbSetInfo = new(entityInfo.ClrType.Name, fields);
 
                 dbSetInfo.SetEntityType(entityInfo.ClrType);
                 metadata.DbSets.Add(dbSetInfo);
@@ -160,7 +165,7 @@ namespace RIAPP.DataService.EFCore
 
         private void GenerateNestedFieldInfos(Field parentField, Type nestedType)
         {
-            PropertyInfo[] nestedProps = nestedType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).ToArray();
+            PropertyInfo[] nestedProps = [.. nestedType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)];
             DataService.Utils.IValueConverter valueConverter = ServiceContainer.ValueConverter;
 
             foreach (PropertyInfo propInfo in nestedProps)
@@ -209,8 +214,8 @@ namespace RIAPP.DataService.EFCore
             Association assoc = metadata.Associations.Where(a => a.name == assoc_name).FirstOrDefault();
             if (assoc == null)
             {
-                IProperty[] principalProps = inverseNavigation.ForeignKey.PrincipalKey.Properties.ToArray();
-                IProperty[] childProps = childToParentNav.ForeignKey.Properties.ToArray();
+                IProperty[] principalProps = [.. inverseNavigation.ForeignKey.PrincipalKey.Properties];
+                IProperty[] childProps = [.. childToParentNav.ForeignKey.Properties];
 
                 assoc = new Association
                 {
@@ -279,12 +284,12 @@ namespace RIAPP.DataService.EFCore
                 Field fieldInfo = new Field { fieldName = ownedNavigation.Name };
                 string nm = ownedNavigation.ForeignKey.DeclaringEntityType.Name;
                 IEntityType nestedOwnedType2 = ownedMap[nm];
-                IEnumerable<INavigation> nestedOwnedTypes2 = nestedOwnedType2.GetNavigations().Where(n => ownedMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name)).ToArray();
+                IEnumerable<INavigation> nestedOwnedTypes2 = [.. nestedOwnedType2.GetNavigations().Where(n => ownedMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name))];
                 GenerateOwnedTypeFieldInfos(fieldInfo, nestedOwnedType2, nestedOwnedTypes2, ownedMap);
                 parentField.nested.Add(fieldInfo);
             }
 
-            IProperty[] edmProps = ownedType.GetProperties().Where(p => !p.IsShadowProperty()).ToArray();
+            IProperty[] edmProps = [.. ownedType.GetProperties().Where(p => !p.IsShadowProperty())];
             DataService.Utils.IValueConverter valueConverter = ServiceContainer.ValueConverter;
 
             foreach (IProperty edmProp in edmProps)
@@ -327,7 +332,7 @@ namespace RIAPP.DataService.EFCore
 
         private FieldsList GenerateFieldInfos(IEnumerable<IProperty> edmProps, IEnumerable<INavigation> ownedTypes, Dictionary<string, IEntityType> ownedMap)
         {
-            FieldsList fieldInfos = new FieldsList();
+            FieldsList fieldInfos = [];
             short pkNum = 0;
             // Console.WriteLine($"Generate fields: {entityInfo.Name} FieldsCount: {edmProps.Count()}");
 
@@ -336,7 +341,7 @@ namespace RIAPP.DataService.EFCore
                 Field fieldInfo = new Field { fieldName = ownedNavigation.Name };
                 string nm = ownedNavigation.ForeignKey.DeclaringEntityType.Name;
                 IEntityType ownedType = ownedMap[nm];
-                IEnumerable<INavigation> nestedOwnedTypes = ownedType.GetNavigations().Where(n => ownedMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name)).ToArray();
+                IEnumerable<INavigation> nestedOwnedTypes = [.. ownedType.GetNavigations().Where(n => ownedMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name))];
                 GenerateOwnedTypeFieldInfos(fieldInfo, ownedType, nestedOwnedTypes, ownedMap);
                 fieldInfos.Add(fieldInfo);
             }

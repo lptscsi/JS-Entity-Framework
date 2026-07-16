@@ -4,15 +4,10 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
 {
-    public class AuthorizeMiddleware<TService>
+    public class AuthorizeMiddleware<TService>(RequestDelegate<QueryContext<TService>> next, QueryMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<QueryContext<TService>> _next;
-
-        public AuthorizeMiddleware(RequestDelegate<QueryContext<TService>> next, QueryMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<QueryContext<TService>> _next = next;
 
         public async Task Invoke(QueryContext<TService> ctx)
         {

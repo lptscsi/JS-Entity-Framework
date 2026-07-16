@@ -13,6 +13,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+#nullable enable
+
 namespace RIAppDemo.BLL.DataServices
 {
     public class FolderBrowserService : BaseDomainService, IWarmUp
@@ -37,7 +39,8 @@ namespace RIAppDemo.BLL.DataServices
 
         string IWarmUp.Name => "FolderBrowserService";
 
-        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft)
+        /// <inheritdoc/>
+        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft, List<Type>? dataServiceEntityTypes = null)
         {
             return DesignTimeMetadata.FromXML(ResourceHelper.GetResourceString("RIAppDemo.BLL.Metadata.FolderBrowser.xml"));
         }
@@ -79,7 +82,7 @@ namespace RIAppDemo.BLL.DataServices
             string infoType)
         {
             string fullpath = Path.GetFullPath(Path.Combine(GetRootPath(infoType), path));
-            DirectoryInfo dinfo = new DirectoryInfo(fullpath);
+            DirectoryInfo dinfo = new(fullpath);
             if (!includeFiles)
             {
                 IEnumerable<DirectoryInfo> dirs = dinfo.EnumerateDirectories();

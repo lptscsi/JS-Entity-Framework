@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core
 {
-    public class ServiceOperationsHelper<TService> : IServiceOperationsHelper<TService>, IEntityVersionHelper<TService>, IDisposable
+    public class ServiceOperationsHelper<TService>(TService domainService, IDataHelper<TService> dataHelper) : IServiceOperationsHelper<TService>, IEntityVersionHelper<TService>, IDisposable
         where TService : BaseDomainService
     {
         #region Fields
@@ -21,18 +21,11 @@ namespace RIAPP.DataService.Core
         /// Already created instances of DataManagers indexed by dbSetName (their lifetime should span the whole request execution for all entities)
         /// they are disposed after the request ended
         /// </summary>
-        private readonly ConcurrentDictionary<string, object> _dataManagers;
-        private readonly IDataHelper<TService> _dataHelper;
-        private TService _domainService;
+        private readonly ConcurrentDictionary<string, object> _dataManagers = new ConcurrentDictionary<string, object>();
+        private readonly IDataHelper<TService> _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
+        private TService _domainService = domainService ?? throw new ArgumentNullException(nameof(domainService));
 
         #endregion
-
-        public ServiceOperationsHelper(TService domainService, IDataHelper<TService> dataHelper)
-        {
-            _domainService = domainService ?? throw new ArgumentNullException(nameof(domainService));
-            _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
-            _dataManagers = new ConcurrentDictionary<string, object>();
-        }
 
         #region Private methods
 
@@ -123,10 +116,9 @@ namespace RIAPP.DataService.Core
             _domainService = null;
             try
             {
-                IDisposable[] dataManagers = _dataManagers.Values
+                IDisposable[] dataManagers = [.. _dataManagers.Values
                     .Where(m => m is IDisposable)
-                    .Select(m => (IDisposable)m)
-                    .ToArray();
+                    .Select(m => (IDisposable)m)];
                 Array.ForEach(dataManagers, m =>
                 {
                     m.Dispose();
@@ -210,7 +202,7 @@ namespace RIAPP.DataService.Core
 
                 if (fieldInfo.fieldType == FieldType.Object && val.Nested != null)
                 {
-                    ApplyValues(entity, rowInfo, fullName + '.', val.Nested.ToArray(), isOriginal);
+                    ApplyValues(entity, rowInfo, fullName + '.', [.. val.Nested], isOriginal);
                 }
                 else
                 {
@@ -223,7 +215,7 @@ namespace RIAPP.DataService.Core
         {
             DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
             ValuesList values = rowInfo.Values;
-            ApplyValues(entity, rowInfo, "", values.ToArray(), isOriginal);
+            ApplyValues(entity, rowInfo, "", [.. values], isOriginal);
 
             if (!isOriginal && rowInfo.ChangeType == ChangeType.Added)
             {
@@ -251,7 +243,7 @@ namespace RIAPP.DataService.Core
 
                 if (fieldInfo.fieldType == FieldType.Object && val.Nested != null)
                 {
-                    UpdateValuesFromEntity(entity, fullName + '.', dbSetInfo, val.Nested.ToArray());
+                    UpdateValuesFromEntity(entity, fullName + '.', dbSetInfo, [.. val.Nested]);
                 }
                 else
                 {
@@ -275,7 +267,7 @@ namespace RIAPP.DataService.Core
 
                 if (fieldInfo.fieldType == FieldType.Object && val.Nested != null)
                 {
-                    CheckValuesChanges(rowInfo, fullName + '.', val.Nested.ToArray());
+                    CheckValuesChanges(rowInfo, fullName + '.', [.. val.Nested]);
                 }
                 else
                 {
@@ -291,7 +283,7 @@ namespace RIAPP.DataService.Core
         public void UpdateRowInfoFromEntity(object entity, RowInfo rowInfo)
         {
             DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
-            UpdateValuesFromEntity(entity, "", dbSetInfo, rowInfo.Values.ToArray());
+            UpdateValuesFromEntity(entity, "", dbSetInfo, [.. rowInfo.Values]);
             if (rowInfo.ChangeType == ChangeType.Added)
             {
                 rowInfo.ServerKey = rowInfo.GetRowKeyAsString();
@@ -313,7 +305,7 @@ namespace RIAPP.DataService.Core
 
         public void UpdateRowInfoAfterUpdates(RowInfo rowInfo)
         {
-            CheckValuesChanges(rowInfo, "", rowInfo.Values.ToArray());
+            CheckValuesChanges(rowInfo, "", [.. rowInfo.Values]);
 
             if (rowInfo.ChangeType == ChangeType.Added)
             {

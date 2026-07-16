@@ -16,7 +16,7 @@ namespace RIAppDemo.BLL.Utils
                 {
                     throw new Exception("Can not find resource: \"" + ID + "\"");
                 }
-                StreamReader rd = new StreamReader(stream, Encoding.UTF8);
+                StreamReader rd = new(stream, Encoding.UTF8);
                 string txt = rd.ReadToEnd();
                 return txt;
             }

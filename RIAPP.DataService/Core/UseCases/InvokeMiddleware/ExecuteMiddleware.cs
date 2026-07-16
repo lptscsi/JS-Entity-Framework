@@ -6,15 +6,10 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.InvokeMiddleware
 {
-    public class ExecuteMiddleware<TService>
+    public class ExecuteMiddleware<TService>(RequestDelegate<InvokeContext<TService>> next, InvokeMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<InvokeContext<TService>> _next;
-
-        public ExecuteMiddleware(RequestDelegate<InvokeContext<TService>> next, InvokeMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<InvokeContext<TService>> _next = next;
 
         public async Task Invoke(InvokeContext<TService> ctx)
         {
@@ -23,18 +18,18 @@ namespace RIAPP.DataService.Core.UseCases.InvokeMiddleware
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
             MethodDescription method = metadata.GetInvokeMethod(ctx.Request.MethodName);
 
-            List<object> methParams = new List<object>();
+            List<object> methParams = [];
             for (int i = 0; i < method.parameters.Count; ++i)
             {
                 methParams.Add(ctx.Request.ParamInfo.GetValue(method.parameters[i].Name, method, dataHelper));
             }
             RequestContext req = InvokeContext<TService>.CreateRequestContext(ctx.Service);
-            using (RequestCallContext callContext = new RequestCallContext(req))
+            using (RequestCallContext callContext = new(req))
             {
                 MethodInfoData methodData = method.GetMethodData();
                 // invoke (aka service methods) are on the Domain Service only, so dbSetName is empty
                 object instance = serviceHelper.GetMethodOwner(string.Empty, methodData);
-                object invokeRes = methodData.MethodInfo.Invoke(instance, methParams.ToArray());
+                object invokeRes = methodData.MethodInfo.Invoke(instance, [.. methParams]);
                 object methodResult = await PropHelper.GetMethodResult(invokeRes);
 
                 if (method.methodResult)

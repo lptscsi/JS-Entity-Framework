@@ -7,10 +7,15 @@ namespace System.Linq.Dynamic.Core.Util;
 /// Renames a single (Typed)ParameterExpression in an Expression.
 /// </summary>
 /// <seealso cref="ExpressionVisitor" />
-internal class ParameterExpressionRenamer : ExpressionVisitor
+/// <remarks>
+/// Initializes a new instance of the <see cref="ParameterExpressionRenamer"/> class.
+/// </remarks>
+/// <param name="oldName">The old name.</param>
+/// <param name="newName">The new name.</param>
+internal class ParameterExpressionRenamer(string oldName, string newName) : ExpressionVisitor
 {
-    private readonly string _newName;
-    private readonly string _oldName;
+    private readonly string _newName = Check.NotEmpty(newName);
+    private readonly string _oldName = Check.NotNull(oldName);
 
     private ParameterExpression? _parameterExpression;
 
@@ -20,17 +25,6 @@ internal class ParameterExpressionRenamer : ExpressionVisitor
     /// <param name="newName">The new name (the oldName is assumed to be "").</param>
     public ParameterExpressionRenamer(string newName) : this(string.Empty, newName)
     {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ParameterExpressionRenamer"/> class.
-    /// </summary>
-    /// <param name="oldName">The old name.</param>
-    /// <param name="newName">The new name.</param>
-    public ParameterExpressionRenamer(string oldName, string newName)
-    {
-        _oldName = Check.NotNull(oldName);
-        _newName = Check.NotEmpty(newName);
     }
 
     /// <summary>

@@ -34,7 +34,7 @@ namespace RIAPP.DataService.Core.Types
     {
         public MethodParameters()
         {
-            Parameters = new List<MethodParameter>();
+            Parameters = [];
         }
 
 

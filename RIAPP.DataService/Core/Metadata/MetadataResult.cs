@@ -16,13 +16,13 @@ namespace RIAPP.DataService.Core.Metadata
         }
 
 
-        public DbSetInfoList dbSets { get; set; } = new DbSetInfoList();
+        public DbSetInfoList dbSets { get; set; } = [];
 
 
-        public AssocList associations { get; set; } = new AssocList();
+        public AssocList associations { get; set; } = [];
 
 
-        public MethodsList methods { get; set; } = new MethodsList();
+        public MethodsList methods { get; set; } = [];
 
 
         public int serverTimezone { get; set; }

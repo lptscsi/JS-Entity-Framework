@@ -7,29 +7,21 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core
 {
-    public class InvokeOperationsUseCase<TService> : IInvokeOperationsUseCase<TService>
+    public class InvokeOperationsUseCase<TService>(BaseDomainService service, Func<Exception, string> onError, RequestDelegate<InvokeContext<TService>> pipeline) : IInvokeOperationsUseCase<TService>
          where TService : BaseDomainService
     {
-        private readonly BaseDomainService _service;
-        private readonly IServiceContainer<TService> _serviceContainer;
-        private readonly Func<Exception, string> _onError;
-        private readonly RequestDelegate<InvokeContext<TService>> _pipeline;
-
-        public InvokeOperationsUseCase(BaseDomainService service, Func<Exception, string> onError, RequestDelegate<InvokeContext<TService>> pipeline)
-        {
-            _serviceContainer = (IServiceContainer<TService>)service.ServiceContainer;
-            _service = service;
-            _onError = onError ?? throw new ArgumentNullException(nameof(onError));
-            _pipeline = pipeline;
-        }
+        private readonly BaseDomainService _service = service;
+        private readonly IServiceContainer<TService> _serviceContainer = (IServiceContainer<TService>)service.ServiceContainer;
+        private readonly Func<Exception, string> _onError = onError ?? throw new ArgumentNullException(nameof(onError));
+        private readonly RequestDelegate<InvokeContext<TService>> _pipeline = pipeline;
 
         public async Task<bool> Handle(InvokeRequest message, IOutputPort<InvokeResponse> outputPort)
         {
-            InvokeResponse response = new InvokeResponse();
+            InvokeResponse response = new();
 
             try
             {
-                InvokeContext<TService> context = new InvokeContext<TService>(message,
+                InvokeContext<TService> context = new(message,
                  response,
                  (TService)_service,
                  _serviceContainer);

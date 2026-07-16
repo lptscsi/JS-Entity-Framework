@@ -1,2 +1,1 @@
-﻿import * as RIAPP from "jriapp-lib";
-{{IMPORTS}}
+﻿{{IMPORTS}}

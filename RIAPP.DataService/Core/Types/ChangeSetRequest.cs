@@ -6,8 +6,8 @@
     {
         public ChangeSetRequest()
         {
-            DbSets = new DbSetList();
-            TrackAssocs = new TrackAssocList();
+            DbSets = [];
+            TrackAssocs = [];
         }
 
 

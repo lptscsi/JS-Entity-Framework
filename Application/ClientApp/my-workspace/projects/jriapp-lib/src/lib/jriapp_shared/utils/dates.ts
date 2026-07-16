@@ -2,7 +2,6 @@
 import { StringUtils } from "./strutils";
 import { Checks } from "./checks";
 import { ERRS } from "../../lang";
-import moment from 'moment';
 
 const { isNt } = Checks, { format: formatStr } = StringUtils;
 
@@ -23,22 +22,23 @@ function strToDate(val: string, format: string = "YYYYMMDD"): Date {
         return null;
     }
 
-    const m = moment(val, format);
-    if (!m.isValid()) {
+    const d = dayjs(val, format, true);
+
+    if (!d.isValid()) {
         throw new Error(formatStr(ERRS.ERR_CONV_INVALID_DATE, val));
     }
-    return m.toDate();
+    return d.toDate();
 }
 
 function dateToStr(dt: Date, format: string = "YYYYMMDD"): string {
     if (isNt(dt)) {
         return "";
     }
-    return moment(dt).format(format);
+    return dayjs(dt).format(format);
 }
 
 function add(dt: Date, val: number, period: TIME_KIND): Date {
-    return moment(dt).add(val, period).toDate();
+    return dayjs(dt).add(val, period).toDate();
 }
 
 export class DateUtils {
@@ -47,8 +47,8 @@ export class DateUtils {
             return false;
         }
 
-        const m = moment(val, format);
-        return m.isValid();
+        const d = dayjs(val, format, true);
+        return d.isValid();
     }
     static readonly strToDate: (val: string, format?: string) => Date = strToDate;
     static strToDatePartial(format?: string) {
@@ -69,24 +69,24 @@ export class DateUtils {
         return (dt: Date) => (val: number) => add(dt, val, period);
     }
     static trim(dt: Date): Date {
-        return moment(dt).startOf(TIME_KIND.DAY).toDate();
+        return dayjs(dt).startOf(TIME_KIND.DAY).toDate();
     }
     static today(): Date {
-        return moment().startOf(TIME_KIND.DAY).toDate();
+        return dayjs().startOf(TIME_KIND.DAY).toDate();
     }
     static now(): Date {
         return new Date();
     }
     static yesterday(dt?: Date): Date {
-        return moment(dt).startOf(TIME_KIND.DAY).add(-1, TIME_KIND.DAY).toDate();
+        return dayjs(dt).startOf(TIME_KIND.DAY).add(-1, TIME_KIND.DAY).toDate();
     }
     static tomorrow(dt?: Date): Date {
-        return moment(dt).startOf(TIME_KIND.DAY).add(1, TIME_KIND.DAY).toDate();
+        return dayjs(dt).startOf(TIME_KIND.DAY).add(1, TIME_KIND.DAY).toDate();
     }
     static startOf(period: TIME_RANGE, dt?: Date): Date {
-        return moment(dt).startOf(period).toDate();
+        return dayjs(dt).startOf(period).toDate();
     }
     static endOf(period: TIME_RANGE, dt?: Date): Date {
-        return moment(dt).endOf(period).toDate();
+        return dayjs(dt).endOf(period).toDate();
     }
 }

@@ -2,15 +2,10 @@
 
 namespace RIAPP.DataService.Core
 {
-    public class RefreshOperationsUseCaseFactory<TService> : IRefreshOperationsUseCaseFactory<TService>
+    public class RefreshOperationsUseCaseFactory<TService>(Func<BaseDomainService, Func<Exception, string>, IRefreshOperationsUseCase<TService>> func) : IRefreshOperationsUseCaseFactory<TService>
         where TService : BaseDomainService
     {
-        private readonly Func<BaseDomainService, Func<Exception, string>, IRefreshOperationsUseCase<TService>> _func;
-
-        public RefreshOperationsUseCaseFactory(Func<BaseDomainService, Func<Exception, string>, IRefreshOperationsUseCase<TService>> func)
-        {
-            _func = func;
-        }
+        private readonly Func<BaseDomainService, Func<Exception, string>, IRefreshOperationsUseCase<TService>> _func = func;
 
         public IRefreshOperationsUseCase Create(BaseDomainService service, Func<Exception, string> onError)
         {

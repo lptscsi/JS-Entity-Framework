@@ -128,7 +128,7 @@ namespace System.Linq.Dynamic.Core
                             compareMethodGeneric.Attributes & ~MethodAttributes.Abstract,
                             compareMethodGeneric.CallingConvention,
                             compareMethodGeneric.ReturnType,
-                            compareMethodGeneric.GetParameters().Select(p => p.ParameterType).ToArray()
+                            [.. compareMethodGeneric.GetParameters().Select(p => p.ParameterType)]
                         );
                         var methodBuilderIL = methodBuilder.GetILGenerator();
                         methodBuilderIL.Emit(OpCodes.Ldarg_0);
@@ -173,8 +173,8 @@ namespace System.Linq.Dynamic.Core
         {
             Check.HasNoNulls(properties, nameof(properties));
 
-            Type[] types = properties.Select(p => p.Type).ToArray();
-            string[] names = properties.Select(p => p.Name).ToArray();
+            Type[] types = [.. properties.Select(p => p.Type)];
+            string[] names = [.. properties.Select(p => p.Name)];
 
             string key = GenerateKey(properties, createParameterCtor);
 
@@ -198,7 +198,7 @@ namespace System.Linq.Dynamic.Core
 
                         if (names.Length != 0)
                         {
-                            string[] genericNames = names.Select(genericName => $"<{genericName}>j__TPar").ToArray();
+                            string[] genericNames = [.. names.Select(genericName => $"<{genericName}>j__TPar")];
                             generics = tb.DefineGenericParameters(genericNames);
                             foreach (GenericTypeParameterBuilder b in generics)
                             {
@@ -354,7 +354,7 @@ namespace System.Linq.Dynamic.Core
                             ilgeneratorConstructorDef.Emit(OpCodes.Ret);
 
                             // .ctor with params
-                            ConstructorBuilder constructor = tb.DefineConstructor(MethodAttributes.Public | MethodAttributes.HideBySig, CallingConventions.HasThis, generics.Select(p => p.AsType()).ToArray());
+                            ConstructorBuilder constructor = tb.DefineConstructor(MethodAttributes.Public | MethodAttributes.HideBySig, CallingConventions.HasThis, [.. generics.Select(p => p.AsType())]);
                             constructor.SetCustomAttribute(DebuggerHiddenAttributeBuilder);
 
                             ILGenerator ilgeneratorConstructor = constructor.GetILGenerator();
@@ -463,7 +463,7 @@ namespace System.Linq.Dynamic.Core
         {
             // We recreate this by creating a fullName composed of all the property names and types, separated by a "|".
             // And append and extra field depending on createParameterCtor.
-            return string.Format("{0}_{1}", string.Join("|", dynamicProperties.Select(p => Escape(p.Name) + "~" + p.Type.FullName).ToArray()), createParameterCtor ? "c" : string.Empty);
+            return string.Format("{0}_{1}", string.Join("|", [.. dynamicProperties.Select(p => Escape(p.Name) + "~" + p.Type.FullName)]), createParameterCtor ? "c" : string.Empty);
         }
 
         private static string Escape(string str)

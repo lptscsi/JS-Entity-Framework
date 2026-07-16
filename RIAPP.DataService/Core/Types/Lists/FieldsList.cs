@@ -20,7 +20,7 @@ namespace RIAPP.DataService.Core.Types
 
     public class FieldsList : List<Field>, IFieldsList
     {
-        private Dictionary<string, Field> _fieldsByNames = new Dictionary<string, Field>();
+        private Dictionary<string, Field> _fieldsByNames = [];
         private readonly Lazy<Field[]> _inResultFields;
         private readonly Lazy<Field[]> _pkFields;
         private readonly Lazy<Field> _timestampField;
@@ -29,9 +29,9 @@ namespace RIAPP.DataService.Core.Types
         public FieldsList()
         {
             _inResultFields = new Lazy<Field[]>(
-              () => this.Where(f => f.GetIsIncludeInResult()).OrderBy(f => f.GetOrdinal()).ToArray(), true);
+              () => [.. this.Where(f => f.GetIsIncludeInResult()).OrderBy(f => f.GetOrdinal())], true);
             _pkFields = new Lazy<Field[]>(
-                    () => this.Where(fi => fi.isPrimaryKey > 0).OrderBy(fi => fi.isPrimaryKey).ToArray(), true);
+                    () => [.. this.Where(fi => fi.isPrimaryKey > 0).OrderBy(fi => fi.isPrimaryKey)], true);
             _timestampField = new Lazy<Field>(() => this.Where(fi => fi.fieldType == FieldType.RowTimeStamp).FirstOrDefault(),
                     true);
         }
@@ -81,12 +81,12 @@ namespace RIAPP.DataService.Core.Types
                     fieldInfos[i].SetOrdinal(i);
                     if (fieldInfos[i].fieldType == FieldType.Object)
                     {
-                        SetOrdinal(fieldInfos[i].nested.ToArray());
+                        SetOrdinal([.. fieldInfos[i].nested]);
                     }
                 }
             }
 
-            Field[] fieldInfos = this.ToArray();
+            Field[] fieldInfos = [.. this];
             int cnt = fieldInfos.Length;
 
             for (int i = 0; i < cnt; ++i)

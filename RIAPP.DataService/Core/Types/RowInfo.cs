@@ -1,4 +1,6 @@
-﻿namespace RIAPP.DataService.Core.Types
+﻿using System.Text.Json.Serialization;
+
+namespace RIAPP.DataService.Core.Types
 {
 
     public class RowInfo
@@ -6,7 +8,7 @@
         public RowInfo()
         {
             ChangeType = ChangeType.None;
-            Values = new ValuesList();
+            Values = [];
             ServerKey = string.Empty;
             _dbSetInfo = null;
             _changeState = null;
@@ -16,6 +18,7 @@
         public ValuesList Values { get; set; }
 
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public ChangeType ChangeType { get; set; }
 
         /// <summary>

@@ -46,10 +46,10 @@ internal class KeywordsHelper : IKeywordsHelper
     };
 
     // PreDefined Types are not IgnoreCase
-    private static readonly Dictionary<string, object> _preDefinedTypeMapping = new();
+    private static readonly Dictionary<string, object> _preDefinedTypeMapping = [];
 
     // Custom DefinedTypes are not IgnoreCase
-    private readonly Dictionary<string, object> _customTypeMapping = new();
+    private readonly Dictionary<string, object> _customTypeMapping = [];
 
     static KeywordsHelper()
     {

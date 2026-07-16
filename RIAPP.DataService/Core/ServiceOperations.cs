@@ -11,32 +11,23 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core
 {
-    public class ServiceOperations<TService> : IServiceOperations<TService>, IDisposable
+    public class ServiceOperations<TService>(
+        TService domainService,
+        IServiceOperationsHelper<TService> operations,
+        IEntityVersionHelper<TService> entityVersion,
+        IDataHelper<TService> dataHelper,
+        IValidationHelper<TService> validation) : IServiceOperations<TService>, IDisposable
         where TService : BaseDomainService
     {
         #region Fields
 
-        private TService _domainService;
-        private readonly IServiceOperationsHelper<TService> _operations;
-        private readonly IEntityVersionHelper<TService> _entityVersion;
-        private readonly IDataHelper<TService> _dataHelper;
-        private readonly IValidationHelper<TService> _validation;
+        private TService _domainService = domainService ?? throw new ArgumentNullException(nameof(domainService));
+        private readonly IServiceOperationsHelper<TService> _operations = operations ?? throw new ArgumentNullException(nameof(operations));
+        private readonly IEntityVersionHelper<TService> _entityVersion = entityVersion ?? throw new ArgumentNullException(nameof(entityVersion));
+        private readonly IDataHelper<TService> _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
+        private readonly IValidationHelper<TService> _validation = validation ?? throw new ArgumentNullException(nameof(validation));
 
         #endregion
-
-        public ServiceOperations(
-            TService domainService,
-            IServiceOperationsHelper<TService> operations,
-            IEntityVersionHelper<TService> entityVersion,
-            IDataHelper<TService> dataHelper,
-            IValidationHelper<TService> validation)
-        {
-            _domainService = domainService ?? throw new ArgumentNullException(nameof(domainService));
-            _operations = operations ?? throw new ArgumentNullException(nameof(operations));
-            _entityVersion = entityVersion ?? throw new ArgumentNullException(nameof(entityVersion));
-            _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
-            _validation = validation ?? throw new ArgumentNullException(nameof(validation));
-        }
 
         public void Dispose()
         {
@@ -136,8 +127,8 @@ namespace RIAPP.DataService.Core
             DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
             IEnumerable<ValidationErrorInfo> errs1 = null;
             IEnumerable<ValidationErrorInfo> errs2 = null;
-            LinkedList<string> mustBeChecked = new LinkedList<string>();
-            LinkedList<string> skipCheckList = new LinkedList<string>();
+            LinkedList<string> mustBeChecked = new();
+            LinkedList<string> skipCheckList = new();
 
             if (rowInfo.ChangeType == ChangeType.Added)
             {
@@ -192,7 +183,7 @@ namespace RIAPP.DataService.Core
                 });
             }
 
-            rowInfo.GetChangeState().ChangedFieldNames = mustBeChecked.ToArray();
+            rowInfo.GetChangeState().ChangedFieldNames = [.. mustBeChecked];
 
             MethodInfoData methodData = metadata.GetOperationMethodInfo(dbSetInfo.dbSetName, MethodType.Validate);
             if (methodData != null)
@@ -232,7 +223,7 @@ namespace RIAPP.DataService.Core
 
             errs1 = errs1.Concat(errs2);
 
-            rowInfo.GetChangeState().ValidationErrors = errs1.ToArray();
+            rowInfo.GetChangeState().ValidationErrors = [.. errs1];
 
             return rowInfo.GetChangeState().ValidationErrors.Length == 0;
         }

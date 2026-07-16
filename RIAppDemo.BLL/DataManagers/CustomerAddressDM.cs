@@ -25,7 +25,10 @@ namespace RIAppDemo.BLL.DataManagers
             DbSet dbCustAddr = changeSet.DbSets.FirstOrDefault(d => d.DbSetName == custAddrDbSet.dbSetName);
             if (dbCustAddr != null)
             {
-                int[] custIDs = dbCustAddr.Rows.Where(r => r.ChangeType == ChangeType.Deleted || r.ChangeType == ChangeType.Added).Select(r => r.Values.First(v => v.FieldName == "CustomerId").Val).Select(id => int.Parse(id)).ToArray();
+                int[] custIDs = [.. dbCustAddr.Rows
+                    .Where(r => r.ChangeType == ChangeType.Deleted || r.ChangeType == ChangeType.Added)
+                    .Select(r => r.Values.First(v => v.FieldName == "CustomerId").Val)
+                    .Select(id => int.Parse(id))];
 
                 System.Collections.Generic.List<Customer> customersList = await DB.Customer.AsNoTracking().Where(c => custIDs.Contains(c.CustomerId)).ToListAsync();
                 System.Collections.Generic.List<int> customerAddress = await DB.CustomerAddress.AsNoTracking().Where(ca => custIDs.Contains(ca.CustomerId)).Select(ca => ca.CustomerId).ToListAsync();
@@ -35,7 +38,7 @@ namespace RIAppDemo.BLL.DataManagers
                     customer.AddressCount = customerAddress.Count(id => id == customer.CustomerId);
                 });
 
-                SubResult subResult = new SubResult
+                SubResult subResult = new()
                 {
                     dbSetName = customerDbSet.dbSetName,
                     Result = customersList

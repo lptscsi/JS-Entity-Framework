@@ -10,7 +10,7 @@ namespace Extensions.Logging.RollingFile.Internal
 {
     public abstract class BatchingLoggerProvider : ILoggerProvider
     {
-        private readonly List<LogMessage> _currentBatch = new List<LogMessage>();
+        private readonly List<LogMessage> _currentBatch = [];
         private readonly TimeSpan _interval;
         private readonly int? _queueCapacity;
         private readonly int _batchSize;

@@ -7,15 +7,10 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
 {
-    public class ExecuteMiddleware<TService>
+    public class ExecuteMiddleware<TService>(RequestDelegate<RefreshContext<TService>> next, RefreshMiddlewareOptions<TService> options)
          where TService : BaseDomainService
     {
-        private readonly RequestDelegate<RefreshContext<TService>> _next;
-
-        public ExecuteMiddleware(RequestDelegate<RefreshContext<TService>> next, RefreshMiddlewareOptions<TService> options)
-        {
-            _next = next;
-        }
+        private readonly RequestDelegate<RefreshContext<TService>> _next = next;
 
         public async Task Invoke(RefreshContext<TService> ctx)
         {
@@ -24,7 +19,7 @@ namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
 
             RequestContext req = RefreshContext<TService>.CreateRequestContext(ctx.Service, ctx.Request.RowInfo);
-            using (RequestCallContext callContext = new RequestCallContext(req))
+            using (RequestCallContext callContext = new(req))
             {
                 MethodInfoData methodData = metadata.GetOperationMethodInfo(ctx.Request.DbSetName, MethodType.Refresh);
                 object instance = serviceHelper.GetMethodOwner(dbSetInfo.dbSetName, methodData);

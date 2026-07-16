@@ -74,7 +74,7 @@ namespace RIAPP.DataService.EFCore.Utils
         {
             StringBuilder sb = new StringBuilder(4096);
 
-            System.Collections.Generic.List<DbSetInfo> dbSets = metadata.DbSets.Values.OrderBy(d => d.dbSetName).ToList();
+            System.Collections.Generic.List<DbSetInfo> dbSets = [.. metadata.DbSets.Values.OrderBy(d => d.dbSetName)];
             dbSets.ForEach(dbSetInfo =>
             {
                 string tableName = GetTableName(DB, dbSetInfo.GetEntityType());

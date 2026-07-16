@@ -8,20 +8,14 @@ using System.Linq;
 
 namespace RIAPP.DataService.Core
 {
-    internal class SubsetsGenerator
+    internal class SubsetsGenerator(RunTimeMetadata metadata, IDataHelper dataHelper)
     {
-        private readonly IDataHelper _dataHelper;
-        private readonly RunTimeMetadata _metadata;
-
-        public SubsetsGenerator(RunTimeMetadata metadata, IDataHelper dataHelper)
-        {
-            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
-            _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
-        }
+        private readonly IDataHelper _dataHelper = dataHelper ?? throw new ArgumentNullException(nameof(dataHelper));
+        private readonly RunTimeMetadata _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
 
         public SubsetList CreateSubsets(IEnumerable<SubResult> subResults)
         {
-            SubsetList result = new SubsetList();
+            SubsetList result = [];
             if (subResults == null)
             {
                 return result;
@@ -36,9 +30,9 @@ namespace RIAPP.DataService.Core
                     throw new DomainServiceException(string.Format("The included sub results already have DbSet {0} entities", dbSetInfo.dbSetName));
                 }
 
-                RowGenerator rowGenerator = new RowGenerator(dbSetInfo, subResult.Result, _dataHelper);
+                RowGenerator rowGenerator = new(dbSetInfo, subResult.Result, _dataHelper);
 
-                Subset current = new Subset
+                Subset current = new()
                 {
                     DbSetName = dbSetInfo.dbSetName,
                     Rows = rowGenerator.CreateDistinctRows(),

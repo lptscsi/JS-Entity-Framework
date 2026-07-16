@@ -11,13 +11,9 @@ namespace System.Linq.Dynamic.Core;
 /// Code is based on SqlLinq by dkackman (https://github.com/dkackman/SqlLinq/blob/210b594e37f14061424397368ed750ce547c21e7/License.md) however it's modified to solve several issues.
 /// </summary>
 /// <seealso cref="GetMemberBinder" />
-internal class DynamicGetMemberBinder : GetMemberBinder
+internal class DynamicGetMemberBinder(string name, ParsingConfig? config) : GetMemberBinder(name, config?.IsCaseSensitive != true)
 {
     private static readonly MethodInfo DynamicGetMemberMethod = typeof(DynamicGetMemberBinder).GetMethod(nameof(GetDynamicMember))!;
-
-    public DynamicGetMemberBinder(string name, ParsingConfig? config) : base(name, config?.IsCaseSensitive != true)
-    {
-    }
 
     public override DynamicMetaObject FallbackGetMember(DynamicMetaObject target, DynamicMetaObject? errorSuggestion)
     {

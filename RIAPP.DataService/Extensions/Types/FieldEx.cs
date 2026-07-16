@@ -6,14 +6,13 @@ namespace RIAPP.DataService.Core.Types
     {
         public static Column[] GetNames(this Field fieldInfo)
         {
-            return fieldInfo.GetNestedInResultFields()
+            return [.. fieldInfo.GetNestedInResultFields()
                     .Select(fi =>
                             new Column
                             {
                                 Name = fi.fieldName,
                                 Nested = fi.fieldType == FieldType.Object ? fi.GetNames() : null
-                            })
-                    .ToArray();
+                            })];
         }
 
         public static int GetOrdinal(this Field field)

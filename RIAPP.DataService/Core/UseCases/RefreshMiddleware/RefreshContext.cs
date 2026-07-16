@@ -6,25 +6,15 @@ using System.Runtime.ExceptionServices;
 
 namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
 {
-    public class RefreshContext<TService> : IRequestContext
+    public class RefreshContext<TService>(
+        RefreshRequest request,
+        RefreshResponse response,
+        TService service,
+        IServiceContainer<TService> serviceContainer
+          ) : IRequestContext
         where TService : BaseDomainService
     {
-        private ExceptionDispatchInfo _ExceptionInfo;
-
-        public RefreshContext(
-            RefreshRequest request,
-            RefreshResponse response,
-            TService service,
-            IServiceContainer<TService> serviceContainer
-          )
-        {
-            _ExceptionInfo = null;
-            Request = request;
-            Response = response;
-            Service = service;
-            ServiceContainer = serviceContainer;
-            Properties = new Expando();
-        }
+        private ExceptionDispatchInfo _ExceptionInfo = null;
 
         public static RequestContext CreateRequestContext(TService service, RowInfo rowInfo)
         {
@@ -33,7 +23,7 @@ namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
 
 
         // Gets a key/value collection that can be used to share data between middleware.
-        public IDictionary<string, object> Properties { get; }
+        public IDictionary<string, object> Properties { get; } = new Expando();
 
         public bool IsMultyPage { get; }
 
@@ -41,8 +31,8 @@ namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
         {
         }
 
-        public RefreshRequest Request { get; }
-        public RefreshResponse Response { get; }
+        public RefreshRequest Request { get; } = request;
+        public RefreshResponse Response { get; } = response;
         public IServiceProvider RequestServices => ServiceContainer.ServiceProvider;
 
         public void CaptureException(Exception ex)
@@ -52,9 +42,9 @@ namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
 
         public Exception ProcessingException => _ExceptionInfo?.SourceException;
 
-        public IServiceContainer<TService> ServiceContainer { get; }
+        public IServiceContainer<TService> ServiceContainer { get; } = serviceContainer;
 
-        public TService Service { get; }
+        public TService Service { get; } = service;
 
         public void ReThrow()
         {

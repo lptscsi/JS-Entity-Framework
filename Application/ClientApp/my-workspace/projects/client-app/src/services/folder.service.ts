@@ -40,7 +40,7 @@ export class FolderService {
         'The service has already been provided in the app. Avoid providing it again in child modules'
       );
     }
-    const self = this, options: IOptions = { service_url: "/FolderBrowserService" };
+    const self = this, options: IOptions = { service_url: "/api/folders" };
 
     self._dbContext = new FOLDER_DB.DbContext();
     self._initPromise = self.dbContext.initialize({

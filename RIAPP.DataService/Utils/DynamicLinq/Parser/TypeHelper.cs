@@ -455,7 +455,7 @@ namespace System.Linq.Dynamic.Core.Parser
                 return types;
             }
 
-            return GetSelfAndBaseClasses(type).Where(t => !excludeObject || t != typeof(object)).ToList();
+            return [.. GetSelfAndBaseClasses(type).Where(t => !excludeObject || t != typeof(object))];
         }
 
         private static IEnumerable<Type> GetSelfAndBaseClasses(Type type)

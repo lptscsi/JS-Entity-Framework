@@ -4,22 +4,9 @@ using System.Linq.Dynamic.Core.Validation;
 
 namespace System.Linq.Dynamic.Core.TypeConverters;
 
-internal class TypeConverterFactory : ITypeConverterFactory
+internal class TypeConverterFactory(ParsingConfig config) : ITypeConverterFactory
 {
-    private readonly ParsingConfig _config;
-
-#if NET6_0
-    static TypeConverterFactory()
-    {
-        TypeDescriptor.AddAttributes(typeof(DateOnly), new TypeConverterAttribute(typeof(DateOnlyConverter)));
-        TypeDescriptor.AddAttributes(typeof(TimeOnly), new TypeConverterAttribute(typeof(TimeOnlyConverter)));
-    }
-#endif
-
-    public TypeConverterFactory(ParsingConfig config)
-    {
-        _config = Check.NotNull(config);
-    }
+    private readonly ParsingConfig _config = Check.NotNull(config);
 
     /// <see cref="ITypeConverterFactory.GetConverter"/>
     public TypeConverter GetConverter(Type type)

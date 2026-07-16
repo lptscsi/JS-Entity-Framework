@@ -4,15 +4,10 @@ using System.Linq;
 
 namespace RIAPP.DataService.Core.CodeGen
 {
-    public class CodeGenFactory<TService> : ICodeGenFactory<TService>
+    public class CodeGenFactory<TService>(IServiceProvider serviceProvider) : ICodeGenFactory<TService>
         where TService : BaseDomainService
     {
-        private readonly ICodeGenConfig _codeGenConfig;
-
-        public CodeGenFactory(IServiceProvider serviceProvider)
-        {
-            _codeGenConfig = (ICodeGenConfig)serviceProvider.GetService(typeof(ICodeGenConfig));
-        }
+        private readonly ICodeGenConfig _codeGenConfig = (ICodeGenConfig)serviceProvider.GetService(typeof(ICodeGenConfig));
 
         public ICodeGenProvider GetCodeGen(BaseDomainService dataService, string lang)
         {

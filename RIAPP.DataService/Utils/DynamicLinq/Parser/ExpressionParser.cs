@@ -36,7 +36,7 @@ public class ExpressionParser
     private readonly IExpressionHelper _expressionHelper;
     private readonly ITypeFinder _typeFinder;
     private readonly ITypeConverterFactory _typeConverterFactory;
-    private readonly Dictionary<string, object> _internals = new();
+    private readonly Dictionary<string, object> _internals = [];
     private readonly Dictionary<string, object?> _symbols;
 
     private IDictionary<string, object>? _externals;
@@ -390,7 +390,7 @@ public class ExpressionParser
                 Expression? nullExpressionReference = null;
                 if (_methodFinder.FindMethod(typeof(IEnumerableSignatures), nameof(IEnumerableSignatures.Contains), false, ref nullExpressionReference, ref args, out var containsSignature) != 1)
                 {
-                    throw ParseError(op.Pos, Res.NoApplicableAggregate, nameof(IEnumerableSignatures.Contains), string.Join(",", args.Select(a => a.Type.Name).ToArray()));
+                    throw ParseError(op.Pos, Res.NoApplicableAggregate, nameof(IEnumerableSignatures.Contains), string.Join(",", [.. args.Select(a => a.Type.Name)]));
                 }
 
                 var typeArgs = new[] { left.Type };
@@ -1523,7 +1523,7 @@ public class ExpressionParser
         var propertyInfos = type.GetProperties();
         if (type.GetTypeInfo().BaseType == typeof(DynamicClass))
         {
-            propertyInfos = propertyInfos.Where(x => x.Name != "Item").ToArray();
+            propertyInfos = [.. propertyInfos.Where(x => x.Name != "Item")];
         }
         var propertyTypes = propertyInfos.Select(p => p.PropertyType).ToArray();
         var ctor = type.GetConstructor(propertyTypes);
@@ -1820,7 +1820,7 @@ public class ExpressionParser
                     {
                         var genericParameters = method.GetParameters().Where(p => p.ParameterType.IsGenericParameter);
                         var typeArguments = genericParameters.Select(a => args[a.Position].Type);
-                        methodToCall = method.MakeGenericMethod(typeArguments.ToArray());
+                        methodToCall = method.MakeGenericMethod([.. typeArguments]);
                     }
 
                     return CallMethod(expression, methodToCall, args);
@@ -1931,7 +1931,7 @@ public class ExpressionParser
 
         // Create the block to return the boolean value.
         var block = Expression.Block(
-            blockList.ToArray(),
+            [.. blockList],
             Expression.Assign(returnValue, methodCall),
             returnValue
         );
@@ -1985,7 +1985,7 @@ public class ExpressionParser
             }
         }
 
-        var enumTypeAsString = string.Concat(parts.Take(parts.Count - 2).ToArray());
+        var enumTypeAsString = string.Concat([.. parts.Take(parts.Count - 2)]);
         var enumType = _typeFinder.FindTypeByName(enumTypeAsString, null, true);
         if (enumType == null)
         {
@@ -2042,7 +2042,7 @@ public class ExpressionParser
 
         if (!_methodFinder.ContainsMethod(typeof(IEnumerableSignatures), methodName, false, null, ref args))
         {
-            throw ParseError(errorPos, Res.NoApplicableAggregate, methodName, string.Join(",", args.Select(a => a.Type.Name).ToArray()));
+            throw ParseError(errorPos, Res.NoApplicableAggregate, methodName, string.Join(",", [.. args.Select(a => a.Type.Name)]));
         }
 
         Type callType = typeof(Enumerable);
@@ -2195,7 +2195,7 @@ public class ExpressionParser
             _textParser.NextToken();
         }
 
-        return argList.ToArray();
+        return [.. argList];
     }
 
     private Expression ParseElementAccess(Expression expr)

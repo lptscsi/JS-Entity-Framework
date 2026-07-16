@@ -2,21 +2,15 @@
 
 namespace RIAPP.DataService.Core.CodeGen
 {
-    public abstract class BaseCsharpProvider<TService> : ICodeGenProvider<TService>
+    public abstract class BaseCsharpProvider<TService>(IMetaDataProvider owner, string lang) : ICodeGenProvider<TService>
          where TService : BaseDomainService
     {
-        public BaseCsharpProvider(IMetaDataProvider owner, string lang)
-        {
-            Owner = owner;
-            Lang = lang;
-        }
-
         public string Lang
         {
             get;
-        }
+        } = lang;
 
-        public IMetaDataProvider Owner { get; }
+        public IMetaDataProvider Owner { get; } = owner;
 
         public abstract string GenerateScript(string comment = null, bool isDraft = false);
     }

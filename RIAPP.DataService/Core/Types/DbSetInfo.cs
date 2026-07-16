@@ -7,7 +7,7 @@ namespace RIAPP.DataService.Core.Types
     {
         #region Fields
 
-        private FieldsList _fields = new FieldsList();
+        private FieldsList _fields = [];
 
         #endregion
 

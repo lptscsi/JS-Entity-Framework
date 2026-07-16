@@ -34,7 +34,7 @@ namespace RIAPP.DataService.Utils
 
         private static IDictionary<string, object> GetValues(Type t, object obj, string[] propNames)
         {
-            Expando res = new Expando();
+            Expando res = [];
 
             if (obj == null)
             {
@@ -57,7 +57,7 @@ namespace RIAPP.DataService.Utils
             ChangeType changeType,
             string dbSetName)
         {
-            LinkedList<Vals> lst = new LinkedList<Vals>();
+            LinkedList<Vals> lst = new();
 
             foreach (string pnm in d1.Keys.Intersect(d2.Keys))
             {
@@ -138,7 +138,7 @@ namespace RIAPP.DataService.Utils
 
             string pkval = string.Join(",", pkNames.Select(nm => dpk[nm].ToString()));
 
-            XElement x = new XElement("diffgram",
+            XElement x = new("diffgram",
                 new XAttribute("dbset-name", dbSetName),
                 new XAttribute("key-name", string.Join(",", pkNames)),
                 new XAttribute("key-val", pkval),

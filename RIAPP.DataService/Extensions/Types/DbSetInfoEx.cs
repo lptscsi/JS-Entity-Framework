@@ -12,12 +12,12 @@ namespace RIAPP.DataService.Core.Types
         /// <returns></returns>
         public static Column[] GetColumns(this DbSetInfo dbSetInfo)
         {
-            return dbSetInfo.GetInResultFields().Select(fi =>
+            return [.. dbSetInfo.GetInResultFields().Select(fi =>
                             new Column
                             {
                                 Name = fi.fieldName,
                                 Nested = fi.fieldType == FieldType.Object ? fi.GetNames() : null
-                            }).ToArray();
+                            })];
         }
 
         /// <summary>

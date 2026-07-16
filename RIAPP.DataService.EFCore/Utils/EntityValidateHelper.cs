@@ -23,14 +23,14 @@ namespace RIAPP.DataService.EFCore.Utils
                                                                                                 || e.State == EntityState.Modified
                                                                                             select e;
 
-            Dictionary<object, object> items = new Dictionary<object, object>();
+            Dictionary<object, object> items = [];
             StringBuilder sb = new StringBuilder();
 
             foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry entry in entries)
             {
                 object entity = entry.Entity;
                 ValidationContext validationContext = new ValidationContext(entity, domainService.ServiceContainer.ServiceProvider, items);
-                List<ValidationResult> results = new List<ValidationResult>();
+                List<ValidationResult> results = [];
 
                 if (Validator.TryValidateObject(entity, validationContext, results, true) == false)
                 {

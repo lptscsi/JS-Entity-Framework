@@ -27,7 +27,7 @@ namespace AngularTest
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            
+
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/my-workspace/dist/ClientApp";
@@ -73,7 +73,8 @@ namespace AngularTest
                 validUser.AddIdentity(bearerIdentity);
 
                 return validUser;
-            };
+            }
+            ;
             #endregion
 
             services.AddSingleton<ICodeGenConfig, CodeGenConfig>();
