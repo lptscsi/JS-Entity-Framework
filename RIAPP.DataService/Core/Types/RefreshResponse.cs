@@ -3,10 +3,10 @@
 
     public class RefreshResponse
     {
-        public string dbSetName { get; set; }
+        public string DbSetName { get; set; }
 
-        public RowInfo rowInfo { get; set; }
+        public RowInfo RowInfo { get; set; }
 
-        public ErrorInfo error { get; set; }
+        public ErrorInfo Error { get; set; }
     }
 }

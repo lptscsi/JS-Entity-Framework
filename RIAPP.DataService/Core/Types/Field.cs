@@ -5,7 +5,7 @@ using System.Linq;
 namespace RIAPP.DataService.Core.Types
 {
     /// <summary>
-    ///     Stores field description (it's attributes)
+    /// Stores field description (it's attributes)
     /// </summary>
     public class Field
     {
@@ -16,7 +16,7 @@ namespace RIAPP.DataService.Core.Types
         {
             _nested = new Lazy<FieldsList>(() => fieldType == FieldType.Object ? new FieldsList() : null, true);
             _nestedInResultFields = new Lazy<Field[]>(() => fieldType == FieldType.Object
-                            ? [.. nested.Where(f => f.GetIsIncludeInResult()).OrderBy(f => f.GetOrdinal())]
+                            ? nested.Where(f => f.GetIsIncludeInResult()).OrderBy(f => f.GetOrdinal()).ToArray()
                             : new Field[0], true);
             isPrimaryKey = 0;
             dataType = DataType.None;

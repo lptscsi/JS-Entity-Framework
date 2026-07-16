@@ -27,7 +27,7 @@ namespace RIAPP.DataService.Core.Security
         public static MethodAuthorization GetMethodAuthorization(this MethodInfoData method)
         {
             object[] attr = method.MethodInfo.GetCustomAttributes(false);
-            MethodAuthorization methodAuthorization = new()
+            MethodAuthorization methodAuthorization = new MethodAuthorization
             {
                 MethodName = method.MethodInfo.Name,
                 AuthorizeData = Enumerable.Empty<IAuthorizeData>(),
@@ -40,7 +40,7 @@ namespace RIAPP.DataService.Core.Security
                 return methodAuthorization;
             }
 
-            IAuthorizeData[] attributes = [.. attr.Where(a => a is IAuthorizeData).Cast<IAuthorizeData>()];
+            IAuthorizeData[] attributes = attr.Where(a => a is IAuthorizeData).Cast<IAuthorizeData>().ToArray();
 
             // the override attribute replaces all authorization for the method
             IEnumerable<IOverrideAuthorize> overrides = attributes.OfType<IOverrideAuthorize>();
@@ -64,7 +64,7 @@ namespace RIAPP.DataService.Core.Security
         {
             object[] attr = managerType.GetCustomAttributes(false);
 
-            DataManagerAuthorization managerAuthorization = new()
+            DataManagerAuthorization managerAuthorization = new DataManagerAuthorization
             {
                 ManagerType = managerType,
                 AuthorizeData = Enumerable.Empty<IAuthorizeData>(),
@@ -78,7 +78,7 @@ namespace RIAPP.DataService.Core.Security
                 return managerAuthorization;
             }
 
-            IAuthorizeData[] attributes = [.. attr.Where(a => a is IAuthorizeData).Cast<IAuthorizeData>()];
+            IAuthorizeData[] attributes = attr.Where(a => a is IAuthorizeData).Cast<IAuthorizeData>().ToArray();
 
             // the override attribute replaces all higher and the current authorization
             IEnumerable<IOverrideAuthorize> overrides = attributes.OfType<IOverrideAuthorize>();
@@ -100,7 +100,7 @@ namespace RIAPP.DataService.Core.Security
 
         public static IEnumerable<IAuthorizeData> GetTypeAuthorization(this Type instanceType)
         {
-            IAuthorizeData[] attributes = [.. instanceType.GetCustomAttributes(false).Where(a => a is IAuthorizeData).Cast<IAuthorizeData>()];
+            IAuthorizeData[] attributes = instanceType.GetCustomAttributes(false).Where(a => a is IAuthorizeData).Cast<IAuthorizeData>().ToArray();
 
             // the override attribute replaces all authorization
             IEnumerable<IOverrideAuthorize> overrides = attributes.OfType<IOverrideAuthorize>();
@@ -114,14 +114,14 @@ namespace RIAPP.DataService.Core.Security
 
         private static IEnumerable<DataManagerAuthorization> _GetDataManagersAuthorization(IEnumerable<MethodInfoData> methods)
         {
-            MethodInfoData[] selectedMethods = [.. methods.Where(m => m.IsInDataManager)];
+            MethodInfoData[] selectedMethods = methods.Where(m => m.IsInDataManager).ToArray();
             if (!selectedMethods.Any())
             {
                 return Enumerable.Empty<DataManagerAuthorization>();
             }
 
-            Dictionary<Type, DataManagerAuthorization> authorizationDict = new();
-            Dictionary<Type, Dictionary<string, MethodAuthorization>> ownerMethodAuthorizationDict = new();
+            Dictionary<Type, DataManagerAuthorization> authorizationDict = new Dictionary<Type, DataManagerAuthorization>();
+            Dictionary<Type, Dictionary<string, MethodAuthorization>> ownerMethodAuthorizationDict = new Dictionary<Type, Dictionary<string, MethodAuthorization>>();
 
             foreach (MethodInfoData method in selectedMethods)
             {
@@ -146,21 +146,21 @@ namespace RIAPP.DataService.Core.Security
 
             foreach (Type ownerType in authorizationDict.Keys)
             {
-                authorizationDict[ownerType].MethodsAuthorization = [.. ownerMethodAuthorizationDict[ownerType].Values];
+                authorizationDict[ownerType].MethodsAuthorization = ownerMethodAuthorizationDict[ownerType].Values.ToArray();
             }
 
-            return [.. authorizationDict.Values];
+            return authorizationDict.Values.ToArray();
         }
 
         private static IEnumerable<MethodAuthorization> _GetMethodsAuthorization(IEnumerable<MethodInfoData> methods)
         {
-            MethodInfoData[] selectedMethods = [.. methods.Where(m => !m.IsInDataManager)];
+            MethodInfoData[] selectedMethods = methods.Where(m => !m.IsInDataManager).ToArray();
             if (!selectedMethods.Any())
             {
                 return Enumerable.Empty<MethodAuthorization>();
             }
 
-            Dictionary<string, MethodAuthorization> methodAuthorizationDict = new();
+            Dictionary<string, MethodAuthorization> methodAuthorizationDict = new Dictionary<string, MethodAuthorization>();
 
             foreach (MethodInfoData method in selectedMethods)
             {
@@ -171,7 +171,7 @@ namespace RIAPP.DataService.Core.Security
                 }
             }
 
-            return [.. methodAuthorizationDict.Values];
+            return methodAuthorizationDict.Values.ToArray();
         }
 
         public static AuthorizationTree GetAuthorizationTree(this IEnumerable<IAuthorizeData> serviceAuthorization, IEnumerable<MethodInfoData> methods)
@@ -187,7 +187,7 @@ namespace RIAPP.DataService.Core.Security
         public static MethodInfoData GetCRUDMethodInfo(this RowInfo rowInfo, RunTimeMetadata metadata, string dbSetName)
         {
             MethodInfoData method = null;
-            switch (rowInfo.changeType)
+            switch (rowInfo.ChangeType)
             {
                 case ChangeType.Added:
                     method = metadata.GetOperationMethodInfo(dbSetName, MethodType.Insert);
@@ -200,7 +200,7 @@ namespace RIAPP.DataService.Core.Security
                     break;
                 default:
                     throw new DomainServiceException(string.Format(ErrorStrings.ERR_REC_CHANGETYPE_INVALID, dbSetName,
-                        rowInfo.changeType));
+                        rowInfo.ChangeType));
             }
             return method;
         }
@@ -215,11 +215,11 @@ namespace RIAPP.DataService.Core.Security
         {
             return new DbSetPermit()
             {
-                dbSetName = dbSetName,
-                canAddRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Insert),
-                canEditRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Update),
-                canDeleteRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Delete),
-                canRefreshRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Refresh)
+                DbSetName = dbSetName,
+                CanAddRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Insert),
+                CanEditRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Update),
+                CanDeleteRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Delete),
+                CanRefreshRow = await authorizer.CanAccessOperation(metadata, dbSetName, MethodType.Refresh)
             };
         }
     }

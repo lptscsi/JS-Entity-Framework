@@ -33,7 +33,7 @@ namespace RIAPP.DataService.Core
         public IEnumerable<Row> CreateDistinctRows()
         {
             // map by PK
-            HashSet<string> keys = new();
+            HashSet<string> keys = new HashSet<string>();
             foreach (object entity in _dataSource)
             {
                 Row row = CreateRow(entity);

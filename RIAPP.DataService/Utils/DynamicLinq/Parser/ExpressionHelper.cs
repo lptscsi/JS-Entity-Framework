@@ -482,7 +482,7 @@ internal class ExpressionHelper : IExpressionHelper
         if (input != null && input.Cast<object>().Any())
         {
             // ReSharper disable once PossibleMultipleEnumeration
-            return [.. input.Cast<object>()];
+            return input.Cast<object>().ToArray();
         }
 
         return new object[0];

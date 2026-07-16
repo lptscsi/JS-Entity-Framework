@@ -10,21 +10,19 @@ export { createWeakMap } from "./jriapp_shared/utils/weakmap";
 export { STRS as LocaleSTRS, ERRS as LocaleERRS } from "./lang";
 
 export { BaseCollection } from "./jriapp_shared/collection/base";
+export * from "./jriapp_shared/collection/int";
 export { CollectionItem } from "./jriapp_shared/collection/item";
 export { ItemAspect } from "./jriapp_shared/collection/aspect";
 export * from "./jriapp_shared/collection/const";
-export { ListItemAspect, ListItem, BaseList } from "./jriapp_shared/collection/list";
-export type { IListItem } from "./jriapp_shared/collection/list";
+export { ListItemAspect, ListItem, IListItem, BaseList } from "./jriapp_shared/collection/list";
 export { BaseDictionary } from "./jriapp_shared/collection/dictionary";
 export { ValidationError } from "./jriapp_shared/errors";
 
 export * from "./jriapp_shared/utils/ipromise";
 export { StatefulPromise, AbortablePromise, CancellationTokenSource } from "./jriapp_shared/utils/promise";
 export { Utils } from "./jriapp_shared/utils/utils";
-export { WaitQueue } from "./jriapp_shared/utils/waitqueue";
-export type { IWaitQueueItem } from "./jriapp_shared/utils/waitqueue";
+export { WaitQueue, IWaitQueueItem } from "./jriapp_shared/utils/waitqueue";
 export { Debounce } from "./jriapp_shared/utils/debounce";
-export { Lazy } from "./jriapp_shared/utils/lazy";
-export type { TValueFactory } from "./jriapp_shared/utils/lazy";
+export { Lazy, TValueFactory } from "./jriapp_shared/utils/lazy";
 export * from "./jriapp_shared/utils/binding/binding";
 export * from "./jriapp_shared/utils/binding/int";

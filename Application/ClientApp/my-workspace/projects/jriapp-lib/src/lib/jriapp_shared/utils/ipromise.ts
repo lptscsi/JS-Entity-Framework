@@ -1,5 +1,5 @@
 ﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-export enum PromiseState { Pending, ResolutionInProgress, Resolved, Rejected }
+export const enum PromiseState { Pending, ResolutionInProgress, Resolved, Rejected }
 
 export interface IPromiseState {
     state(): PromiseState;

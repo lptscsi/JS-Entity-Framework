@@ -59,7 +59,7 @@ namespace RIAPP.DataService.Core
 
         #region Private Fields
 
-        private readonly Lazy<dynamic> _dataBag = new(() => new ExpandoObject(), true);
+        private readonly Lazy<dynamic> _dataBag = new Lazy<dynamic>(() => new ExpandoObject(), true);
 
         #endregion
 
@@ -67,24 +67,24 @@ namespace RIAPP.DataService.Core
 
         object IEntityVersionProvider.GetOriginal()
         {
-            return DataService.ServiceContainer.ServiceHelper.GetOriginalEntity(CurrentRowInfo);
+            return DataService.ServiceContainer.EntityVersionHelper.GetOriginalEntity(CurrentRowInfo);
         }
 
         public object GetParent(Type entityType)
         {
-            return DataService.ServiceContainer.ServiceHelper.GetParentEntity(entityType, CurrentRowInfo);
+            return DataService.ServiceContainer.EntityVersionHelper.GetParentEntity(entityType, CurrentRowInfo);
         }
 
         public TModel GetOriginal<TModel>()
             where TModel : class
         {
-            return DataService.ServiceContainer.ServiceHelper.GetOriginalEntity<TModel>(CurrentRowInfo);
+            return DataService.ServiceContainer.EntityVersionHelper.GetOriginalEntity<TModel>(CurrentRowInfo);
         }
 
         public TModel GetParent<TModel>()
             where TModel : class
         {
-            return DataService.ServiceContainer.ServiceHelper.GetParentEntity<TModel>(CurrentRowInfo);
+            return DataService.ServiceContainer.EntityVersionHelper.GetParentEntity<TModel>(CurrentRowInfo);
         }
 
         #endregion

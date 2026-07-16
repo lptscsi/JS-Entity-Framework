@@ -46,13 +46,13 @@ namespace RIAPP.DataService.Core.Metadata
         /// </summary>
         public static MethodDescription FromMethodInfo(MethodInfoData data, IValueConverter valueConverter)
         {
-            MethodDescription methDescription = new(data);
+            MethodDescription methDescription = new MethodDescription(data);
             //else Result is Converted to JSON
             System.Reflection.ParameterInfo[] paramsInfo = data.MethodInfo.GetParameters();
             for (int i = 0; i < paramsInfo.Length; ++i)
             {
                 ParamMetadata param = ParamMetadata.FromParamInfo(paramsInfo[i], valueConverter);
-                param.ordinal = i;
+                param.Ordinal = i;
                 methDescription.parameters.Add(param);
             }
             return methDescription;

@@ -1,6 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
-using System.Collections.Generic;
 
 namespace System.Linq.Dynamic.Core;
 
@@ -54,7 +54,7 @@ internal class DefaultAssemblyHelper : IAssemblyHelper
             }
         }
 
-        return [.. loadedAssemblies];
+        return loadedAssemblies.ToArray();
 #endif
     }
 }

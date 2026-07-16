@@ -5,7 +5,7 @@ export interface IConverter {
   convertToTarget(val: any, param: any): any;
 }
 
-const utils = Utils, { isNt, isNumber } = utils.check, { format, stripNonNumeric, formatNumber } = utils.str,
+const utils = Utils, { isNt, isNumber, isDate, isString } = utils.check, { format, stripNonNumeric, formatNumber } = utils.str,
     { round } = utils.core, { strToDate, dateToStr } = utils.dates;
 
 export const NUM_CONV = { None: 0, Integer: 1, Decimal: 2, Float: 3, SmallInt: 4 };
@@ -43,6 +43,9 @@ export const dateConverter = new DateConverter();
 
 export class DateTimeConverter implements IConverter {
   convertToSource(val: string, param: string): Date {
+    if (!isString(val)) {
+      return val as any;
+    }
     const res = strToDate(val, param);
     return res;
   }
@@ -57,44 +60,47 @@ export class DateTimeConverter implements IConverter {
 export const dateTimeConverter = new DateTimeConverter();
 
 export class NumberConverter implements IConverter {
-    convertToSource(val: any, param: any): number {
-        if (isNt(val)) {
-            return null;
-        }
-        const dp = decimalPoint;
-        let prec = 4;
-        let value = val.replace(thousandSep, "");
-        value = value.replace(dp, ".");
-        value = stripNonNumeric(value);
-        if (value === "") {
-            return null;
-        }
-        let num: number = null;
-        switch (param) {
-            case NUM_CONV.SmallInt:
-                num = parseInt(value, 10);
-                break;
-            case NUM_CONV.Integer:
-                num = parseInt(value, 10);
-                break;
-            case NUM_CONV.Decimal:
-                prec = decPrecision;
-                num = round(parseFloat(value), prec);
-                break;
-            case NUM_CONV.Float:
-                num = parseFloat(value);
-                break;
-            default:
-                num = Number(value);
-                break;
-        }
-
-      if (!isNumber(num)) {
-        throw new Error("Invalid number" + num);
-      }
-        return num;
+  convertToSource(val: any, param: any): number {
+    if (isNt(val)) {
+      return null;
     }
-    convertToTarget(val: any, param: any): string {
+    if (!isString(val)) {
+      return val as any;
+    }
+    const dp = decimalPoint;
+    let prec = 4;
+    let value = val.replace(thousandSep, "");
+    value = value.replace(dp, ".");
+    value = stripNonNumeric(value);
+    if (value === "") {
+      return null;
+    }
+    let num: number = null;
+    switch (param) {
+      case NUM_CONV.SmallInt:
+        num = parseInt(value, 10);
+        break;
+      case NUM_CONV.Integer:
+        num = parseInt(value, 10);
+        break;
+      case NUM_CONV.Decimal:
+        prec = decPrecision;
+        num = round(parseFloat(value), prec);
+        break;
+      case NUM_CONV.Float:
+        num = parseFloat(value);
+        break;
+      default:
+        num = Number(value);
+        break;
+    }
+
+    if (!isNumber(num)) {
+      throw new Error("Invalid number" + num);
+    }
+    return num;
+  }
+  convertToTarget(val: any, param: any): string {
         if (isNt(val)) {
             return "";
         }

@@ -24,16 +24,16 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
         private async Task<bool> ValidateRows(CRUDContext<TService> ctx, ChangeSetRequest changeSet, RunTimeMetadata metadata, IEnumerable<RowInfo> rows)
         {
             TService service = ctx.Service;
-            IServiceOperationsHelper<TService> serviceHelper = ctx.ServiceContainer.GetServiceHelper();
+            IServiceOperations<TService> serviceHelper = ctx.ServiceContainer.GetServiceOperations<TService>();
 
             foreach (RowInfo rowInfo in rows)
             {
                 RequestContext req = CRUDContext<TService>.CreateRequestContext(service, changeSet, rowInfo);
-                using (RequestCallContext callContext = new(req))
+                using (RequestCallContext callContext = new RequestCallContext(req))
                 {
                     if (!await serviceHelper.ValidateEntity(metadata, req))
                     {
-                        rowInfo.invalid = rowInfo.GetChangeState().ValidationErrors;
+                        rowInfo.Invalid = rowInfo.GetChangeState().ValidationErrors;
                         return false;
                     }
                 }

@@ -10,7 +10,7 @@ namespace RIAPP.DataService.Utils.Extensions
         public static bool RemoveService<TService>(this IServiceCollection services)
            where TService : class
         {
-            ServiceDescriptor[] toRemove = [.. services.Where(sd => sd.ServiceType == typeof(TService))];
+            ServiceDescriptor[] toRemove = services.Where(sd => sd.ServiceType == typeof(TService)).ToArray();
             Array.ForEach(toRemove, sd => services.Remove(sd));
             return toRemove.Length > 0;
         }

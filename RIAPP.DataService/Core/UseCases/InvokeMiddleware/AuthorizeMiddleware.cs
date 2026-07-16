@@ -19,7 +19,7 @@ namespace RIAPP.DataService.Core.UseCases.InvokeMiddleware
             Security.IAuthorizer<TService> authorizer = ctx.ServiceContainer.GetAuthorizer();
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
 
-            MethodDescription method = metadata.GetInvokeMethod(ctx.Request.methodName);
+            MethodDescription method = metadata.GetInvokeMethod(ctx.Request.MethodName);
             await authorizer.CheckUserRightsToExecute(method.GetMethodData());
 
             await _next(ctx);

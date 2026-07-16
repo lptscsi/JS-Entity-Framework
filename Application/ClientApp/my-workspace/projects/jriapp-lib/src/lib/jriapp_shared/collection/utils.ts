@@ -1,6 +1,6 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { ERRS } from "../../lang";
-import { DATA_TYPE, FIELD_TYPE } from "../collection/const";
+import { DATA_TYPE } from "../collection/const";
 import { IFieldInfo } from "../collection/int";
 import { Utils } from "../utils/utils";
 import { IValueUtils } from "./int";
@@ -58,9 +58,9 @@ export const ValueUtils: IValueUtils = {
             return false;
         }
         switch (dataType) {
-            case DATA_TYPE.DateTime:
-            case DATA_TYPE.Date:
-            case DATA_TYPE.Time:
+            case 'DateTime':
+            case 'Date':
+            case 'Time':
                 return (isDate(v1) && isDate(v2)) ? (v1.getTime() === v2.getTime()) : false;
             default:
                 return v1 === v2;
@@ -86,40 +86,40 @@ export const ValueUtils: IValueUtils = {
         };
         let isOK = false;
         switch (dataType) {
-            case DATA_TYPE.None:
+            case 'None':
                 res = conv(v);
                 isOK = true;
                 break;
-            case DATA_TYPE.String:
-            case DATA_TYPE.Guid:
+            case 'String':
+            case 'Guid':
                 if (isString(v)) {
                     res = v;
                     isOK = true;
                 }
                 break;
-            case DATA_TYPE.Bool:
+            case 'Bool':
                 if (isBoolean(v)) {
                     res = JSON.stringify(v);
                     isOK = true;
                 }
                 break;
-            case DATA_TYPE.Integer:
-            case DATA_TYPE.Decimal:
-            case DATA_TYPE.Float:
+            case 'Integer':
+            case 'Decimal':
+            case 'Float':
                 if (isNumber(v)) {
                     res = JSON.stringify(v);
                     isOK = true;
                 }
                 break;
-            case DATA_TYPE.DateTime:
-            case DATA_TYPE.Date:
-            case DATA_TYPE.Time:
+            case 'DateTime':
+            case 'Date':
+            case 'Time':
                 if (isDate(v)) {
                     res = ValueUtils.dateToValue(v);
                     isOK = true;
                 }
                 break;
-            case DATA_TYPE.Binary:
+            case 'Binary':
                 if (isArray(v)) {
                     res = JSON.stringify(v);
                     isOK = true;
@@ -141,29 +141,29 @@ export const ValueUtils: IValueUtils = {
             return res;
         }
         switch (dataType) {
-            case DATA_TYPE.None:
+            case 'None':
                 res = v;
                 break;
-            case DATA_TYPE.String:
-            case DATA_TYPE.Guid:
+            case 'String':
+            case 'Guid':
                 res = v;
                 break;
-            case DATA_TYPE.Bool:
+            case 'Bool':
                 res = parseBool(v);
                 break;
-            case DATA_TYPE.Integer:
+            case 'Integer':
                 res = parseInt(v, 10);
                 break;
-            case DATA_TYPE.Decimal:
-            case DATA_TYPE.Float:
+            case 'Decimal':
+            case 'Float':
                 res = parseFloat(v);
                 break;
-            case DATA_TYPE.DateTime:
-            case DATA_TYPE.Date:
-            case DATA_TYPE.Time:
+            case 'DateTime':
+            case 'Date':
+            case 'Time':
                 res = ValueUtils.valueToDate(v);
                 break;
-            case DATA_TYPE.Binary:
+            case 'Binary':
                 res = JSON.parse(v);
                 break;
             default:
@@ -177,7 +177,7 @@ export const ValueUtils: IValueUtils = {
 export type WalkFieldCB<T> = (fld: IFieldInfo, name: string, parentRes?: T) => T;
 
 export function fn_walkField<T>(fldName: string, fld: IFieldInfo, cb: WalkFieldCB<T>, parentRes?: T): void {
-    if (fld.fieldType === FIELD_TYPE.Object) {
+    if (fld.fieldType === 'Object') {
         const res = cb(fld, fldName, parentRes);
 
         // for object fields traverse their nested fields
@@ -186,7 +186,7 @@ export function fn_walkField<T>(fldName: string, fld: IFieldInfo, cb: WalkFieldC
             const len = fld.nested.length;
             for (let i = 0; i < len; i += 1) {
                 nestedFld = fld.nested[i];
-                if (nestedFld.fieldType === FIELD_TYPE.Object) {
+                if (nestedFld.fieldType === 'Object') {
                     fn_walkField(fldName + "." + nestedFld.fieldName, nestedFld, cb, res);
                 } else {
                     cb(nestedFld, fldName + "." + nestedFld.fieldName, res);
@@ -229,10 +229,10 @@ export const CollUtils = {
     },
     initVals: function (flds: IFieldInfo[], vals: any): any {
         CollUtils.walkFields(flds, (fld, fullName) => {
-            if (fld.fieldType === FIELD_TYPE.Object) {
+            if (fld.fieldType === 'Object') {
                 setValue(vals, fullName, {});
             } else {
-                if (!(fld.fieldType === FIELD_TYPE.Navigation || fld.fieldType === FIELD_TYPE.Calculated)) {
+                if (!(fld.fieldType === 'Navigation' || fld.fieldType === 'Calculated')) {
                     setValue(vals, fullName, null);
                 }
             }
@@ -241,10 +241,10 @@ export const CollUtils = {
     },
     copyVals: function (flds: IFieldInfo[], from: any, to: any): any {
         CollUtils.walkFields(flds, (fld, fullName) => {
-            if (fld.fieldType === FIELD_TYPE.Object) {
+            if (fld.fieldType === 'Object') {
                 setValue(to, fullName, {});
             } else {
-                if (!(fld.fieldType === FIELD_TYPE.Navigation || fld.fieldType === FIELD_TYPE.Calculated)) {
+                if (!(fld.fieldType === 'Navigation' || fld.fieldType === 'Calculated')) {
                     const value = getValue(from, fullName);
                     setValue(to, fullName, value);
                 }

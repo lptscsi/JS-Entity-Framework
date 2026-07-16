@@ -25,11 +25,11 @@ namespace RIAPP.DataService.Core
 
         public async Task<bool> Handle(InvokeRequest message, IOutputPort<InvokeResponse> outputPort)
         {
-            InvokeResponse response = new();
+            InvokeResponse response = new InvokeResponse();
 
             try
             {
-                InvokeContext<TService> context = new(message,
+                InvokeContext<TService> context = new InvokeContext<TService>(message,
                  response,
                  (TService)_service,
                  _serviceContainer);
@@ -44,7 +44,7 @@ namespace RIAPP.DataService.Core
                 }
 
                 string err = _onError(ex);
-                response.error = new ErrorInfo(err, ex.GetType().Name);
+                response.Error = new ErrorInfo(err, ex.GetType().Name);
             }
 
             outputPort.Handle(response);

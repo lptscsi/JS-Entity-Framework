@@ -48,7 +48,7 @@ export interface IPropertyBag extends IBaseObject {
   isPropertyBag: boolean;
 }
 
-export enum TPriority {
+export const enum TPriority {
   Normal = 0, AboveNormal = 1, High = 2
 }
 

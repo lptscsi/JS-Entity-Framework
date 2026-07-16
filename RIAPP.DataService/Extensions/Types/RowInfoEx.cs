@@ -14,8 +14,8 @@ namespace RIAPP.DataService.Core.Types
             object[] result = new object[finfos.Length];
             for (int i = 0; i < finfos.Length; ++i)
             {
-                ValueChange fv = rowInfo.values.Single(v => v.fieldName == finfos[i].fieldName);
-                result[i] = dataHelper.DeserializeField(entityType, finfos[i], fv.val);
+                ValueChange fv = rowInfo.Values.Single(v => v.FieldName == finfos[i].fieldName);
+                result[i] = dataHelper.DeserializeField(entityType, finfos[i], fv.Val);
             }
             return result;
         }
@@ -24,7 +24,7 @@ namespace RIAPP.DataService.Core.Types
         {
             DbSetInfo dbSetInfo = rowInfo.GetDbSetInfo();
             Field[] pkFieldsInfo = dbSetInfo.GetPKFields();
-            StringBuilder sb = new();
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < pkFieldsInfo.Length; ++i)
             {
                 if (i > 0)
@@ -43,8 +43,8 @@ namespace RIAPP.DataService.Core.Types
             string[] vals = new string[finfos.Length];
             for (int i = 0; i < finfos.Length; ++i)
             {
-                ValueChange fv = rowInfo.values.Single(v => v.fieldName == finfos[i].fieldName);
-                vals[i] = fv.val;
+                ValueChange fv = rowInfo.Values.Single(v => v.FieldName == finfos[i].fieldName);
+                vals[i] = fv.Val;
             }
             return string.Join(";", vals);
         }

@@ -1,0 +1,23 @@
+<div class="content" *ngIf="initialized$ | async as ok; else loading">
+  <div>
+    <div style="padding: 5px; background-color:aqua;">
+      folders count: {{count$ | async}}
+    </div>
+    <ul>
+      <li *ngFor='let item of  items$ | async'>
+        <span [ngClass]="{ 'hasSubDirs' : item.HasSubDirs }" (click)="onItemClicked($event, item)">{{item.Name}}</span>
+        <ul>
+          <li *ngFor='let child of item.exProp.items$ | async'>
+            <span (click)="onItemClicked($event, child)">{{child.Name}}</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+  
+  <ng-template #loading>
+    <div class="content" role="main">
+      Loading stuff...
+    </div>
+  </ng-template>

@@ -57,10 +57,7 @@
             "styles": [
               "projects/client-app/src/styles.scss"
             ],
-            "scripts": [
-              "projects/client-app/src/assets/js/dayjs/dayjs.min.js",
-              "projects/client-app/src/assets/js/dayjs/customParseFormat.min.js"
-            ],
+            "scripts": [],
             "vendorChunk": true,
             "extractLicenses": false,
             "buildOptimizer": false,

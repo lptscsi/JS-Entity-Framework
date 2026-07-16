@@ -29,7 +29,7 @@ export class ExProps extends RIAPP.BaseObject {
       this._childView = this.createChildView();
     }
     this._clickTimeOut = null;
-    this._dbSet = item._aspect.dbSet as unknown as FOLDERBROWSER_SVC.FileSystemObjectDb;
+    this._dbSet = <FOLDERBROWSER_SVC.FileSystemObjectDb>item._aspect.dbSet;
   }
   toggle(): void {
     const self = this;
@@ -95,7 +95,7 @@ export class ExProps extends RIAPP.BaseObject {
     });
 
     //explicit refresh with no async
-    dvw.syncRefresh();
+    dvw.refreshSync();
     return dvw;
   }
   loadChildren() {
@@ -104,7 +104,7 @@ export class ExProps extends RIAPP.BaseObject {
     let promise = query.load();
     return promise;
   }
-  override dispose() {
+  dispose() {
     if (this.getIsDisposed())
       return;
     this.setDisposing();

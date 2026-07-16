@@ -1,7 +1,7 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { BaseError, Utils } from "../jriapp_shared";
-import { IEntityItem } from "./int";
 import { DATA_OPER } from "./const";
+import { IEntityItem } from "./int";
 
 const { format } = Utils.str;
 
@@ -40,7 +40,7 @@ export class SubmitError extends DataOperationError {
 
     constructor(origError: any, allSubmitted: IEntityItem[], notValidated: IEntityItem[]) {
         let message = origError.message || ("" + origError);
-        super(origError, DATA_OPER.Submit);
+        super(origError, 'Submit');
         this._origError = origError;
         this._allSubmitted = allSubmitted || [];
         this._notValidated = notValidated || [];

@@ -59,7 +59,7 @@ namespace Pipeline.Extensions
             RequestDelegate<TContext> branch = branchBuilder.Build();
 
             // put middleware in pipeline
-            MapWhenOptions<TContext> options = new()
+            MapWhenOptions<TContext> options = new MapWhenOptions<TContext>
             {
                 Predicate = predicate,
                 Branch = branch,

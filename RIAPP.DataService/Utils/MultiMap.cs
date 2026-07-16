@@ -8,7 +8,7 @@ namespace RIAPP.DataService.Utils
     public class MultiMap<K, V> : IMultiMap<K, V>
     {
         private readonly ConcurrentDictionary<K, IEnumerable<V>> _dictionary =
-            new();
+            new ConcurrentDictionary<K, IEnumerable<V>>();
 
         private volatile bool _isReadOnly;
 
@@ -38,7 +38,7 @@ namespace RIAPP.DataService.Utils
             get
             {
                 ICollection<IEnumerable<V>> lists = _dictionary.Values;
-                List<V> res = new();
+                List<V> res = new List<V>();
                 foreach (IEnumerable<V> list in lists)
                 {
                     foreach (V val in list)
@@ -68,10 +68,10 @@ namespace RIAPP.DataService.Utils
                 }
 
                 _isReadOnly = true;
-                List<K> keys = [.. Keys];
+                List<K> keys = Keys.ToList();
                 keys.ForEach(k =>
                 {
-                    V[] vals = [.. _dictionary[k]];
+                    V[] vals = _dictionary[k].ToArray();
                     _dictionary[k] = vals;
                 });
             }

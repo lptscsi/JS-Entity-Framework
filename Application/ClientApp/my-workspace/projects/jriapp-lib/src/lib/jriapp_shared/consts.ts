@@ -1,15 +1,15 @@
 ﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-export enum DEBUG_LEVEL {
+export const enum DEBUG_LEVEL {
     NONE = 0, NORMAL = 1, HIGH = 2
 }
 
-export enum BRACKETS {
+export const enum BRACKETS {
     ROUND = 0,
     CURLY = 1,
     SQUARE = 2
 }
 
-export enum SIDE {
+export const enum SIDE {
     BOTH = 0,
     LEFT = 1,
     RIGHT = 2

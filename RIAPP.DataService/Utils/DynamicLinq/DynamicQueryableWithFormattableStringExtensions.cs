@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
+using JetBrains.Annotations;
 using System.Collections;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 
 namespace System.Linq.Dynamic.Core
 {

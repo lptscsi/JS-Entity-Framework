@@ -27,11 +27,11 @@ namespace RIAPP.DataService.Core
 
         public async Task<bool> Handle(ChangeSetRequest message, IOutputPort<ChangeSetResponse> outputPort)
         {
-            ChangeSetResponse response = new(message);
+            ChangeSetResponse response = new ChangeSetResponse(message);
 
             try
             {
-                CRUDContext<TService> context = new(message, response, (TService)_service, _serviceContainer);
+                CRUDContext<TService> context = new CRUDContext<TService>(message, response, (TService)_service, _serviceContainer);
                 context.Properties.Add(CRUDContext<TService>.CHANGE_METHODS_KEY, _serviceMethods);
 
                 await _pipeline(context);
@@ -44,12 +44,12 @@ namespace RIAPP.DataService.Core
                 }
 
                 string err = _serviceMethods.OnError(ex);
-                response.error = new ErrorInfo(err, ex.GetType().Name);
+                response.Error = new ErrorInfo(err, ex.GetType().Name);
             }
 
             outputPort.Handle(response);
 
-            return response.error == null;
+            return response.Error == null;
         }
     }
 }

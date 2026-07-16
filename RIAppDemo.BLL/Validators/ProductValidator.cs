@@ -19,7 +19,7 @@ namespace RIAppDemo.BLL.Validators
                 string name = (product["Name"] as string);
                 if (name.StartsWith("Ugly", StringComparison.OrdinalIgnoreCase))
                 {
-                    errors.AddLast(new ValidationErrorInfo { fieldName = "Name", message = "Ugly name" });
+                    errors.AddLast(new ValidationErrorInfo { FieldName = "Name", Message = "Ugly name" });
                 }
             }
 
@@ -30,8 +30,8 @@ namespace RIAppDemo.BLL.Validators
                 {
                     errors.AddLast(new ValidationErrorInfo
                     {
-                        fieldName = "Weight",
-                        message = "Weight must be less than 20000"
+                        FieldName = "Weight",
+                        Message = "Weight must be less than 20000"
                     });
                 }
             }
@@ -44,8 +44,8 @@ namespace RIAppDemo.BLL.Validators
                 {
                     errors.AddLast(new ValidationErrorInfo
                     {
-                        fieldName = "SellEndDate",
-                        message = "SellEndDate must be after SellStartDate"
+                        FieldName = "SellEndDate",
+                        Message = "SellEndDate must be after SellStartDate"
                     });
                 }
             }
@@ -57,8 +57,8 @@ namespace RIAppDemo.BLL.Validators
                 {
                     errors.AddLast(new ValidationErrorInfo
                     {
-                        fieldName = "SellStartDate",
-                        message = "SellStartDate must be prior today"
+                        FieldName = "SellStartDate",
+                        Message = "SellStartDate must be prior today"
                     });
                 }
             }
@@ -72,8 +72,8 @@ namespace RIAppDemo.BLL.Validators
                 {
                     errors.AddLast(new ValidationErrorInfo
                     {
-                        fieldName = "ModifiedDate",
-                        message = "ModifiedDate must be greater than the previous ModifiedDate"
+                        FieldName = "ModifiedDate",
+                        Message = "ModifiedDate must be greater than the previous ModifiedDate"
                     });
                 }
             }
@@ -85,8 +85,8 @@ namespace RIAppDemo.BLL.Validators
                 {
                     errors.AddLast(new ValidationErrorInfo
                     {
-                        fieldName = "ProductNumber",
-                        message = "ProductNumber must not start from 00"
+                        FieldName = "ProductNumber",
+                        Message = "ProductNumber must not start from 00"
                     });
                 }
             }

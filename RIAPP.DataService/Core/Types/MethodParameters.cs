@@ -15,18 +15,18 @@ namespace RIAPP.DataService.Core.Types
     {
         public MethodParameter()
         {
-            name = "";
-            value = null;
+            Name = "";
+            Value = null;
         }
 
 
         [Description("Parameter name")]
-        public string name { get; set; }
+        public string Name { get; set; }
 
 
 
         [Description("Parameter value as string")]
-        public string value { get; set; }
+        public string Value { get; set; }
     }
 
 
@@ -34,28 +34,28 @@ namespace RIAPP.DataService.Core.Types
     {
         public MethodParameters()
         {
-            parameters = new List<MethodParameter>();
+            Parameters = new List<MethodParameter>();
         }
 
 
-        public List<MethodParameter> parameters { get; set; }
+        public List<MethodParameter> Parameters { get; set; }
 
         public object GetValue(string name, MethodDescription methodDescription, IDataHelper dataHelper)
         {
-            MethodParameter par = parameters.Where(p => p.name == name).FirstOrDefault();
+            MethodParameter par = Parameters.Where(p => p.Name == name).FirstOrDefault();
             if (par == null)
             {
                 return null;
             }
 
-            ParamMetadata paraminfo = methodDescription.parameters.Where(p => p.name == name).FirstOrDefault();
+            ParamMetadata paraminfo = methodDescription.parameters.Where(p => p.Name == name).FirstOrDefault();
             if (paraminfo == null)
             {
                 throw new DomainServiceException(string.Format("Method: {0} has no parameter with a name: {1}",
                     methodDescription.methodName, name));
             }
-            return dataHelper.ParseParameter(paraminfo.GetParameterType(), paraminfo, paraminfo.isArray,
-                par.value);
+            return dataHelper.ParseParameter(paraminfo.GetParameterType(), paraminfo, paraminfo.IsArray,
+                par.Value);
         }
     }
 }

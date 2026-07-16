@@ -61,10 +61,10 @@ namespace Pipeline.Extensions
             return app.Use(next =>
             {
                 MethodInfo[] methods = middleware.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-                MethodInfo[] invokeMethods = [.. methods.Where(m =>
+                MethodInfo[] invokeMethods = methods.Where(m =>
                     string.Equals(m.Name, InvokeMethodName, StringComparison.Ordinal)
                     || string.Equals(m.Name, InvokeAsyncMethodName, StringComparison.Ordinal)
-                    )];
+                    ).ToArray();
 
                 if (invokeMethods.Length > 1)
                 {

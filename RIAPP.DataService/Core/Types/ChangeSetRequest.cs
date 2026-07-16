@@ -6,14 +6,14 @@
     {
         public ChangeSetRequest()
         {
-            dbSets = new DbSetList();
-            trackAssocs = new TrackAssocList();
+            DbSets = new DbSetList();
+            TrackAssocs = new TrackAssocList();
         }
 
 
-        public DbSetList dbSets { get; set; }
+        public DbSetList DbSets { get; set; }
 
 
-        public TrackAssocList trackAssocs { get; set; }
+        public TrackAssocList TrackAssocs { get; set; }
     }
 }

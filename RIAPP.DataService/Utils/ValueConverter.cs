@@ -8,10 +8,6 @@ using System.Globalization;
 
 namespace RIAPP.DataService.Utils
 {
-    /// <summary>
-    /// Конвертер типов данных
-    /// </summary>
-    /// <typeparam name="TService"></typeparam>
     public class ValueConverter<TService> : IValueConverter<TService>
         where TService : BaseDomainService
     {
@@ -36,7 +32,7 @@ namespace RIAPP.DataService.Utils
         public virtual object DeserializeField(Field fieldInfo, string value)
         {
             Type propType = TypeFromDataType(fieldInfo.dataType);
-    
+
             return DeserializeValue(propType, fieldInfo.dataType, fieldInfo.dateConversion, value);
         }
 
@@ -97,6 +93,8 @@ namespace RIAPP.DataService.Utils
             return result;
         }
 
+
+
         public virtual string SerializeField(Type propType, Field fieldInfo, object value)
         {
             if (value == null)
@@ -111,11 +109,13 @@ namespace RIAPP.DataService.Utils
             {
                 return converter(value, fieldInfo);
             }
+            /*
             else if (mainType.IsEnum)
             {
                 var val = Convert.ChangeType(value, Enum.GetUnderlyingType(mainType), CultureInfo.InvariantCulture);
                 return (string)Convert.ChangeType(val, typeof(string), CultureInfo.InvariantCulture);
             }
+            */
             else if (mainType.IsValueType)
             {
                 return (string)Convert.ChangeType(value, typeof(string), CultureInfo.InvariantCulture);
@@ -178,20 +178,7 @@ namespace RIAPP.DataService.Utils
 
         protected virtual object ConvertToNumber(string value, bool IsNullableType, Type propType, Type propMainType)
         {
-            if (value == null)
-            {
-                return null;
-            }
-
-            if (propMainType.IsEnum)
-            {
-                object enumVal = Convert.ChangeType(value, propMainType.GetEnumUnderlyingType(), CultureInfo.InvariantCulture);
-                return enumVal;
-            }
-            else
-            {
-                return Convert.ChangeType(value, propMainType, CultureInfo.InvariantCulture);
-            }
+            return value == null ? null : Convert.ChangeType(value, propMainType, CultureInfo.InvariantCulture);
 
             // commented, because no need to create nullable type here - on boxing it turns into ordinary value anyway
             // return (IsNullableType)? CreateGenericInstance(propType, propMainType, new[] { typedVal }): typedVal;

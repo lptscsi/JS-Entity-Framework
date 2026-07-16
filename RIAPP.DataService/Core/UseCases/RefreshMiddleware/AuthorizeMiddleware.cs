@@ -19,11 +19,11 @@ namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
 
         public async Task Invoke(RefreshContext<TService> ctx)
         {
-            DbSetInfo dbSetInfo = ctx.Request.GetDbSetInfo() ?? throw new InvalidOperationException($"Could not get the DbSet for {ctx.Request.dbSetName}");
+            DbSetInfo dbSetInfo = ctx.Request.GetDbSetInfo() ?? throw new InvalidOperationException($"Could not get the DbSet for {ctx.Request.DbSetName}");
             Security.IAuthorizer<TService> authorizer = ctx.ServiceContainer.GetAuthorizer();
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
 
-            MethodInfoData methodData = metadata.GetOperationMethodInfo(ctx.Request.dbSetName, MethodType.Refresh);
+            MethodInfoData methodData = metadata.GetOperationMethodInfo(ctx.Request.DbSetName, MethodType.Refresh);
             if (methodData == null)
             {
                 throw new InvalidOperationException(string.Format(ErrorStrings.ERR_REC_REFRESH_INVALID,

@@ -7,9 +7,7 @@
     "declarationMap": true,
     "inlineSources": true,
     "noImplicitOverride": true,
-    "types": [
-      "./src/typings" 
-    ],
+    "types": [],
     "lib": [
       "dom",
       "es2018"

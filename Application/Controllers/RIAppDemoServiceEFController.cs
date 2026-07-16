@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.Models;
+using Microsoft.AspNetCore.Mvc;
+using RIAPP.DataService.Core.Types;
 using RIAppDemo.BLL.DataServices;
 using RIAppDemo.Utils;
 using System.Threading.Tasks;
@@ -13,18 +15,16 @@ namespace RIAppDemo.Controllers
 
         }
 
+        [ActionName("static")]
         [HttpGet]
-        public async Task<string> ProductModelData()
+        public async Task<ActionResult> PreloadData()
         {
-            RIAPP.DataService.Core.Types.QueryResponse info = await DomainService.GetQueryData("ProductModel", "ReadProductModel");
-            return DomainService.Serializer.Serialize(info);
-        }
-
-        [HttpGet]
-        public async Task<string> ProductCategoryData()
-        {
-            RIAPP.DataService.Core.Types.QueryResponse info = await DomainService.GetQueryData("ProductCategory", "ReadProductCategory");
-            return DomainService.Serializer.Serialize(info);
+            StaticData res = new StaticData()
+            {
+                ProductModelData = await DomainService.GetQueryData("ProductModel", "ReadProductModel"),
+                ProductCategoryData = await DomainService.GetQueryData("ProductCategory", "ReadProductCategory")
+            };
+            return new ChunkedResult<StaticData>(res, DomainService.Serializer);
         }
     }
 }

@@ -99,7 +99,7 @@ namespace System.Linq.Dynamic.Core
         public static List<dynamic> ToDynamicList(this IEnumerable source, Type type)
 #endif
         {
-            return [.. ToDynamicArray(Check.NotNull(source), Check.NotNull(type))];
+            return ToDynamicArray(Check.NotNull(source), Check.NotNull(type)).ToList();
         }
 
         /// <summary>
@@ -115,12 +115,12 @@ namespace System.Linq.Dynamic.Core
 
         internal static T[] CastToArray<T>(IEnumerable source)
         {
-            return [.. source.Cast<T>()];
+            return source.Cast<T>().ToArray();
         }
 
         internal static List<T> CastToList<T>(IEnumerable source)
         {
-            return [.. source.Cast<T>()];
+            return source.Cast<T>().ToList();
         }
     }
 }

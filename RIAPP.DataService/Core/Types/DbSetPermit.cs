@@ -4,18 +4,18 @@
     public class DbSetPermit
     {
 
-        public string dbSetName { get; set; }
+        public string DbSetName { get; set; }
 
 
-        public bool canAddRow { get; set; }
+        public bool CanAddRow { get; set; }
 
 
-        public bool canEditRow { get; set; }
+        public bool CanEditRow { get; set; }
 
 
-        public bool canDeleteRow { get; set; }
+        public bool CanDeleteRow { get; set; }
 
 
-        public bool canRefreshRow { get; set; }
+        public bool CanRefreshRow { get; set; }
     }
 }

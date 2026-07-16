@@ -196,7 +196,7 @@ export class EventHelper {
 
       for (let i = 0; i < len; i++) {
         const node: TEventNode = arr[i];
-        const res: any = node.fn.apply(node.context, [sender, args]);
+        const res = node.fn.apply(node.context, [sender, args]);
         if (!!res && isThenable(res)) {
           await res as Promise<any>;
         }

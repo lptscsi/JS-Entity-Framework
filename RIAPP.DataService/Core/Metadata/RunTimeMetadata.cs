@@ -7,32 +7,41 @@ using System.Linq;
 
 namespace RIAPP.DataService.Core.Metadata
 {
-    /// <summary>
-    /// Метаданные используемые в процессе выполнения сервиса
-    /// </summary>
-    /// <param name="dbSets"></param>
-    /// <param name="dbSetsByEntityType"></param>
-    /// <param name="associations"></param>
-    /// <param name="svcMethods"></param>
-    /// <param name="operMethods"></param>
-    /// <param name="typeScriptImports"></param>
-    public class RunTimeMetadata(DbSetsDictionary dbSets,
-        ILookup<Type, DbSetInfo> dbSetsByEntityType,
-        AssociationsDictionary associations,
-        MethodMap svcMethods,
-        OperationalMethods operMethods,
-        string[] typeScriptImports)
+    public class RunTimeMetadata
     {
-        public string[] TypeScriptImports => typeScriptImports;
+        private readonly OperationalMethods _operMethods;
+        private readonly MethodMap _svcMethods;
+
+        public RunTimeMetadata(
+            DbSetInfoMap dbSets,
+            AssociationMap associations,
+            MethodMap svcMethods,
+            OperationalMethods operMethods,
+            string[] typeScriptImports)
+        {
+            DbSets = dbSets;
+            Associations = associations;
+            _svcMethods = svcMethods;
+            _operMethods = operMethods;
+            TypeScriptImports = typeScriptImports;
+        }
+
+        public string[] TypeScriptImports
+        {
+            get;
+        }
 
         /// <summary>
         /// Lookup table for <see cref="DbSetInfo"/> indexed by entity type
         /// </summary>
-        public ILookup<Type, DbSetInfo> DbSetsByEntityType => dbSetsByEntityType;
+        public ILookup<Type, DbSetInfo> DbSetsByEntityType
+        {
+            get;
+        }
 
         public MethodDescription GetQueryMethod(string dbSetName, string name)
         {
-            MethodDescription method = svcMethods.GetQueryMethod(dbSetName, name);
+            MethodDescription method = _svcMethods.GetQueryMethod(dbSetName, name);
             if (method == null)
             {
                 throw new DomainServiceException(string.Format(ErrorStrings.ERR_QUERY_NAME_INVALID, name));
@@ -42,31 +51,34 @@ namespace RIAPP.DataService.Core.Metadata
 
         public IEnumerable<MethodDescription> GetQueryMethods(string dbSetName)
         {
-            return svcMethods.GetQueryMethods(dbSetName);
+            return _svcMethods.GetQueryMethods(dbSetName);
         }
 
         public MethodDescription GetInvokeMethod(string name)
         {
-            MethodDescription method = svcMethods.GetInvokeMethod(name) ?? 
+            MethodDescription method = _svcMethods.GetInvokeMethod(name);
+            if (method == null)
+            {
                 throw new DomainServiceException(string.Format(ErrorStrings.ERR_METH_NAME_INVALID, name));
+            }
             return method;
         }
 
         public IEnumerable<MethodDescription> GetInvokeMethods()
         {
-            return svcMethods.GetInvokeMethods();
+            return _svcMethods.GetInvokeMethods();
         }
 
         public MethodInfoData GetOperationMethodInfo(string dbSetName, MethodType methodType)
         {
-            return operMethods.GetMethod(dbSetName, methodType);
+            return _operMethods.GetMethod(dbSetName, methodType);
         }
 
-        public DbSetsDictionary DbSets { get; } = dbSets;
+        public DbSetInfoMap DbSets { get; }
 
-        public AssociationsDictionary Associations { get; } = associations;
+        public AssociationMap Associations { get; }
 
-        public MethodsList MethodDescriptions => [.. svcMethods.Values];
+        public MethodsList MethodDescriptions => new MethodsList(_svcMethods.Values);
 
     }
 }

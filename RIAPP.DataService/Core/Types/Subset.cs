@@ -6,16 +6,12 @@ namespace RIAPP.DataService.Core.Types
     public class Subset
     {
         /// <summary>
-        ///     field names
+        /// field names
         /// </summary>
+        public IEnumerable<Column> Columns { get; set; }
 
-        public IEnumerable<FieldName> names { get; set; }
+        public IEnumerable<Row> Rows { get; set; }
 
-
-        public IEnumerable<Row> rows { get; set; }
-
-
-
-        public string dbSetName { get; set; }
+        public string DbSetName { get; set; }
     }
 }

@@ -21,41 +21,41 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
 
         public async Task Invoke(QueryContext<TService> ctx)
         {
-            DbSetInfo dbSetInfo = ctx.Request.GetDbSetInfo() ?? throw new InvalidOperationException($"Could not get the DbSet for {ctx.Request.dbSetName}");
+            DbSetInfo dbSetInfo = ctx.Request.GetDbSetInfo() ?? throw new InvalidOperationException($"Could not get the DbSet for {ctx.Request.DbSetName}");
             IDataHelper<TService> dataHelper = ctx.ServiceContainer.GetDataHelper();
             IServiceOperationsHelper<TService> serviceHelper = ctx.ServiceContainer.GetServiceHelper();
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
 
-            MethodDescription method = metadata.GetQueryMethod(ctx.Request.dbSetName, ctx.Request.queryName);
+            MethodDescription method = metadata.GetQueryMethod(ctx.Request.DbSetName, ctx.Request.QueryName);
 
-            LinkedList<object> methParams = new();
+            LinkedList<object> methParams = new LinkedList<object>();
 
             for (int i = 0; i < method.parameters.Count; ++i)
             {
-                methParams.AddLast(ctx.Request.paramInfo.GetValue(method.parameters[i].name, method, dataHelper));
+                methParams.AddLast(ctx.Request.ParamInfo.GetValue(method.parameters[i].Name, method, dataHelper));
             }
 
             RequestContext req = QueryContext<TService>.CreateRequestContext(ctx.Service, ctx.Request);
-            using (RequestCallContext callContext = new(req))
+            using (RequestCallContext callContext = new RequestCallContext(req))
             {
                 MethodInfoData methodData = method.GetMethodData();
-                object instance = serviceHelper.GetMethodOwner(methodData);
-                object invokeRes = methodData.MethodInfo.Invoke(instance, [.. methParams]);
-                QueryResult queryResult = (QueryResult)await serviceHelper.GetMethodResult(invokeRes);
+                object instance = serviceHelper.GetMethodOwner(dbSetInfo.dbSetName, methodData);
+                object invokeRes = methodData.MethodInfo.Invoke(instance, methParams.ToArray());
+                QueryResult queryResult = (QueryResult)await PropHelper.GetMethodResult(invokeRes);
 
                 IEnumerable<object> entities = queryResult.Result;
                 int? totalCount = queryResult.TotalCount;
-                RowGenerator rowGenerator = new(dbSetInfo, entities, dataHelper);
+                RowGenerator rowGenerator = new RowGenerator(dbSetInfo, entities, dataHelper);
                 IEnumerable<Row> rows = rowGenerator.CreateRows();
 
-                SubsetsGenerator subsetsGenerator = new(metadata, dataHelper);
-                SubsetList subResults = subsetsGenerator.CreateSubsets(queryResult.subResults);
+                SubsetsGenerator subsetsGenerator = new SubsetsGenerator(metadata, dataHelper);
+                SubsetList subResults = subsetsGenerator.CreateSubsets(queryResult.SubResults);
 
-                ctx.Response.names = dbSetInfo.GetNames();
-                ctx.Response.totalCount = totalCount;
-                ctx.Response.rows = rows;
-                ctx.Response.subsets = subResults;
-                ctx.Response.extraInfo = queryResult.extraInfo;
+                ctx.Response.Columns = dbSetInfo.GetColumns();
+                ctx.Response.TotalCount = totalCount;
+                ctx.Response.Rows = rows;
+                ctx.Response.Subsets = subResults;
+                ctx.Response.ExtraInfo = queryResult.ExtraInfo;
             }
 
             await _next(ctx);

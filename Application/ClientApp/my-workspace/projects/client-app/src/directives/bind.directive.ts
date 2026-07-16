@@ -1,26 +1,29 @@
 import { ChangeDetectorRef, Directive, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, SimpleChanges } from "@angular/core";
 import { NgControl } from "@angular/forms";
-import { BaseObject, Binding, getBindingOptions, TBindingInfo } from "jriapp-lib";
+import { BaseObject, Binding, getBindingOptions, IValidatable, IValidationInfo, TBindingInfo, Utils } from "jriapp-lib";
 import { IConverter } from "projects/client-app/src/logic/converter";
 import { Subscription } from "rxjs";
 import { DATASOURCE, DataSourceDirective } from "./datasource.directive";
 
-class BindTarget extends BaseObject {
+const queue = Utils.queue;
+class BindTarget extends BaseObject implements IValidatable {
   private readonly ngControl: NgControl;
   private readonly changeDetectorRef: ChangeDetectorRef;
   private readonly subscription: Subscription = new Subscription();
+  private _validationErrors: IValidationInfo[];
 
   constructor(control: NgControl,
     changeDetectorRef: ChangeDetectorRef) {
     super();
     this.ngControl = control;
     this.changeDetectorRef = changeDetectorRef;
+    this._validationErrors = [];
 
-    if (!this.ngControl?.valueChanges) {
-      return;
+    if (!!this.ngControl?.valueChanges) {
+      this.subscription.add(this.ngControl.valueChanges.subscribe((v) => {
+        this.objEvents.raiseProp("value");
+      }));
     }
-
-    this.subscription.add(this.ngControl.valueChanges.subscribe(() => this.objEvents.raiseProp("value")));
   }
 
   get value(): any {
@@ -39,6 +42,28 @@ class BindTarget extends BaseObject {
     this.subscription.unsubscribe();
     super.dispose();
   }
+
+  get validationErrors(): IValidationInfo[] {
+    return this._validationErrors;
+  }
+
+  set validationErrors(v: IValidationInfo[]) {
+    this._validationErrors = v;
+    if (this._validationErrors.length > 0) {
+      const errors = this._validationErrors.reduce((prev, e) => {
+        if (!prev[e.fieldName]) {
+          prev[e.fieldName] = [];
+        }
+        prev[e.fieldName] = [...prev[e.fieldName], ...e.errors]
+        return prev;
+      }, {});
+
+      this.ngControl.control.setErrors(errors);
+    }
+    else {
+      this.ngControl.control.setErrors(null);
+    }
+  }
 }
 
 export type TBindingMode = "OneTime" | "OneWay" | "TwoWay" | "BackWay";
@@ -55,17 +80,10 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges {
   private binding: Binding | null = null;
 
   get dataSource(): any {
-    if (!this.localDataSource) {
-      return this.dataSourceDirective?.dataSource ?? null;
-    }
-    else {
-      return this.localDataSource;
-    }
+    return this.dataSourceDirective?.dataSource ?? null;
   }
 
-  @Input('bind') localDataSource: any | null = null;
-
-  @Input('bindPath') path: string;
+  @Input('bind') path: string = "";
 
   @Input('bindMode') mode: TBindingMode = "OneWay";
 
@@ -75,7 +93,7 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges {
 
   constructor(
     @Optional() @Inject(NgControl) control: NgControl,
-    @Optional() @Inject(DATASOURCE) dataSourceDirective: DataSourceDirective,
+    @Inject(DATASOURCE) dataSourceDirective: DataSourceDirective,
     @Optional() @Inject(ChangeDetectorRef) private changeDetectorRef?: ChangeDetectorRef | null,
   ) {
     if (!control) {
@@ -90,12 +108,18 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges {
 
   ngOnInit() {
     this.target = new BindTarget(this.ngControl, this.changeDetectorRef);
-    this.binding = this.bindDataSource();
-    if (!!this.dataSourceDirective) {
-      this.subscription.add(this.dataSourceDirective.changes$.subscribe(() => { if (!!this.binding) { this.binding.source = this.dataSource; } }));
-    }
+    queue.enque(() => {
+      this.binding = this.bindDataSource();
+      if (!!this.dataSourceDirective) {
+        this.subscription.add(this.dataSourceDirective.changes$.subscribe(() => {
+          if (!!this.binding) {
+            this.binding.source = this.dataSource;
+          }
+        }));
+      }
+    });
   }
-
+ 
   ngOnDestroy() {
     this.binding?.dispose();
     this.binding = null;
@@ -116,10 +140,6 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges {
     if (changes["converter"]) {
       this.binding.converter = this.converter;
     }
-
-    if (changes["localDataSource"]) {
-      this.binding.source = this.dataSource;
-    }
   }
 
   public get controlName(): string | null {
@@ -129,7 +149,7 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges {
   private bindDataSource(): Binding {
     let bindInfo: TBindingInfo = {
       targetPath: "value",
-      sourcePath: this.path ?? this.controlName,
+      sourcePath: this.path,
       source: this.dataSource,
       target: this.target,
       mode: this.mode,

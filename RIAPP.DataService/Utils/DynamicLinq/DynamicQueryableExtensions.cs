@@ -872,7 +872,7 @@ namespace System.Linq.Dynamic.Core
                 selectors.Add((Func<TElement, object>)l.Compile());
             }
 
-            return GroupByManyInternal(source, [.. selectors], 0);
+            return GroupByManyInternal(source, selectors.ToArray(), 0);
         }
 
         /// <inheritdoc cref="GroupByMany{TElement}(IEnumerable{TElement}, ParsingConfig, string[])"/>
@@ -1572,7 +1572,7 @@ namespace System.Linq.Dynamic.Core
             Check.NotEmpty(ordering, nameof(ordering));
 
             ParameterExpression[] parameters = { ParameterExpressionHelper.CreateParameterExpression(source.ElementType, string.Empty, config.RenameEmptyParameterExpressionNames) };
-            ExpressionParser parser = new(parameters, ordering, args, config);
+            ExpressionParser parser = new ExpressionParser(parameters, ordering, args, config);
             IList<DynamicOrdering> dynamicOrderings = parser.ParseOrdering();
 
             Expression queryExpr = source.Expression;
@@ -1803,10 +1803,10 @@ namespace System.Linq.Dynamic.Core
             LambdaExpression lambda = DynamicExpressionParser.ParseLambda(config, createParameterCtor, source.ElementType, typeof(TResult), selector, args);
 
             var methodCallExpression = Expression.Call(
-                typeof(Queryable), 
+                typeof(Queryable),
                 nameof(Queryable.Select),
                 new[] { source.ElementType, typeof(TResult) },
-                source.Expression, 
+                source.Expression,
                 Expression.Quote(lambda)
             );
 
@@ -2556,7 +2556,7 @@ namespace System.Linq.Dynamic.Core
             Check.NotEmpty(ordering, nameof(ordering));
 
             ParameterExpression[] parameters = { ParameterExpressionHelper.CreateParameterExpression(source.ElementType, string.Empty, config.RenameEmptyParameterExpressionNames) };
-            ExpressionParser parser = new(parameters, ordering, args, config);
+            ExpressionParser parser = new ExpressionParser(parameters, ordering, args, config);
             IList<DynamicOrdering> dynamicOrderings = parser.ParseOrdering(forceThenBy: true);
 
             Expression queryExpr = source.Expression;

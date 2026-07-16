@@ -8,7 +8,7 @@ export function assign<T extends U, U extends IIndexer<any>>(target: T, source: 
     return coreUtils.assignStrings(target, source);
 }
 
-export interface _IErrors extends IIndexer<string> {
+export interface _IErrorString extends IIndexer<string> {
     ERR_OBJ_ALREADY_REGISTERED: string;
     ERR_OPTIONS_ALREADY_REGISTERED: string;
     ERR_APP_NEED_JQUERY: string;
@@ -92,7 +92,7 @@ export interface _IErrors extends IIndexer<string> {
     ERR_DATAVIEW_FILTER_INVALID: string;
 }
 
-export type IErrors = Partial<_IErrors>;
+export type IErrorStrings = Partial<_IErrorString>;
 
 export interface _IPagerText extends IIndexer<string> {
     firstText: string;
@@ -137,7 +137,7 @@ export interface ILocaleText extends IIndexer<any> {
     TEXT: IText;
 }
 
-const _ERRS: _IErrors = {
+const _ERRS: _IErrorString = {
     ERR_OBJ_ALREADY_REGISTERED: "Object with the name: {0} is already registered and can not be overwritten",
     ERR_OPTIONS_ALREADY_REGISTERED: "Options with the name: {0} are already registered and can not be overwritten",
     ERR_APP_NEED_JQUERY: "The project is dependent on JQuery and can not function properly without it",
@@ -260,5 +260,5 @@ const _STRS: ILocaleText = {
     TEXT: TEXT
 };
 
-export let ERRS: IErrors = _ERRS;
+export let ERRS: IErrorStrings = _ERRS;
 export let STRS: ILocaleText = _STRS;

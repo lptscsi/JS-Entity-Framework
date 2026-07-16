@@ -30,7 +30,7 @@ internal static class PredefinedTypesHelper
         { "ushort", typeof(ushort) },
     };
 
-    public static readonly IDictionary<Type, int> PredefinedTypes = new ConcurrentDictionary<Type, int>(new Dictionary<Type, int> 
+    public static readonly IDictionary<Type, int> PredefinedTypes = new ConcurrentDictionary<Type, int>(new Dictionary<Type, int>
     {
         { typeof(object), 0 },
         { typeof(bool), 0 },

@@ -39,7 +39,7 @@ namespace RIAPP.DataService.Utils
 
             if (!string.IsNullOrEmpty(val) && !string.IsNullOrEmpty(fieldInfo.regex))
             {
-                Regex rx = new(fieldInfo.regex, RegexOptions.IgnoreCase);
+                Regex rx = new Regex(fieldInfo.regex, RegexOptions.IgnoreCase);
                 if (!rx.IsMatch(val))
                 {
                     throw new ValidationException(string.Format(ErrorStrings.ERR_VAL_IS_NOT_VALID, fieldInfo.fieldName));

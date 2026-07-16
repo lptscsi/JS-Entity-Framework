@@ -88,18 +88,19 @@ namespace System.Linq.Dynamic.Core.Parser.SupportedMethods
             // Passing args by reference is now required with the params array support.
             var inlineArgs = args;
 
-            MethodData[] applicable = [.. methods
+            MethodData[] applicable = methods
                 .Select(m => new MethodData { MethodBase = m, Parameters = m.GetParameters() })
-                .Where(m => IsApplicable(m, inlineArgs))];
+                .Where(m => IsApplicable(m, inlineArgs))
+                .ToArray();
 
             if (applicable.Length > 1)
             {
-                applicable = [.. applicable.Where(m => applicable.All(n => m == n || FirstIsBetterThanSecond(inlineArgs, m, n)))];
+                applicable = applicable.Where(m => applicable.All(n => m == n || FirstIsBetterThanSecond(inlineArgs, m, n))).ToArray();
             }
 
             if (args.Length == 2 && applicable.Length > 1 && (args[0].Type == typeof(Guid?) || args[1].Type == typeof(Guid?)))
             {
-                applicable = [.. applicable.Take(1)];
+                applicable = applicable.Take(1).ToArray();
             }
 
             if (applicable.Length == 1)

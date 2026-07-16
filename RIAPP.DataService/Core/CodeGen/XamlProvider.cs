@@ -2,18 +2,23 @@
 
 namespace RIAPP.DataService.Core.CodeGen
 {
-    /// <summary>
-    /// Провайдер функции генерации кода на XML (xaml)
-    /// </summary>
-    /// <typeparam name="TService"></typeparam>
-    /// <param name="owner"></param>
-    /// <param name="lang"></param>
-    public class XamlProvider<TService>(IMetaDataProvider owner, string lang) : ICodeGenProvider<TService>
+
+    public class XamlProvider<TService> : ICodeGenProvider<TService>
          where TService : BaseDomainService
     {
-        public string Lang => lang;
+        public XamlProvider(IMetaDataProvider owner, string lang)
+        {
+            Owner = owner;
+            Lang = lang;
+        }
 
-        public IMetaDataProvider Owner => owner;
+
+        public string Lang
+        {
+            get;
+        }
+
+        public IMetaDataProvider Owner { get; }
 
         public virtual string GenerateScript(string comment = null, bool isDraft = false)
         {

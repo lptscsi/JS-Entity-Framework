@@ -19,7 +19,7 @@ namespace RIAPP.DataService.Core.UseCases.QueryMiddleware
             Security.IAuthorizer<TService> authorizer = ctx.ServiceContainer.GetAuthorizer();
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
 
-            MethodDescription method = metadata.GetQueryMethod(ctx.Request.dbSetName, ctx.Request.queryName);
+            MethodDescription method = metadata.GetQueryMethod(ctx.Request.DbSetName, ctx.Request.QueryName);
             await authorizer.CheckUserRightsToExecute(method.GetMethodData());
 
             await _next(ctx);

@@ -14,7 +14,7 @@ export class ArrayHelper {
         if (arr.length === 1) {
             return [arr[0]];
         } else {
-            return Array.apply(null, arr) as any[];
+            return Array.apply(null, arr);
         }
     }
 
@@ -29,7 +29,7 @@ export class ArrayHelper {
     public static merge<T>(arrays: Array<Array<T>>): Array<T> {
         if (!arrays)
             return [];
-        return [].concat.apply([], arrays as any);
+        return [].concat.apply([], arrays);
     }
 
     public static distinct(arr: string[]): string[];

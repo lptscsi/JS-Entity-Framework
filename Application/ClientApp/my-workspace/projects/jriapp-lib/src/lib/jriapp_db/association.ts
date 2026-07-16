@@ -7,7 +7,7 @@ import {
     Utils
 } from "../jriapp_shared";
 import {
-    COLL_CHANGE_TYPE, ITEM_STATUS
+    ITEM_STATUS
 } from "../jriapp_shared/collection/const";
 import {
     ICollChangedArgs, IFieldInfo
@@ -56,7 +56,7 @@ export class Association extends BaseObject {
       parentToChildrenName: null,
       childToParentName: null,
       name: this._uniqueID,
-      onDeleteAction: DELETE_ACTION.NoAction
+      onDeleteAction: 'NoAction'
     }, options);
 
     this._name = opts.name;
@@ -153,13 +153,13 @@ export class Association extends BaseObject {
     const self = this, changedKeys = Indexer();
     let item: IEntityItem, changed: string[] = [];
     switch (args.changeType) {
-      case COLL_CHANGE_TYPE.Reset:
+      case 'Reset':
         changed = self.refreshParentMap();
         break;
-      case COLL_CHANGE_TYPE.Add:
+      case 'Add':
         changed = self._mapParentItems(args.items);
         break;
-      case COLL_CHANGE_TYPE.Remove:
+      case 'Remove':
         {
           for (const item of args.items) {
             const key = self._unMapParentItem(item);
@@ -170,7 +170,7 @@ export class Association extends BaseObject {
           changed = Object.keys(changedKeys);
         }
         break;
-      case COLL_CHANGE_TYPE.Remap:
+      case 'Remap':
         {
           if (!!args.old_key) {
             item = this._parentMap[args.old_key];
@@ -202,13 +202,13 @@ export class Association extends BaseObject {
     const self = this;
     let fkey: string;
     if (isBegin) {
-      if (isRejected && status === ITEM_STATUS.Added) {
+      if (isRejected && status === 'Added') {
         fkey = this._unMapParentItem(item);
         if (!!fkey) {
           self._notifyParentChanged([fkey]);
         }
         return;
-      } else if (!isRejected && status === ITEM_STATUS.Deleted) {
+      } else if (!isRejected && status === 'Deleted') {
         fkey = this._unMapParentItem(item);
         if (!!fkey) {
           self._notifyParentChanged([fkey]);
@@ -252,21 +252,21 @@ export class Association extends BaseObject {
     const self = this, newStatus = item._aspect.status;
     let fkey: string = null;
     let children: IEntityItem[];
-    if (newStatus === ITEM_STATUS.Deleted) {
+    if (newStatus === 'Deleted') {
       children = self.getChildItems(item);
       fkey = this._unMapParentItem(item);
       switch (self.onDeleteAction) {
-        case DELETE_ACTION.NoAction:
+        case 'NoAction':
           // nothing
           break;
-        case DELETE_ACTION.Cascade:
+        case 'Cascade':
           {
             for (const child of children) {
               child._aspect.deleteItem();
             }
           }
           break;
-        case DELETE_ACTION.SetNulls:
+        case 'SetNulls':
           {
             for (const child of children) {
               const isEdit = child._aspect.isEditing;
@@ -298,13 +298,13 @@ export class Association extends BaseObject {
     const self = this, items = args.items, changedKeys = Indexer();
     let item: IEntityItem, changed: string[] = [];
     switch (args.changeType) {
-      case COLL_CHANGE_TYPE.Reset:
+      case 'Reset':
         changed = self.refreshChildMap();
         break;
-      case COLL_CHANGE_TYPE.Add:
+      case 'Add':
         changed = self._mapChildren(items);
         break;
-      case COLL_CHANGE_TYPE.Remove:
+      case 'Remove':
         {
           for (const item of items) {
             const key = self._unMapChildItem(item);
@@ -315,7 +315,7 @@ export class Association extends BaseObject {
           changed = Object.keys(changedKeys);
         }
         break;
-      case COLL_CHANGE_TYPE.Remap:
+      case 'Remap':
         {
           if (!!args.old_key) {
             item = items[0];
@@ -401,13 +401,13 @@ export class Association extends BaseObject {
     const self = this;
     let fkey: string;
     if (isBegin) {
-      if (isRejected && status === ITEM_STATUS.Added) {
+      if (isRejected && status === 'Added') {
         fkey = this._unMapChildItem(item);
         if (!!fkey) {
           self._notifyChildrenChanged([fkey]);
         }
         return;
-      } else if (!isRejected && status === ITEM_STATUS.Deleted) {
+      } else if (!isRejected && status === 'Deleted') {
         fkey = self._unMapChildItem(item);
         if (!!fkey) {
           self._notifyChildrenChanged([fkey]);
@@ -459,7 +459,7 @@ export class Association extends BaseObject {
     if (!fkey) {
       return;
     }
-    if (newStatus === ITEM_STATUS.Deleted) {
+    if (newStatus === 'Deleted') {
       fkey = self._unMapChildItem(item);
       if (!!fkey) {
         self._notifyChildrenChanged([fkey]);
@@ -514,12 +514,12 @@ export class Association extends BaseObject {
     }
     return changedKey;
   }
-  protected _mapParentItems(items: IEntityItem[]): string[] {
+  protected _mapParentItems(items: ReadonlyArray<IEntityItem>): string[] {
     const chngedKeys = Indexer(), len = items.length;
     for (let i = 0; i < len; i += 1) {
       const item: IEntityItem = items[i];
       const status: ITEM_STATUS = item._aspect.status;
-      if (status === ITEM_STATUS.Deleted) {
+      if (status === 'Deleted') {
         continue;
       }
       const fkey: string = this.getParentFKey(item);
@@ -552,13 +552,13 @@ export class Association extends BaseObject {
       }
     }
   }
-  protected _mapChildren(items: IEntityItem[]): string[] {
+  protected _mapChildren(items: ReadonlyArray<IEntityItem>): string[] {
     const chngedKeys = Indexer(), len = items.length;
 
     for (let i = 0; i < len; i += 1) {
       const item: IEntityItem = items[i];
       const status: ITEM_STATUS = item._aspect.status;
-      if (status === ITEM_STATUS.Deleted) {
+      if (status === 'Deleted') {
         continue;
       }
       const fkey: string = this.getChildFKey(item);

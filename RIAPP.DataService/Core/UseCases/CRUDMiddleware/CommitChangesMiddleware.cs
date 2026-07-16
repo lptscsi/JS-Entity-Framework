@@ -28,7 +28,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
             RequestContext req = CRUDContext<TService>.CreateRequestContext(ctx.Service, changeSet);
 
-            using (RequestCallContext callContext = new(req))
+            using (RequestCallContext callContext = new RequestCallContext(req))
             {
                 await serviceMethods.ExecuteChangeSet();
                 await serviceHelper.AfterExecuteChangeSet(changeSet);
@@ -36,18 +36,18 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
                 foreach (RowInfo rowInfo in graph.AllList)
                 {
-                    if (rowInfo.changeType != ChangeType.Deleted)
+                    if (rowInfo.ChangeType != ChangeType.Deleted)
                     {
                         serviceHelper.UpdateRowInfoAfterUpdates(rowInfo);
                     }
                 }
 
-                SubResultList subResults = new();
+                SubResultList subResults = new SubResultList();
                 await serviceHelper.AfterChangeSetCommited(changeSet, subResults);
                 await serviceMethods.AfterChangeSetCommited(subResults);
 
-                SubsetsGenerator subsetsGenerator = new(metadata, dataHelper);
-                ctx.Response.subsets = subsetsGenerator.CreateSubsets(subResults);
+                SubsetsGenerator subsetsGenerator = new SubsetsGenerator(metadata, dataHelper);
+                ctx.Response.Subsets = subsetsGenerator.CreateSubsets(subResults);
             }
 
 

@@ -17,9 +17,9 @@ namespace RIAPP.DataService.Core.Types
 
         public IEnumerable<object> Result { get; set; }
 
-        public object extraInfo { get; set; }
+        public object ExtraInfo { get; set; }
 
-        public SubResultList subResults => _subResults.Value;
+        public SubResultList SubResults => _subResults.Value;
     }
 
     public class QueryResult<T> : QueryResult
