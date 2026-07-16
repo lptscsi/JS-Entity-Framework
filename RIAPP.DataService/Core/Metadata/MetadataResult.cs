@@ -16,7 +16,7 @@ namespace RIAPP.DataService.Core.Metadata
         }
 
 
-        public DbSetInfoList dbSets { get; set; } = new DbSetInfoList();
+        public DBSetList dbSets { get; set; } = new DBSetList();
 
 
         public AssocList associations { get; set; } = new AssocList();

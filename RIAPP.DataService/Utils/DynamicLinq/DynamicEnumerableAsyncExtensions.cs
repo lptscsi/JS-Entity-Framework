@@ -1,11 +1,11 @@
 ﻿#if !(NET35 || NET40)
-using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Dynamic.Core.Validation;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace System.Linq.Dynamic.Core;
 
@@ -34,7 +34,7 @@ public static class DynamicEnumerableAsyncExtensions
     public static async Task<dynamic[]> ToDynamicArrayAsync(this IEnumerable source, Type type, CancellationToken cancellationToken = default)
     {
         var result = await ToDynamicListAsync(Check.NotNull(source), Check.NotNull(type), cancellationToken).ConfigureAwait(false);
-        return result.ToArray();
+        return [.. result];
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public static class DynamicEnumerableAsyncExtensions
     [PublicAPI]
     public static async Task<dynamic[]> ToDynamicArrayAsync(this IEnumerable source, CancellationToken cancellationToken = default)
     {
-        return (await ToListAsync<dynamic>(Check.NotNull(source), cancellationToken).ConfigureAwait(false)).ToArray();
+        return [.. (await ToListAsync<dynamic>(Check.NotNull(source), cancellationToken).ConfigureAwait(false))];
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public static class DynamicEnumerableAsyncExtensions
     [PublicAPI]
     public static async Task<T[]> ToDynamicArrayAsync<T>(this IEnumerable source, CancellationToken cancellationToken = default)
     {
-        return (await ToListAsync<T>(Check.NotNull(source), cancellationToken).ConfigureAwait(false)).ToArray();
+        return [.. (await ToListAsync<T>(Check.NotNull(source), cancellationToken).ConfigureAwait(false))];
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public static class DynamicEnumerableAsyncExtensions
 
         var list = (IList)task.GetType().GetProperty(nameof(Task<object>.Result))!.GetValue(task)!;
 
-        return list.Cast<dynamic>().ToList();
+        return [.. list.Cast<dynamic>()];
     }
 
     /// <summary>
@@ -126,10 +126,10 @@ public static class DynamicEnumerableAsyncExtensions
                 return list;
 #endif
             case IEnumerable<T> enumerable:
-                return enumerable.ToList();
+                return [.. enumerable];
 
             default:
-                return source.Cast<T>().ToList();
+                return [.. source.Cast<T>()];
         }
     }
 }

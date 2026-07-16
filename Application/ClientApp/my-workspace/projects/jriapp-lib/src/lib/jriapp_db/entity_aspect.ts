@@ -5,17 +5,17 @@ import {
     Utils
 } from "../jriapp_shared";
 import { ItemAspect } from "../jriapp_shared/collection/aspect";
-import { ITEM_STATUS, VALS_VERSION } from "../jriapp_shared/collection/const";
+import { DATA_TYPE, FIELD_TYPE, ITEM_STATUS, VALS_VERSION } from "../jriapp_shared/collection/const";
 import { ICancellableArgs, IFieldInfo } from "../jriapp_shared/collection/int";
-import {
-    CollectionItem
-} from "../jriapp_shared/collection/item";
 import { ValueUtils } from "../jriapp_shared/collection/utils";
 import { ValidationError } from "../jriapp_shared/errors";
 import { FLAGS, REFRESH_MODE } from "./const";
 import { DbSet } from "./dbset";
 import { SubmitError } from "./error";
 import { IEntityItem, IRowInfo, IValueChange } from "./int";
+import {
+  CollectionItem
+} from "../jriapp_shared/collection/item";
 
 const utils = Utils, { _undefined } = utils.check, { format } = utils.str, { getValue, setValue, uuid } = utils.core,
   { compareVals, parseValue } = ValueUtils, sys = utils.sys;
@@ -23,9 +23,9 @@ const utils = Utils, { _undefined } = utils.check, { format } = utils.str, { get
 // don't submit these types of fields to the server
 function fn_isNotSubmittable(fieldInfo: IFieldInfo) {
   switch (fieldInfo.fieldType) {
-    case 'ClientOnly':
-    case 'Navigation':
-    case 'Calculated':
+    case FIELD_TYPE.ClientOnly:
+    case FIELD_TYPE.Navigation:
+    case FIELD_TYPE.Calculated:
       return true;
     default:
       return false;
@@ -93,7 +93,7 @@ export class EntityAspect extends ItemAspect {
   // override
   protected override _getValue(name: string, ver: VALS_VERSION): any {
     switch (ver) {
-      case 'Original':
+      case VALS_VERSION.Original:
         if (!this._origVals) {
           throw new Error("Invalid Operation, no Stored Version: " + ver);
         }
@@ -105,7 +105,7 @@ export class EntityAspect extends ItemAspect {
   // override
   protected override _setValue(name: string, val: any, ver: VALS_VERSION): void {
     switch (ver) {
-      case 'Original':
+      case VALS_VERSION.Original:
         if (!this._origVals) {
           throw new Error("Invalid Operation, no Stored Version: " + ver);
         }
@@ -119,7 +119,7 @@ export class EntityAspect extends ItemAspect {
   // override
   protected override _storeVals(toVer: VALS_VERSION): void {
     switch (toVer) {
-      case 'Original':
+      case VALS_VERSION.Original:
         this._origVals = this._cloneVals();
         break;
       default:
@@ -130,7 +130,7 @@ export class EntityAspect extends ItemAspect {
   // override
   protected override _restoreVals(fromVer: VALS_VERSION): void {
     switch (fromVer) {
-      case 'Original':
+      case VALS_VERSION.Original:
         if (!this._origVals) {
           throw new Error("Invalid Operation, no Stored Version: " + fromVer);
         }
@@ -159,7 +159,7 @@ export class EntityAspect extends ItemAspect {
       return res;
     }
     switch (fieldInfo.fieldType) {
-      case 'ServerCalculated':
+      case FIELD_TYPE.ServerCalculated:
         res = {
           fieldName: fieldInfo.fieldName,
           val: null,
@@ -168,7 +168,7 @@ export class EntityAspect extends ItemAspect {
           nested: null
         };
         break;
-      case 'Object':
+      case FIELD_TYPE.Object:
         res = { fieldName: fieldInfo.fieldName, val: null, orig: null, flags: FLAGS.None, nested: [] };
         const len = fieldInfo.nested.length;
         for (let i = 0; i < len; i += 1) {
@@ -179,8 +179,8 @@ export class EntityAspect extends ItemAspect {
         }
         break;
       default:
-        const newVal = dbSet._getInternal().getStrValue(self._getValue(fullName, 'Current'), fieldInfo),
-          oldV = !self.hasOrigVals ? newVal : dbSet._getInternal().getStrValue(self._getValue(fullName, 'Original'), fieldInfo),
+        const newVal = dbSet._getInternal().getStrValue(self._getValue(fullName, VALS_VERSION.Current), fieldInfo),
+          oldV = !self.hasOrigVals ? newVal : dbSet._getInternal().getStrValue(self._getValue(fullName, VALS_VERSION.Original), fieldInfo),
           isChanged = (oldV !== newVal);
         if (isChanged) {
           res = {
@@ -190,7 +190,7 @@ export class EntityAspect extends ItemAspect {
             flags: (FLAGS.Changed | FLAGS.Setted),
             nested: null
           };
-        } else if (fieldInfo.isPrimaryKey > 0 || fieldInfo.fieldType === 'RowTimeStamp' || fieldInfo.isNeedOriginal) {
+        } else if (fieldInfo.isPrimaryKey > 0 || fieldInfo.fieldType === FIELD_TYPE.RowTimeStamp || fieldInfo.isNeedOriginal) {
           res = {
             fieldName: fieldInfo.fieldName,
             val: newVal,
@@ -211,7 +211,7 @@ export class EntityAspect extends ItemAspect {
     }
 
     if (changedOnly) {
-      if (fieldInfo.fieldType === 'Object') {
+      if (fieldInfo.fieldType === FIELD_TYPE.Object) {
         return (res.nested.length > 0) ? res : null;
       } else if ((res.flags & FLAGS.Changed) === FLAGS.Changed) {
         return res;
@@ -236,7 +236,7 @@ export class EntityAspect extends ItemAspect {
   }
   protected _fldChanging(_fieldName: string, _fieldInfo: IFieldInfo, _oldV: any, _newV: any): boolean {
     if (!this._origVals) {
-      this._storeVals('Original');
+      this._storeVals(VALS_VERSION.Original);
     }
     return true;
   }
@@ -273,7 +273,7 @@ export class EntityAspect extends ItemAspect {
       return false;
     }
     const self = this, changes: IValueChange[] = this._getValueChanges(true), dbSet = this.dbSet;
-    this._restoreVals('Temporary');
+    this._restoreVals(VALS_VERSION.Temporary);
     dbSet.errors.removeAllErrors(this.item as IEntityItem);
     this._setStatus(this._savedStatus);
     this._savedStatus = null;
@@ -296,7 +296,7 @@ export class EntityAspect extends ItemAspect {
     if (old !== v) {
       const internal = this.dbSet._getInternal();
       super._setStatus(v);
-      if (v !== 'None') {
+      if (v !== ITEM_STATUS.None) {
         internal.addToChanged(this.item as IEntityItem);
       } else {
         internal.removeFromChanged(this.key);
@@ -328,7 +328,7 @@ export class EntityAspect extends ItemAspect {
     this._setKey(key);
   }
   _checkCanRefresh(): void {
-    if (this.key === null || this.status === 'Added') {
+    if (this.key === null || this.status === ITEM_STATUS.Added) {
       throw new Error(ERRS.ERR_OPER_REFRESH_INVALID);
     }
   }
@@ -338,41 +338,41 @@ export class EntityAspect extends ItemAspect {
       throw new Error(format(ERRS.ERR_DBSET_INVALID_FIELDNAME, self.dbSetName, fullName));
     }
     const dataType = fld.dataType;
-    let newVal = parseValue(val, dataType), oldVal = self._getValue(fullName, 'Current');
+    let newVal = parseValue(val, dataType), oldVal = self._getValue(fullName, VALS_VERSION.Current);
     switch (refreshMode) {
-      case 'CommitChanges':
+      case REFRESH_MODE.CommitChanges:
         {
           if (!compareVals(newVal, oldVal, dataType)) {
-            self._setValue(fullName, newVal, 'Current');
+            self._setValue(fullName, newVal, VALS_VERSION.Current);
             self._onFieldChanged(fullName, dependents, fld);
           }
         }
         break;
-      case 'RefreshCurrent':
+      case REFRESH_MODE.RefreshCurrent:
         {
           if (self.hasOrigVals) {
-            self._setValue(fullName, newVal, 'Original');
+            self._setValue(fullName, newVal, VALS_VERSION.Original);
           }
           if (self.hasTempVals) {
-            self._setValue(fullName, newVal, 'Temporary');
+            self._setValue(fullName, newVal, VALS_VERSION.Temporary);
           }
           if (!compareVals(newVal, oldVal, dataType)) {
-            self._setValue(fullName, newVal, 'Current');
+            self._setValue(fullName, newVal, VALS_VERSION.Current);
             self._onFieldChanged(fullName, dependents, fld);
           }
         }
         break;
-      case 'MergeIntoCurrent':
+      case REFRESH_MODE.MergeIntoCurrent:
         {
           let origOldVal: any = _undefined;
           if (self.hasOrigVals) {
-            origOldVal = self._getValue(fullName, 'Original');
-            self._setValue(fullName, newVal, 'Original');
+            origOldVal = self._getValue(fullName, VALS_VERSION.Original);
+            self._setValue(fullName, newVal, VALS_VERSION.Original);
           }
           if (origOldVal === _undefined || compareVals(origOldVal, oldVal, dataType)) {
             // unmodified
             if (!compareVals(newVal, oldVal, dataType)) {
-              self._setValue(fullName, newVal, 'Current');
+              self._setValue(fullName, newVal, VALS_VERSION.Current);
               self._onFieldChanged(fullName, dependents, fld);
             }
           }
@@ -385,8 +385,8 @@ export class EntityAspect extends ItemAspect {
   _refreshValues(rowInfo: IRowInfo, refreshMode: REFRESH_MODE): void {
     const self = this, oldStatus = this.status;
     if (!this.getIsDisposed()) {
-      if (refreshMode === 'None') {
-        refreshMode = 'RefreshCurrent';
+      if (!refreshMode) {
+        refreshMode = REFRESH_MODE.RefreshCurrent;
       }
 
       const dependents = utils.core.Indexer();
@@ -399,11 +399,11 @@ export class EntityAspect extends ItemAspect {
         });
       }
 
-      if (oldStatus === 'Updated') {
+      if (oldStatus === ITEM_STATUS.Updated) {
         const changes = this._getValueChanges(true);
         if (changes.length === 0) {
           this._origVals = null;
-          this._setStatus('None');
+          this._setStatus(ITEM_STATUS.None);
         }
       }
 
@@ -430,10 +430,10 @@ export class EntityAspect extends ItemAspect {
     this.dbSet._getInternal().setNavFieldVal(fieldName, this.item as IEntityItem, value);
   }
   _clearFieldVal(fieldName: string): void {
-    this._setValue(fieldName, null, 'Current');
+    this._setValue(fieldName, null, VALS_VERSION.Current);
   }
   _getFieldVal(fieldName: string): any {
-    return this._getValue(fieldName, 'Current');
+    return this._getValue(fieldName, VALS_VERSION.Current);
   }
   _setFieldVal(fieldName: string, val: any): boolean {
     if (this.isCancelling) {
@@ -450,7 +450,7 @@ export class EntityAspect extends ItemAspect {
     }
 
     try {
-      if (fieldInfo.dataType === 'String' && fieldInfo.isNullable && !newV) {
+      if (fieldInfo.dataType === DATA_TYPE.String && fieldInfo.isNullable && !newV) {
         newV = null;
       }
       if (oldV !== newV) {
@@ -459,11 +459,11 @@ export class EntityAspect extends ItemAspect {
         }
 
         if (this._fldChanging(fieldName, fieldInfo, oldV, newV)) {
-          this._setValue(fieldName, newV, 'Current');
-          if (!(fieldInfo.fieldType === 'ClientOnly' || fieldInfo.fieldType === 'ServerCalculated')) {
+          this._setValue(fieldName, newV, VALS_VERSION.Current);
+          if (!(fieldInfo.fieldType === FIELD_TYPE.ClientOnly || fieldInfo.fieldType === FIELD_TYPE.ServerCalculated)) {
             switch (this.status) {
-              case 'None':
-                this._setStatus('Updated');
+              case ITEM_STATUS.None:
+                this._setStatus(ITEM_STATUS.Updated);
                 break;
             }
           }
@@ -478,7 +478,7 @@ export class EntityAspect extends ItemAspect {
           throw new ValidationError([validationInfo], this);
         }
       }
-    } catch (ex) {
+    } catch (ex: any) {
       let error: IValidationError;
       if (sys.isValidationError(ex)) {
         error = ex;
@@ -501,10 +501,10 @@ export class EntityAspect extends ItemAspect {
     }
     const oldStatus = this.status, dbSet = this.dbSet, internal = dbSet._getInternal(),
       errors = dbSet.errors;
-    if (oldStatus !== 'None') {
+    if (oldStatus !== ITEM_STATUS.None) {
       internal.onCommitChanges(this.item as IEntityItem, true, false, oldStatus);
 
-      if (oldStatus === 'Deleted') {
+      if (oldStatus === ITEM_STATUS.Deleted) {
         internal.removeFromChanged(this.key);
         errors.removeAllErrors(this.item as IEntityItem);
         if (!this.getIsStateDirty()) {
@@ -514,12 +514,12 @@ export class EntityAspect extends ItemAspect {
         this._origVals = null;
         if (this.hasTempVals) {
           // refresh saved temporary values
-          this._storeVals('Temporary');
+          this._storeVals(VALS_VERSION.Temporary);
         }
-        this._setStatus('None');
+        this._setStatus(ITEM_STATUS.None);
         errors.removeAllErrors(this.item as IEntityItem);
         if (!!rowInfo) {
-          this._refreshValues(rowInfo, 'CommitChanges');
+          this._refreshValues(rowInfo, REFRESH_MODE.CommitChanges);
         }
         internal.onCommitChanges(this.item as IEntityItem, false, false, oldStatus);
       }
@@ -538,10 +538,10 @@ export class EntityAspect extends ItemAspect {
     if (args.isCancel) {
       return false;
     }
-    if (oldStatus === 'Added') {
+    if (oldStatus === ITEM_STATUS.Added) {
       dbSet.removeItem(this.item as IEntityItem);
     } else {
-      this._setStatus('Deleted');
+      this._setStatus(ITEM_STATUS.Deleted);
     }
     return true;
   }
@@ -553,10 +553,10 @@ export class EntityAspect extends ItemAspect {
       return;
     }
     const self = this, oldStatus = self.status, dbSet = self.dbSet, internal = dbSet._getInternal(), errors = dbSet.errors;
-    if (oldStatus !== 'None') {
+    if (oldStatus !== ITEM_STATUS.None) {
       internal.onCommitChanges(self.item as IEntityItem, true, true, oldStatus);
 
-      if (oldStatus === 'Added') {
+      if (oldStatus === ITEM_STATUS.Added) {
         internal.removeFromChanged(this.key);
         errors.removeAllErrors(this.item as IEntityItem);
         if (!this.getIsStateDirty()) {
@@ -565,13 +565,13 @@ export class EntityAspect extends ItemAspect {
       } else {
         const changes = self._getValueChanges(true);
         if (self.hasOrigVals) {
-          self._restoreVals('Original');
+          self._restoreVals(VALS_VERSION.Original);
           if (self.hasTempVals) {
             // refresh saved temporary values
-            self._storeVals('Temporary');
+            self._storeVals(VALS_VERSION.Temporary);
           }
         }
-        self._setStatus('None');
+        self._setStatus(ITEM_STATUS.None);
         errors.removeAllErrors(this.item as IEntityItem);
         const dependents = utils.core.Indexer();
         for (const change of changes) {

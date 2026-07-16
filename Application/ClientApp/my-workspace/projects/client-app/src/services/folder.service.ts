@@ -142,7 +142,7 @@ export class FolderService {
     }
   }
 
-  setCount(countVal) {
+  setCount(countVal: number) {
     this.count.next(countVal);
   }
 

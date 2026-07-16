@@ -5,7 +5,7 @@ import { IIndexer, IValidationError } from "../int";
 import { Utils } from "../utils/utils";
 import { ItemAspect } from "./aspect";
 import { BaseCollection } from "./base";
-import { COLL_CHANGE_OPER, COLL_CHANGE_REASON } from "./const";
+import { COLL_CHANGE_OPER, COLL_CHANGE_REASON, COLL_CHANGE_TYPE, VALS_VERSION } from "./const";
 import { ICollectionItem, IFieldInfo, IPropInfo } from "./int";
 import { CollectionItem } from "./item";
 import { CollUtils } from "./utils";
@@ -30,14 +30,14 @@ export class ListItemAspect extends ItemAspect {
         if (fieldInfo.isReadOnly && !(this.isNew && fieldInfo.allowClientDefault)) {
           throw new Error(ERRS.ERR_FIELD_READONLY);
         }
-        this._setValue(name, val, 'Current');
+        this._setValue(name, val, VALS_VERSION.Current);
         sys.raiseProp(item, name);
         errors.removeError(item, name);
         const validationInfo = this._validateField(name);
         if (!!validationInfo && validationInfo.errors.length > 0) {
           throw new ValidationError([validationInfo], this);
         }
-      } catch (ex) {
+      } catch (ex: any) {
         if (utils.sys.isValidationError(ex)) {
           error = ex;
         } else {
@@ -51,7 +51,7 @@ export class ListItemAspect extends ItemAspect {
     }
   }
   _getProp(name: string): any {
-    return this._getValue(name, 'Current');
+    return this._getValue(name, VALS_VERSION.Current);
   }
   override toString(): string {
     if (!this.item) {
@@ -167,15 +167,15 @@ export abstract class BaseList<TItem extends IListItem = IListItem> extends Base
       }
     } finally {
       this._onCollectionChanged({
-        changeType: 'Reset',
-        reason: 'None',
-        oper: 'Fill',
+        changeType: COLL_CHANGE_TYPE.Reset,
+        reason: COLL_CHANGE_REASON.None,
+        oper: COLL_CHANGE_OPER.Fill,
         items: items
       });
       this._onFillEnd({
         items: items,
         newItems: newItems,
-        reason: 'None'
+        reason: COLL_CHANGE_REASON.None
       });
     }
     if (!!clearAll) {

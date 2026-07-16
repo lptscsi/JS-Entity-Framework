@@ -83,7 +83,7 @@ namespace Pipeline
 
         public PipelineBuilder<TService, TContext> Use(Func<RequestDelegate<TContext>, RequestDelegate<TContext>> component)
         {
-            MiddlewareComponentNode<TContext> node = new MiddlewareComponentNode<TContext>
+            MiddlewareComponentNode<TContext> node = new()
             {
                 Component = component
             };
@@ -92,6 +92,6 @@ namespace Pipeline
             return this;
         }
 
-        private readonly LinkedList<MiddlewareComponentNode<TContext>> _components = new LinkedList<MiddlewareComponentNode<TContext>>();
+        private readonly LinkedList<MiddlewareComponentNode<TContext>> _components = new();
     }
 }

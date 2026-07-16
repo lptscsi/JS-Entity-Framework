@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Utils
 {
+    /// <summary>
+    /// Интерфейс сериализатора
+    /// </summary>
     public interface ISerializer
     {
         string Serialize(object obj);

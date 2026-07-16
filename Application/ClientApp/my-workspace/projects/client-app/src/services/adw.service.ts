@@ -1,123 +1,11 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, Optional, SkipSelf } from '@angular/core';
-import {
-    BaseObject,
-    DataView,
-    IColumn,
-    IPromise, IQueryResult,
-    IRowData,
-    IStatefulPromise, Utils
-} from 'jriapp-lib';
-import { DbContext, KeyValDictionary, KeyValListItem, Product, ProductCategory } from "../db/adwDB";
-
+import { IPromise, IQueryResult, IStatefulPromise, SORT_ORDER, Utils } from 'jriapp-lib';
+import { DbContext, Product } from "../db/adwDB";
+import { HttpClient } from '@angular/common/http';
 const utils = Utils;
 
 export interface IOptions {
   service_url: string;
-}
-
-type IQueryResponse = {
-  columns: IColumn[];
-  rows: IRowData[];
-  dbSetName: string;
-  totalCount: string | null;
-};
-
-type IStaticData = {
-  productModelData: IQueryResponse;
-  productCategoryData: IQueryResponse;
-};
-
-export class Filter extends BaseObject {
-  readonly dbContext: DbContext;
-
-  private _parentCategoryId: number = null;
-  private _childCategoryId: number = null;
-  private _parentCategories: DataView<ProductCategory>;
-  private _childCategories: DataView<ProductCategory>;
-
-  private _testDict: KeyValDictionary;
-  private _testDictVw: DataView<KeyValListItem>;
-
-  constructor(dbContext: DbContext) {
-    super();
-    this.dbContext = dbContext;
-    const self = this;
-
-    this._testDict = new KeyValDictionary();
-
-    self._testDict.fillItems([
-      { key: 0, val: 'Legal entity' },
-      { key: 1, val: 'Mother' },
-      { key: 2, val: 'Father' },
-      { key: 3, val: 'Daugher' },
-      { key: 4, val: 'Son' },
-      { key: 5, val: 'Legal representative' },
-      { key: 6, val: 'Other individual' }
-    ], true);
-
-    // dataview has the same structure as a dataset or a dictionary
-    // but it has its own current row position, and optionally - sorting and a filter
-    this._testDictVw = new DataView<KeyValListItem>(
-      {
-        dataSource: this._testDict,
-        fn_sort: function (a, b) { return a.val.localeCompare(b.val); },
-
-        fn_filter: function (item) {
-          return item.key < 6;
-        }
-      });
-
-    // need to refresh it (because the dictionary was already filled, and the data is not changed)
-    this._testDictVw.refreshSync();
-
-
-    //filters top level product categories
-    this._parentCategories = new DataView<ProductCategory>(
-      {
-        dataSource: this.dbContext.dbSets.ProductCategory,
-        fn_sort: function (a, b) { return a.ProductCategoryId - b.ProductCategoryId; },
-        fn_filter: function (item) { return item.ParentProductCategoryId === null; }
-      });
-
-    //filters product categories which have parent category
-    this._childCategories = new DataView<ProductCategory>(
-      {
-        dataSource: this.dbContext.dbSets.ProductCategory,
-        fn_sort: function (a, b) { return a.ProductCategoryId - b.ProductCategoryId; },
-        fn_filter: function (item) { return item.ParentProductCategoryId !== null && item.ParentProductCategoryId == self.parentCategoryId; }
-      });
-  }
-
-  reset() {
-    this.parentCategoryId = null;
-    this.childCategoryId = null;
-  }
-
-  get parentCategoryId() {  return this._parentCategoryId;  }
-  set parentCategoryId(v) {
-    if (this._parentCategoryId != v) {
-      this._parentCategoryId = v;
-      this.objEvents.raiseProp('parentCategoryId');
-      this._childCategories.refreshSync();
-    }
-  }
-  get childCategoryId() { return this._childCategoryId; }
-  set childCategoryId(v) {
-    if (this._childCategoryId != v) {
-      this._childCategoryId = v;
-      this.objEvents.raiseProp('childCategoryId');
-    }
-  }
-
-  get dbSets() { return this.dbContext.dbSets; }
-  get parentCategories() { return this._parentCategories; }
-  get childCategories() { return this._childCategories; }
-  get productModels() { return this.dbSets.ProductModel; }
-  get productCategories() { return this.dbSets.ProductCategory; }
-
-  get testDict() { return this._testDict; }
-  get testDictVw() { return this._testDictVw; }
 }
 
 @Injectable({
@@ -127,8 +15,7 @@ export class AdwService {
   private _dbContext: DbContext;
   private _uniqueID: string;
   private _initPromise: Promise<any>;
-  private _filter: Filter = null;
-
+  
   constructor(
     @Optional() @SkipSelf() existingService: AdwService,
     private readonly http: HttpClient
@@ -138,15 +25,14 @@ export class AdwService {
         'The service has already been provided in the app. Avoid providing it again in child modules'
       );
     }
-
     const self = this, options: IOptions = { service_url: "/RIAppDemoServiceEF" };
     self._uniqueID = utils.core.getNewID();
     self._dbContext = new DbContext();
-
     self._initPromise = self.dbContext.initialize({
       serviceUrl: options.service_url,
       http: http
     }).then(() => {
+
       this.dbSet.addOnEndEdit(function (_s, args) {
         // NOOP
       }, self.uniqueID);
@@ -162,78 +48,16 @@ export class AdwService {
       this.dbContext.addOnError(function (s, args) {
         console.error(args.error);
       }, self.uniqueID);
+
     });
   }
-
-  async loadStaticData() {
-    this._filter = new Filter(this.dbContext);
-
-    console.log("dictionary", this.filter.testDict.items);
-    console.log("dataview", this.filter.testDictVw.items);
-
-    
-    const url = this.dbContext.getUrl('static');
-    const promise = new Promise<IStaticData>((resolve, reject) => {
-      this.http.get(url).subscribe(
-        (res) => resolve(res as unknown as IStaticData), // success path
-        err => reject(err) // error path
-      );
-    });
-    const staticData = await promise;
-
-    // subscribe to the dataview refreshed event
-    this.filter.parentCategories.addOnViewRefreshed((_s, args) => {
-      if (this.filter.parentCategories.moveFirst()) {
-        do {
-          const parentItem = this.filter.parentCategories.currentItem;
-          this.filter.parentCategoryId = parentItem.ProductCategoryId;
-
-          console.log(`parentCategory: ${this.filter.parentCategoryId}) ${parentItem.Name}`, this.filter.childCategories.items);
-        } while (this.filter.parentCategories.moveNext());
-      }
-
-    }, this.uniqueID);
-
-    this.dbContext.dbSets.ProductModel.fillData(staticData.productModelData);
-    // when we fill the data (when data changed), the dataview based on this dataset is automatically refreshed
-    this.dbContext.dbSets.ProductCategory.fillData(staticData.productCategoryData);
-  }
-
-  load(pageIndex: number = 0, pageSize: number): IStatefulPromise<IQueryResult<Product>> {
+  load(): IStatefulPromise<IQueryResult<Product>> {
     const self = this, query = self.dbSet.createReadProductQuery({ param1: [0], param2: "test" });
     query.isClearPrevData = true;
-    query.isPagingEnabled = true;
-    query.pageIndex = pageIndex;
-    query.pageSize = pageSize;
-    query
-      .orderBy('Name')
-      .thenBy('SellStartDate', 'DESC');
+    query.orderBy('Name').thenBy('SellStartDate', SORT_ORDER.DESC);
     let promise = query.load();
     return promise;
   }
-
-  pageChanged(pageIndex: number = 0, pageSize: number) {
-    const self = this;
-    self.dbSet.pageSize = pageSize;
-    self.dbSet.pageIndex = pageIndex;
-  }
-
-  sortChanged(field: string, order: number): IStatefulPromise<IQueryResult<Product>>  {
-    const self = this, query = self.dbSet.query;
-    if (!!field) {
-      query.clearSort();
-      query.pageIndex = 0;
-      query.orderBy(field, order > 0 ? 'DESC' : 'ASC');
-      // console.log(query.sortInfo);
-    }
-    else {
-      query
-        .orderBy('Name')
-        .thenBy('SellStartDate', 'DESC');
-    }
-    return query.load();
-  }
-
   submit(): IPromise<any> {
     const self = this;
     return self.dbContext.submitChanges();
@@ -251,8 +75,5 @@ export class AdwService {
   }
   get uniqueID() {
     return this._uniqueID;
-  }
-  get filter() {
-    return this._filter;
   }
 }

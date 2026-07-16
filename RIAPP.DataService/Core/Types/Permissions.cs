@@ -1,13 +1,15 @@
-﻿namespace RIAPP.DataService.Core.Types
+﻿using RIAPP.DataService.Utils;
+
+namespace RIAPP.DataService.Core.Types
 {
 
     public class Permissions
     {
         public Permissions()
         {
-
+         
         }
 
-        public PermissionList Items { get; set; } = new PermissionList();
+        public PermissionList permissions { get; set; } = new PermissionList();
     }
 }

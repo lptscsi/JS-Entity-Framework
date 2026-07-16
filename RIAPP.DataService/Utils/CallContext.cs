@@ -6,14 +6,14 @@ namespace RIAPP.DataService.Utils
     public class CallContext<T> : IDisposable
         where T : class
     {
-        private static readonly AsyncLocal<CallContext<T>> _asyncLocal = new AsyncLocal<CallContext<T>>();
+        private static readonly AsyncLocal<CallContext<T>> _asyncLocal = new();
         private static CallContext<T> _currentScope
         {
             get => _asyncLocal.Value;
             set => _asyncLocal.Value = value;
         }
 
-        private readonly object SyncRoot = new object();
+        private readonly object SyncRoot = new();
         private readonly CallContext<T> _outerScope;
         private readonly T _contextData;
         private bool _isDisposed;

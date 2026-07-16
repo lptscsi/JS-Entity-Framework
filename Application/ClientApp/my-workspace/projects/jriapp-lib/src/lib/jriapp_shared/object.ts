@@ -25,9 +25,9 @@ sys.isBaseObj = (obj: any): obj is IBaseObject => {
     return (!!obj && obj.__objSig === signature);
 };
 
-export const enum ObjState { None = 0, Disposing = 1, Disposed = 2 }
+export enum ObjState { None = 0, Disposing = 1, Disposed = 2 }
 
-export const enum OBJ_EVENTS {
+export enum OBJ_EVENTS {
     error = "error",
     disposed = "disposed"
 }

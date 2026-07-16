@@ -5,13 +5,13 @@
     {
         public DbSet()
         {
-            Rows = new RowsList();
+            rows = new RowsList();
         }
 
 
-        public string DbSetName { get; set; }
+        public string dbSetName { get; set; }
 
 
-        public RowsList Rows { get; set; }
+        public RowsList rows { get; set; }
     }
 }

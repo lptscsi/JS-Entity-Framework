@@ -4,17 +4,11 @@ using RIAPP.DataService.Core.CodeGen;
 
 namespace RIAPP.DataService.EFCore.Utils
 {
-    public class CsharpProvider<TService, TDB> : BaseCsharpProvider<TService>
+    public class CsharpProvider<TService, TDB>(TService owner, string lang) : BaseCsharpProvider<TService>(owner, lang)
         where TService : EFDomainService<TDB>
         where TDB : DbContext
     {
-        private readonly TDB _db;
-
-        public CsharpProvider(TService owner, string lang) :
-            base(owner, lang)
-        {
-            _db = owner.DB;
-        }
+        private readonly TDB _db = owner.DB;
 
         public override string GenerateScript(string comment = null, bool isDraft = false)
         {

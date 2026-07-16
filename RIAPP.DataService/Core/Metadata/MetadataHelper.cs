@@ -4,10 +4,12 @@ using System;
 
 namespace RIAPP.DataService.Core.Metadata
 {
-
+    /// <summary>
+    /// Хэлпер для генерации метаданных
+    /// </summary>
     public static class MetadataHelper
     {
-        private static readonly MetadataCache _metadataCache = new MetadataCache();
+        private static readonly MetadataCache _metadataCache = new();
 
         public static RunTimeMetadata GetInitializedMetadata(
             BaseDomainService domainService,
@@ -40,7 +42,7 @@ namespace RIAPP.DataService.Core.Metadata
             IDataHelper dataHelper,
             IValueConverter valueConverter)
         {
-            RunTimeMetadataBuilder runTimeMetadataBuilder = new RunTimeMetadataBuilder(domainService.GetType(), designTimeMetadata, dataHelper, valueConverter);
+            RunTimeMetadataBuilder runTimeMetadataBuilder = new(domainService.GetType(), designTimeMetadata, dataHelper, valueConverter);
 
             try
             {

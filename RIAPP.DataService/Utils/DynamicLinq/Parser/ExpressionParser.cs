@@ -1,5 +1,4 @@
-﻿using AnyOfTypes;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -12,6 +11,7 @@ using System.Linq.Dynamic.Core.TypeConverters;
 using System.Linq.Dynamic.Core.Validation;
 using System.Linq.Expressions;
 using System.Reflection;
+using AnyOfTypes;
 
 namespace System.Linq.Dynamic.Core.Parser;
 
@@ -920,7 +920,7 @@ public class ExpressionParser
             stringValue += _textParser.CurrentToken.Text;
             _textParser.NextToken();
         }
-
+        
         return ConstantExpressionHelper.CreateLiteral(stringValue, stringValue);
     }
 
@@ -1523,7 +1523,7 @@ public class ExpressionParser
         var propertyInfos = type.GetProperties();
         if (type.GetTypeInfo().BaseType == typeof(DynamicClass))
         {
-            propertyInfos = propertyInfos.Where(x => x.Name != "Item").ToArray();
+            propertyInfos = [.. propertyInfos.Where(x => x.Name != "Item")];
         }
         var propertyTypes = propertyInfos.Select(p => p.PropertyType).ToArray();
         var ctor = type.GetConstructor(propertyTypes);
@@ -1820,7 +1820,7 @@ public class ExpressionParser
                     {
                         var genericParameters = method.GetParameters().Where(p => p.ParameterType.IsGenericParameter);
                         var typeArguments = genericParameters.Select(a => args[a.Position].Type);
-                        methodToCall = method.MakeGenericMethod(typeArguments.ToArray());
+                        methodToCall = method.MakeGenericMethod([.. typeArguments]);
                     }
 
                     return CallMethod(expression, methodToCall, args);
@@ -1931,7 +1931,7 @@ public class ExpressionParser
 
         // Create the block to return the boolean value.
         var block = Expression.Block(
-            blockList.ToArray(),
+            [.. blockList],
             Expression.Assign(returnValue, methodCall),
             returnValue
         );
@@ -2195,7 +2195,7 @@ public class ExpressionParser
             _textParser.NextToken();
         }
 
-        return argList.ToArray();
+        return [.. argList];
     }
 
     private Expression ParseElementAccess(Expression expr)

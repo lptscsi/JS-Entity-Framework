@@ -20,7 +20,7 @@ namespace RIAPP.DataService.Core.CodeGen
                 {
                     throw new Exception("Can not find embedded string resource: \"" + ID + "\"");
                 }
-                StreamReader rd = new StreamReader(stream, Encoding.UTF8);
+                StreamReader rd = new(stream, Encoding.UTF8);
                 string txt = rd.ReadToEnd();
                 return txt;
             }

@@ -2,6 +2,7 @@
 import { ERRS } from "../../lang";
 import { Utils } from "../utils/utils";
 import { BaseCollection } from "./base";
+import { COLL_CHANGE_OPER, COLL_CHANGE_REASON, COLL_CHANGE_TYPE } from "./const";
 import { IPropInfo } from "./int";
 import { BaseList, IListItem, ListItemAspect } from "./list";
 import { CollUtils } from "./utils";
@@ -60,9 +61,9 @@ export abstract class BaseDictionary<TItem extends IListItem = IListItem> extend
     if (oldkey !== newkey) {
       self._remapItem(oldkey, newkey, item);
       this._onCollectionChanged({
-        changeType: 'Remap',
-        reason: 'None',
-        oper: 'Commit',
+        changeType: COLL_CHANGE_TYPE.Remap,
+        reason: COLL_CHANGE_REASON.None,
+        oper: COLL_CHANGE_OPER.Commit,
         items: [item],
         old_key: oldkey,
         new_key: newkey

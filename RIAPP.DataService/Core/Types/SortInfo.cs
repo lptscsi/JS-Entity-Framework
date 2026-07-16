@@ -7,15 +7,15 @@ namespace RIAPP.DataService.Core.Types
     {
         public SortItem()
         {
-            FieldName = string.Empty;
-            SortOrder = SortOrder.ASC;
+            fieldName = string.Empty;
+            sortOrder = SortOrder.ASC;
         }
 
 
-        public string FieldName { get; set; }
+        public string fieldName { get; set; }
 
 
-        public SortOrder SortOrder { get; set; }
+        public SortOrder sortOrder { get; set; }
     }
 
 
@@ -24,10 +24,10 @@ namespace RIAPP.DataService.Core.Types
     {
         public SortInfo()
         {
-            SortItems = new List<SortItem>();
+            sortItems = new List<SortItem>();
         }
 
 
-        public List<SortItem> SortItems { get; set; }
+        public List<SortItem> sortItems { get; set; }
     }
 }

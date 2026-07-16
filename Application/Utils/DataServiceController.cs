@@ -115,47 +115,32 @@ namespace RIAppDemo.Utils
 
         [ActionName("query")]
         [HttpPost]
-        public async Task<ActionResult> PerformQuery()
+        public async Task<ActionResult> PerformQuery([FromBody] QueryRequest request)
         {
-            try
-            {
-                string body = await Request.GetRawBodyAsync();
-                QueryRequest request = (QueryRequest)DomainService.Serializer.DeSerialize(body, typeof(QueryRequest));
-                QueryResponse res = await DomainService.ServiceGetData(request);
-                return new ChunkedResult<QueryResponse>(res, DomainService.Serializer);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            QueryResponse res = await DomainService.ServiceGetData(request);
+            return new ChunkedResult<QueryResponse>(res, DomainService.Serializer);
         }
 
         [ActionName("save")]
         [HttpPost]
-        public async Task<ActionResult> Save()
+        public async Task<ActionResult> Save([FromBody] ChangeSetRequest changeSet)
         {
-            string body = await Request.GetRawBodyAsync();
-            ChangeSetRequest changeSet = (ChangeSetRequest)DomainService.Serializer.DeSerialize(body, typeof(ChangeSetRequest));
             ChangeSetResponse res = await DomainService.ServiceApplyChangeSet(changeSet);
             return new ChunkedResult<ChangeSetResponse>(res, DomainService.Serializer);
         }
 
         [ActionName("refresh")]
         [HttpPost]
-        public async Task<ActionResult> Refresh()
+        public async Task<ActionResult> Refresh([FromBody] RefreshRequest refreshInfo)
         {
-            string body = await Request.GetRawBodyAsync();
-            RefreshRequest refreshInfo = (RefreshRequest)DomainService.Serializer.DeSerialize(body, typeof(RefreshRequest));
             RefreshResponse res = await DomainService.ServiceRefreshRow(refreshInfo);
             return new ChunkedResult<RefreshResponse>(res, DomainService.Serializer);
         }
 
         [ActionName("invoke")]
         [HttpPost]
-        public async Task<ActionResult> Invoke()
+        public async Task<ActionResult> Invoke([FromBody] InvokeRequest invokeInfo)
         {
-            string body = await Request.GetRawBodyAsync();
-            InvokeRequest invokeInfo = (InvokeRequest)DomainService.Serializer.DeSerialize(body, typeof(InvokeRequest));
             InvokeResponse res = await DomainService.ServiceInvokeMethod(invokeInfo);
             return new ChunkedResult<InvokeResponse>(res, DomainService.Serializer);
         }

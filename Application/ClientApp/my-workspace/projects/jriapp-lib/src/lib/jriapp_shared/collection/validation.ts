@@ -1,8 +1,9 @@
-/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-import { ERRS } from "../../lang";
-import { IIndexer, IValidationInfo } from "../int";
-import { Utils } from "../utils/utils";
+﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
+import { DATA_TYPE } from "./const";
 import { IFieldInfo } from "./int";
+import { ERRS } from "../../lang";
+import { Utils } from "../utils/utils";
+import { IIndexer, IValidationInfo } from "../int";
 
 
 const utils = Utils, { Indexer } = utils.core, { isGuid, isNumber, isString, isArray, isDate, isBoolean } = utils.check,
@@ -66,14 +67,14 @@ export class Validations {
         }
 
         switch (fieldInfo.dataType) {
-            case 'None':
+            case DATA_TYPE.None:
                 break;
-            case 'Guid':
+            case DATA_TYPE.Guid:
                 if (!isGuid(value)) {
                     res.push(format(ERRS.ERR_FIELD_WRONG_TYPE, value, "Guid"));
                 }
                 break;
-            case 'String':
+            case DATA_TYPE.String:
                 if (!isString(value)) {
                     res.push(format(ERRS.ERR_FIELD_WRONG_TYPE, value, "String"));
                 }
@@ -87,7 +88,7 @@ export class Validations {
                     }
                 }
                 break;
-            case 'Binary':
+            case DATA_TYPE.Binary:
                 if (!isArray(value)) {
                     res.push(format(ERRS.ERR_FIELD_WRONG_TYPE, value, "Array"));
                 }
@@ -95,14 +96,14 @@ export class Validations {
                     res.push(format(ERRS.ERR_FIELD_MAXLEN, fieldInfo.maxLength));
                 }
                 break;
-            case 'Bool':
+            case DATA_TYPE.Bool:
                 if (!isBoolean(value)) {
                     res.push(format(ERRS.ERR_FIELD_WRONG_TYPE, value, "Boolean"));
                 }
                 break;
-            case 'Integer':
-            case 'Decimal':
-            case 'Float':
+            case DATA_TYPE.Integer:
+            case DATA_TYPE.Decimal:
+            case DATA_TYPE.Float:
                 if (!isNumber(value)) {
                     res.push(format(ERRS.ERR_FIELD_WRONG_TYPE, value, "Number"));
                 }
@@ -112,8 +113,8 @@ export class Validations {
                     });
                 }
                 break;
-            case 'DateTime':
-            case 'Date':
+            case DATA_TYPE.DateTime:
+            case DATA_TYPE.Date:
                 if (!isDate(value)) {
                     res.push(format(ERRS.ERR_FIELD_WRONG_TYPE, value, "Date"));
                 }
@@ -123,7 +124,7 @@ export class Validations {
                     });
                 }
                 break;
-            case 'Time':
+            case DATA_TYPE.Time:
                 if (!isDate(value)) {
                     res.push(format(ERRS.ERR_FIELD_WRONG_TYPE, value, "Time"));
                 }

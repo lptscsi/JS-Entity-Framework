@@ -4,32 +4,32 @@
     public class QueryRequest : IUseCaseRequest<QueryResponse>
     {
 
-        public string DbSetName { get; set; }
+        public string dbSetName { get; set; }
 
 
-        public string QueryName { get; set; }
+        public string queryName { get; set; }
 
 
-        public FilterInfo FilterInfo { get; set; } = new FilterInfo();
+        public FilterInfo filterInfo { get; set; } = new FilterInfo();
 
 
-        public SortInfo SortInfo { get; set; } = new SortInfo();
+        public SortInfo sortInfo { get; set; } = new SortInfo();
 
 
-        public MethodParameters ParamInfo { get; set; } = new MethodParameters();
+        public MethodParameters paramInfo { get; set; } = new MethodParameters();
 
 
-        public int PageIndex { get; set; }
+        public int pageIndex { get; set; }
 
 
-        public int PageSize { get; set; }
+        public int pageSize { get; set; }
 
 
-        public int PageCount { get; set; }
+        public int pageCount { get; set; }
 
 
 
-        public bool IsIncludeTotalCount { get; set; }
+        public bool isIncludeTotalCount { get; set; }
 
         internal DbSetInfo _dbSetInfo { get; set; }
     }

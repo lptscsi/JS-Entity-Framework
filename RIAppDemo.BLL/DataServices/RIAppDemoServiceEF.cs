@@ -19,6 +19,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ResourceHelper = RIAppDemo.BLL.Utils.ResourceHelper;
 
+#nullable enable
+
 namespace RIAppDemo.BLL.DataServices
 {
     [Authorize]
@@ -61,26 +63,30 @@ namespace RIAppDemo.BLL.DataServices
             return new AdventureWorksLT2012Context(optionsBuilder.Options);
         }
         */
-        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft)
+
+
+        /// <inheritdoc/>
+        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft, List<Type>? dataServiceEntityTypes = null)
         {
             if (isDraft)
             {
-                return base.GetDesignTimeMetadata(true);
+                //  to reduce manual work - first the uncorrected metadata was saved into xml file and then edited to perfection 
+                return base.GetDesignTimeMetadata(true, []);
             }
-            //  first the uncorrected metadata was saved into xml file and then edited 
+
             return DesignTimeMetadata.FromXML(ResourceHelper.GetResourceString("RIAppDemo.BLL.Metadata.MainDemo.xml"));
         }
 
         /// <summary>
-        ///     here can be tracked changes to the entities
-        ///     for example: product entity changes is tracked and can be seen here
+        ///  here can be tracked changes to the entities
+        ///  for example: product entity changes is tracked and can be seen here
         /// </summary>
         /// <param name="dbSetName"></param>
         /// <param name="changeType"></param>
         /// <param name="diffgram"></param>
         protected override void OnTrackChange(string dbSetName, ChangeType changeType, string diffgram)
         {
-            string userName = User.Identity.Name;
+            string userName = User.Identity?.Name ?? "anonymous";
             //you can set a breakpoint here and to examine diffgram
             _logger.LogInformation($"User: {userName} action: {diffgram}");
         }
@@ -144,14 +150,14 @@ namespace RIAppDemo.BLL.DataServices
         public async Task<QueryResult<SalesInfo>> ReadSalesInfo()
         {
             QueryRequest queryInfo = this.GetCurrentQueryInfo();
-            string startsWithVal = queryInfo.FilterInfo.FilterItems[0].Values.First().TrimEnd('%');
+            string startsWithVal = queryInfo.filterInfo.filterItems[0].values.First().TrimEnd('%');
             IQueryable<SalesInfo> res = DB.Customer.AsNoTracking().Where(c => c.SalesPerson.StartsWith(startsWithVal))
                     .Select(s => s.SalesPerson)
                     .Distinct()
                     .OrderBy(s => s)
                     .Select(s => new SalesInfo { SalesPerson = s });
 
-            List<SalesInfo> resPage = await res.Skip(queryInfo.PageIndex * queryInfo.PageSize).Take(queryInfo.PageSize).ToListAsync();
+            List<SalesInfo> resPage = await res.Skip(queryInfo.pageIndex * queryInfo.pageSize).Take(queryInfo.pageSize).ToListAsync();
 
             return new QueryResult<SalesInfo>(resPage, await res.CountAsync());
         }
@@ -211,7 +217,7 @@ namespace RIAppDemo.BLL.DataServices
         [Invoke]
         public byte[] TestComplexInvoke(AddressInfo info, KeyVal[] keys)
         {
-            string vals = string.Join(",", keys?.Select(k => k.val).ToArray());
+            string vals = string.Join(",", keys?.Select(k => k.val)?.ToArray() ?? []);
             // System.Diagnostics.Debug.WriteLine(info);
             // System.Diagnostics.Debug.WriteLine(vals);
             return BitConverter.GetBytes(DateTime.Now.Ticks);
@@ -228,16 +234,16 @@ namespace RIAppDemo.BLL.DataServices
         {
             IQueryable<Customer> customers = DB.Customer.AsNoTracking().Where(c => c.CustomerAddress.Any());
             QueryRequest queryInfo = this.GetCurrentQueryInfo();
-            int? totalCount = queryInfo.PageIndex == 0 ? 0 : (int?)null;
+            int? totalCount = queryInfo.pageIndex == 0 ? 0 : (int?)null;
             // calculate totalCount only when we fetch first page (to speed up query)
-            PerformQueryResult<Customer> custQueryResult = this.PerformQuery(customers, queryInfo.PageIndex == 0 ? (countQuery) => countQuery.CountAsync() : (Func<IQueryable<Customer>, Task<int>>)null);
+            PerformQueryResult<Customer> custQueryResult = this.PerformQuery(customers, queryInfo.pageIndex == 0 ? (countQuery) => countQuery.CountAsync() : null as Func<IQueryable<Customer>, Task<int>>);
             List<Customer> custList = await custQueryResult.Data.ToListAsync();
 
             // only execute total counting if we got full page size of rows, preventing unneeded database call to count total
-            if (queryInfo.PageIndex == 0 && custList.Any())
+            if (queryInfo.pageIndex == 0 && custList.Any())
             {
                 int cnt = custList.Count;
-                if (cnt < queryInfo.PageSize)
+                if (cnt < queryInfo.pageSize)
                 {
                     totalCount = cnt;
                 }
@@ -252,11 +258,11 @@ namespace RIAppDemo.BLL.DataServices
                                            join addr in DB.Address on custAddr.AddressId equals addr.AddressId
                                            select new
                                            {
-                                               CustomerId = custAddr.CustomerId,
+                                               custAddr.CustomerId,
                                                ID = addr.AddressId,
                                                Line1 = addr.AddressLine1,
                                                Line2 = addr.AddressLine2,
-                                               City = addr.City,
+                                               addr.City,
                                                Region = addr.CountryRegion
                                            }).ToListAsync();
 
@@ -455,7 +461,7 @@ namespace RIAppDemo.BLL.DataServices
                 prodModel = await DB.ProductModel.OrderBy(l => l.Name).Select(d => new KeyVal { key = d.ProductModelId, val = d.Name }).ToListAsync()
             };
 
-            (res.prodModel as List<KeyVal>).Insert(0, new KeyVal() { key = -1, val = "Not Set (Empty)" });
+            (res.prodModel as List<KeyVal>)!.Insert(0, new KeyVal() { key = -1, val = "Not Set (Empty)" });
 
             return res;
         }

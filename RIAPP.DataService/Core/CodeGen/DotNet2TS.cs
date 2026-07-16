@@ -15,7 +15,7 @@ namespace RIAPP.DataService.Core.CodeGen
     {
         // a container for available services (something like dependency injection container)
         // maps type name to its definition
-        private readonly Dictionary<string, string> _tsTypes = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _tsTypes = new();
         private readonly IValueConverter _valueConverter;
         private readonly Action<Type> _onClientTypeAdded;
 
@@ -175,7 +175,7 @@ namespace RIAPP.DataService.Core.CodeGen
 
             CommentAttribute commentAttr = t.GetCustomAttributes(typeof(CommentAttribute), false).OfType<CommentAttribute>().FirstOrDefault();
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             if (commentAttr != null && !string.IsNullOrWhiteSpace(commentAttr.Text))
             {
                 AddComment(sb, commentAttr.Text);
@@ -219,21 +219,17 @@ namespace RIAPP.DataService.Core.CodeGen
             }
 
             CommentAttribute commentAttr =
-                t.GetCustomAttributes(typeof(CommentAttribute), false)
-                .OfType<CommentAttribute>()
-                .FirstOrDefault();
+                t.GetCustomAttributes(typeof(CommentAttribute), false).OfType<CommentAttribute>().FirstOrDefault();
 
-            StringBuilder sb = new StringBuilder();
-
+            StringBuilder sb = new();
             if (commentAttr != null && !string.IsNullOrWhiteSpace(commentAttr.Text))
             {
                 AddComment(sb, commentAttr.Text);
             }
-
             sb.AppendFormat("export enum {0}", name);
             sb.AppendLine();
             sb.AppendLine("{");
-            int[] enumVals = Enum.GetValues(t).Cast<int>().ToArray();
+            int[] enumVals = [.. Enum.GetValues(t).Cast<int>()];
             bool isFirst = true;
             Array.ForEach(enumVals, val =>
             {
@@ -256,7 +252,7 @@ namespace RIAPP.DataService.Core.CodeGen
         public string GetInterfaceDeclarations()
         {
             Dictionary<string, string>.ValueCollection vals = _tsTypes.Values;
-            StringBuilder sb = new StringBuilder(4096);
+            StringBuilder sb = new(4096);
             foreach (string str in vals)
             {
                 sb.Append(str);

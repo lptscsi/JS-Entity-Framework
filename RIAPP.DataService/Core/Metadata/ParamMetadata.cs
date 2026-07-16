@@ -20,37 +20,37 @@ namespace RIAPP.DataService.Core.Metadata
     {
         public ParamMetadata()
         {
-            Name = "";
-            DataType = DataType.None;
-            Ordinal = -1;
-            IsNullable = false;
-            IsArray = false;
-            DateConversion = DateConversion.None;
+            name = "";
+            dataType = DataType.None;
+            ordinal = -1;
+            isNullable = false;
+            isArray = false;
+            dateConversion = DateConversion.None;
         }
 
 
         [Description("Parameter name")]
-        public string Name { get; set; }
+        public string name { get; set; }
 
 
         [Description("Parameter type")]
-        public DataType DataType { get; set; }
+        public DataType dataType { get; set; }
 
 
         [Description("True if parameter is array")]
-        public bool IsArray { get; set; }
+        public bool isArray { get; set; }
 
 
         [Description("Parameter position")]
-        public bool IsNullable { get; set; }
+        public bool isNullable { get; set; }
 
 
         [Description("How adjust date timezone between server and client")]
-        public DateConversion DateConversion { get; set; }
+        public DateConversion dateConversion { get; set; }
 
 
         [Description("Parameter position")]
-        public int Ordinal { get; set; }
+        public int ordinal { get; set; }
 
         internal Type _ParameterType { get; set; }
 
@@ -68,29 +68,29 @@ namespace RIAPP.DataService.Core.Metadata
                 throw new DomainServiceException("Out parameters are not supported in service methods");
             }
 
-            ParamMetadata paramInfo = new ParamMetadata
+            ParamMetadata paramInfo = new()
             {
-                IsNullable = ptype.IsNullableType(),
-                Name = pinfo.Name
+                isNullable = ptype.IsNullableType(),
+                name = pinfo.Name
             };
             paramInfo.SetParameterType(ptype);
-            Type realType = paramInfo.IsNullable ? Nullable.GetUnderlyingType(ptype) : ptype;
+            Type realType = paramInfo.isNullable ? Nullable.GetUnderlyingType(ptype) : ptype;
 
             IDateConversionData dateConvert = (IDateConversionData)pinfo.GetCustomAttributes(false).FirstOrDefault(a => a is IDateConversionData);
 
             if (dateConvert != null)
             {
-                paramInfo.DateConversion = dateConvert.DateConversion;
+                paramInfo.dateConversion = dateConvert.DateConversion;
             }
 
-            paramInfo.IsArray = realType.IsArrayType();
+            paramInfo.isArray = realType.IsArrayType();
             try
             {
-                paramInfo.DataType = valueConverter.DataTypeFromType(realType);
+                paramInfo.dataType = valueConverter.DataTypeFromType(realType);
             }
             catch (UnsupportedTypeException)
             {
-                paramInfo.DataType = DataType.None;
+                paramInfo.dataType = DataType.None;
             }
 
             return paramInfo;

@@ -5,7 +5,7 @@ import { BaseObject } from "../object";
 import { IVoidPromise } from "../utils/ipromise";
 import { Utils } from "../utils/utils";
 import { BaseCollection } from "./base";
-import { ITEM_STATUS, VALS_VERSION } from "./const";
+import { FIELD_TYPE, ITEM_STATUS, VALS_VERSION } from "./const";
 import { ICancellableArgs, ICollectionItem, IFieldInfo, IItemAspect, ITEM_EVENTS } from "./int";
 import { CollUtils } from "./utils";
 import { Validations } from "./validation";
@@ -66,7 +66,7 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
     this._coll = collection;
     this._vals = vals;
     this._key = key;
-    this._status = isNew ? 'Added' : 'None';
+    this._status = isNew ? ITEM_STATUS.Added : ITEM_STATUS.None;
     this._tempVals = null;
     this._flags = 0;
     this._valueBag = null;
@@ -93,7 +93,7 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
       });
     }
     this._flags = 0;
-    this._status = 'None';
+    this._status = ITEM_STATUS.None;
     super.dispose();
   }
   protected _onErrorsChanged(): void {
@@ -139,7 +139,7 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
         ERROR.reThrow(ex, isHandled);
       }
     }
-    this._storeVals('Temporary');
+    this._storeVals(VALS_VERSION.Temporary);
     this.coll.currentItem = this.item;
     return true;
   }
@@ -170,11 +170,11 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
     coll.errors.removeAllErrors(item);
     const names = coll.getFieldNames();
     for (const name of names) {
-      if (self._getValue(name, 'Temporary') !== self._getValue(name, 'Current')) {
+      if (self._getValue(name, VALS_VERSION.Temporary) !== self._getValue(name, VALS_VERSION.Current)) {
         changed.push(name);
       }
     }
-    this._restoreVals('Temporary');
+    this._restoreVals(VALS_VERSION.Temporary);
     // refresh User interface when values restored
     for (const name of changed) {
       sys.raiseProp(this.item, name);
@@ -212,7 +212,7 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
       res: IValidationInfo[] = [];
     // revalidate all fields one by one
     walkFields(fieldInfos, (fld, fullName) => {
-      if (fld.fieldType !== 'Object') {
+      if (fld.fieldType !== FIELD_TYPE.Object) {
         const fieldValidation: IValidationInfo = self._validateField(fullName);
         if (!!fieldValidation && fieldValidation.errors.length > 0) {
           res.push(fieldValidation);
@@ -229,9 +229,9 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
   }
   protected _getValue(name: string, ver: VALS_VERSION): any {
     switch (ver) {
-      case 'Current':
+      case VALS_VERSION.Current:
         return getValue(this._vals, name);
-      case 'Temporary':
+      case VALS_VERSION.Temporary:
         if (!this._tempVals) {
           throw new Error("Invalid Operation, no Stored Version: " + ver);
         }
@@ -242,10 +242,10 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
   }
   protected _setValue(name: string, val: any, ver: VALS_VERSION): void {
     switch (ver) {
-      case 'Current':
+      case VALS_VERSION.Current:
         setValue(this._vals, name, val, false);
         break;
-      case 'Temporary':
+      case VALS_VERSION.Temporary:
         if (!this._tempVals) {
           throw new Error("Invalid Operation, no Stored Version: " + ver);
         }
@@ -260,7 +260,7 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
   }
   protected _storeVals(toVer: VALS_VERSION): void {
     switch (toVer) {
-      case 'Temporary':
+      case VALS_VERSION.Temporary:
         this._tempVals = this._cloneVals();
         break;
       default:
@@ -269,7 +269,7 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
   }
   protected _restoreVals(fromVer: VALS_VERSION): void {
     switch (fromVer) {
-      case 'Temporary':
+      case VALS_VERSION.Temporary:
         if (!this._tempVals) {
           throw new Error("Invalid Operation, no Stored Version: " + fromVer);
         }
@@ -281,7 +281,7 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
     }
   }
   _resetStatus(): void {
-    this._status = 'None';
+    this._status = ITEM_STATUS.None;
   }
   _setKey(v: string): void {
     this._key = v;
@@ -552,13 +552,13 @@ export abstract class ItemAspect extends BaseObject implements IItemAspect {
     return false;
   }
   get isHasChanges(): boolean {
-    return this._status !== 'None';
+    return this._status !== ITEM_STATUS.None;
   }
   get isNew(): boolean {
-    return this._status === 'Added';
+    return this._status === ITEM_STATUS.Added;
   }
   get isDeleted(): boolean {
-    return this._status === 'Deleted';
+    return this._status === ITEM_STATUS.Deleted;
   }
   get isEdited(): boolean {
     return this._getFlag(AspectFlags.IsEdited);

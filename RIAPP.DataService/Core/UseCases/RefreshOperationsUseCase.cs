@@ -25,16 +25,16 @@ namespace RIAPP.DataService.Core
 
         public async Task<bool> Handle(RefreshRequest message, IOutputPort<RefreshResponse> outputPort)
         {
-            RefreshResponse response = new RefreshResponse { RowInfo = message.RowInfo, DbSetName = message.DbSetName };
+            RefreshResponse response = new() { rowInfo = message.rowInfo, dbSetName = message.dbSetName };
 
             try
             {
                 Metadata.RunTimeMetadata metadata = _service.GetMetadata();
-                DbSetInfo dbSetInfo = metadata.DbSets.Get(message.DbSetName) ?? throw new InvalidOperationException($"The DbSet {message.DbSetName} was not found in metadata");
+                DbSetInfo dbSetInfo = metadata.DbSets.Get(message.dbSetName) ?? throw new InvalidOperationException($"The DbSet {message.dbSetName} was not found in metadata");
                 message.SetDbSetInfo(dbSetInfo);
-                message.RowInfo.SetDbSetInfo(dbSetInfo);
+                message.rowInfo.SetDbSetInfo(dbSetInfo);
 
-                RefreshContext<TService> context = new RefreshContext<TService>(message,
+                RefreshContext<TService> context = new(message,
                 response,
                 (TService)_service,
                 _serviceContainer);
@@ -50,7 +50,7 @@ namespace RIAPP.DataService.Core
                 }
 
                 string err = _onError(ex);
-                response.Error = new ErrorInfo(err, ex.GetType().Name);
+                response.error = new ErrorInfo(err, ex.GetType().Name);
             }
 
             outputPort.Handle(response);

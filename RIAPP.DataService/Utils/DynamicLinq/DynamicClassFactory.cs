@@ -10,6 +10,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using JetBrains.Annotations;
 #if WINDOWS_APP
 using System.Linq;
 #endif
@@ -128,7 +129,7 @@ namespace System.Linq.Dynamic.Core
                             compareMethodGeneric.Attributes & ~MethodAttributes.Abstract,
                             compareMethodGeneric.CallingConvention,
                             compareMethodGeneric.ReturnType,
-                            compareMethodGeneric.GetParameters().Select(p => p.ParameterType).ToArray()
+                            [.. compareMethodGeneric.GetParameters().Select(p => p.ParameterType)]
                         );
                         var methodBuilderIL = methodBuilder.GetILGenerator();
                         methodBuilderIL.Emit(OpCodes.Ldarg_0);
@@ -173,8 +174,8 @@ namespace System.Linq.Dynamic.Core
         {
             Check.HasNoNulls(properties, nameof(properties));
 
-            Type[] types = properties.Select(p => p.Type).ToArray();
-            string[] names = properties.Select(p => p.Name).ToArray();
+            Type[] types = [.. properties.Select(p => p.Type)];
+            string[] names = [.. properties.Select(p => p.Name)];
 
             string key = GenerateKey(properties, createParameterCtor);
 
@@ -198,7 +199,7 @@ namespace System.Linq.Dynamic.Core
 
                         if (names.Length != 0)
                         {
-                            string[] genericNames = names.Select(genericName => $"<{genericName}>j__TPar").ToArray();
+                            string[] genericNames = [.. names.Select(genericName => $"<{genericName}>j__TPar")];
                             generics = tb.DefineGenericParameters(genericNames);
                             foreach (GenericTypeParameterBuilder b in generics)
                             {
@@ -354,7 +355,7 @@ namespace System.Linq.Dynamic.Core
                             ilgeneratorConstructorDef.Emit(OpCodes.Ret);
 
                             // .ctor with params
-                            ConstructorBuilder constructor = tb.DefineConstructor(MethodAttributes.Public | MethodAttributes.HideBySig, CallingConventions.HasThis, generics.Select(p => p.AsType()).ToArray());
+                            ConstructorBuilder constructor = tb.DefineConstructor(MethodAttributes.Public | MethodAttributes.HideBySig, CallingConventions.HasThis, [.. generics.Select(p => p.AsType())]);
                             constructor.SetCustomAttribute(DebuggerHiddenAttributeBuilder);
 
                             ILGenerator ilgeneratorConstructor = constructor.GetILGenerator();

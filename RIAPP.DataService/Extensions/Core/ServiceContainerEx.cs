@@ -4,6 +4,9 @@ using RIAPP.DataService.Utils;
 
 namespace RIAPP.DataService.Core
 {
+    /// <summary>
+    /// Методы расширения для работы с сервисами используемыми службой <see cref="BaseDomainService"/>
+    /// </summary>
     public static class ServiceContainerEx
     {
         public static IUserProvider GetUserProvider(this IServiceContainer container)
@@ -35,22 +38,10 @@ namespace RIAPP.DataService.Core
             return container.GetRequiredService<IValidationHelper<TService>>();
         }
 
-        public static IServiceOperations<TService> GetServiceOperations<TService>(this IServiceContainer<TService> container)
-         where TService : BaseDomainService
-        {
-            return container.GetRequiredService<IServiceOperations<TService>>();
-        }
-
         public static IServiceOperationsHelper<TService> GetServiceHelper<TService>(this IServiceContainer<TService> container)
              where TService : BaseDomainService
         {
             return container.GetRequiredService<IServiceOperationsHelper<TService>>();
-        }
-
-        public static IEntityVersionHelper<TService> GetEntityVersionHelper<TService>(this IServiceContainer<TService> container)
-            where TService : BaseDomainService
-        {
-            return container.GetRequiredService<IEntityVersionHelper<TService>>();
         }
 
         public static ICodeGenFactory<TService> GetCodeGenFactory<TService>(this IServiceContainer<TService> container)

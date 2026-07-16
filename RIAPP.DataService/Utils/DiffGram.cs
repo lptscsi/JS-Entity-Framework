@@ -2,7 +2,9 @@
 using RIAPP.DataService.Resources;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace RIAPP.DataService.Utils
@@ -34,7 +36,7 @@ namespace RIAPP.DataService.Utils
 
         private static IDictionary<string, object> GetValues(Type t, object obj, string[] propNames)
         {
-            Expando res = new Expando();
+            Expando res = new();
 
             if (obj == null)
             {
@@ -49,15 +51,15 @@ namespace RIAPP.DataService.Utils
         }
 
         public static string GetDiffGram(
-            IDictionary<string, object> d1,
-            IDictionary<string, object> d2,
-            Type t,
+            IDictionary<string, object> d1, 
+            IDictionary<string, object> d2, 
+            Type t, 
             string[] pkNames,
-            IDictionary<string, object> dpk,
-            ChangeType changeType,
+            IDictionary<string, object> dpk, 
+            ChangeType changeType, 
             string dbSetName)
         {
-            LinkedList<Vals> lst = new LinkedList<Vals>();
+            LinkedList<Vals> lst = new();
 
             foreach (string pnm in d1.Keys.Intersect(d2.Keys))
             {
@@ -138,7 +140,7 @@ namespace RIAPP.DataService.Utils
 
             string pkval = string.Join(",", pkNames.Select(nm => dpk[nm].ToString()));
 
-            XElement x = new XElement("diffgram",
+            XElement x = new("diffgram",
                 new XAttribute("dbset-name", dbSetName),
                 new XAttribute("key-name", string.Join(",", pkNames)),
                 new XAttribute("key-val", pkval),

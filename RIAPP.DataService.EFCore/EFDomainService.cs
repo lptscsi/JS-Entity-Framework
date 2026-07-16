@@ -12,46 +12,51 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using DataType = RIAPP.DataService.Core.Types.DataType;
 
 namespace RIAPP.DataService.EFCore
 {
-    public abstract class EFDomainService<TDB> : BaseDomainService
+    /// <summary>
+    /// Базовый класс сервиса для работы с данными посредством EF
+    /// </summary>
+    /// <typeparam name="TDB"></typeparam>
+    /// <param name="serviceContainer"></param>
+    /// <param name="db"></param>
+    public abstract class EFDomainService<TDB>(IServiceContainer serviceContainer, TDB db = default) 
+        : BaseDomainService(serviceContainer)
        where TDB : DbContext
     {
-        private TDB _db;
         private bool _ownsDb;
-
-        public EFDomainService(IServiceContainer serviceContainer, TDB db = default(TDB))
-            : base(serviceContainer)
-        {
-            _db = db;
-        }
+        private readonly Lock SyncLock = new();
 
         public TDB DB
         {
             get
             {
-                if (_db == null)
+                lock (SyncLock)
                 {
-                    _db = CreateDataContext();
-                    if (_db != null)
+                    if (db == null)
                     {
-                        _ownsDb = true;
+                        db = CreateDataContext();
+                        if (db != null)
+                        {
+                            _ownsDb = true;
+                        }
                     }
+                    return db;
                 }
-                return _db;
             }
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            if (_db != null && _ownsDb)
+            if (db != null && _ownsDb)
             {
-                _db.Dispose();
-                _db = null;
+                db.Dispose();
+                db = null;
                 _ownsDb = false;
             }
 
@@ -59,6 +64,7 @@ namespace RIAPP.DataService.EFCore
         }
 
         #region Overridable Methods
+
         protected virtual TDB CreateDataContext()
         {
             return Activator.CreateInstance<TDB>();
@@ -69,7 +75,7 @@ namespace RIAPP.DataService.EFCore
         {
             try
             {
-                using (TransactionScope transScope = new TransactionScope(TransactionScopeOption.RequiresNew,
+                using (TransactionScope transScope = new(TransactionScopeOption.RequiresNew,
                     new TransactionOptions
                     {
                         IsolationLevel = IsolationLevel.ReadCommitted,
@@ -90,27 +96,49 @@ namespace RIAPP.DataService.EFCore
             }
         }
 
-        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft)
+        /// <summary>
+        /// Возвращает метаданные для работы сервиса
+        /// </summary>
+        /// <param name="isDraft"></param>
+        /// <param name="dataServiceEntityTypes"></param>
+        /// <returns></returns>
+        protected override DesignTimeMetadata GetDesignTimeMetadata(bool isDraft, List<Type> dataServiceEntityTypes = null)
         {
-            DesignTimeMetadata metadata = new DesignTimeMetadata();
+            DesignTimeMetadata metadata = new();
             IModel dbModel = DB.Model;
-            IEntityType[] allEntities = dbModel.GetEntityTypes().ToArray();
-            IEntityType[] plainEntities = allEntities.Where(t => !t.IsOwned()).ToArray();
+            IEntityType[] allEntities = [.. dbModel.GetEntityTypes()];
+            IEntityType[] plainEntities = [.. allEntities.Where(t => !t.IsOwned())];
 
-            Dictionary<string, IEntityType> ownedTypesMap = allEntities.Where(t => t.IsOwned()).ToDictionary(t => t.Name);
+            Dictionary<string, IEntityType> ownedTypesMap = allEntities
+                .Where(t => t.IsOwned())
+                .ToDictionary(t => t.Name);
+
+            HashSet<Type> chosenTypes = dataServiceEntityTypes?.ToHashSet();
 
             foreach (IEntityType entityInfo in plainEntities)
             {
-                IEnumerable<IProperty> edmProps = entityInfo.GetProperties().Where(p => !p.IsShadowProperty()).ToArray();
+                if (chosenTypes != null && !chosenTypes.Contains(entityInfo.ClrType))
+                {
+                    continue;
+                }
+
+                IEnumerable<IProperty> edmProps = entityInfo.GetProperties()
+                    .Where(p => !p.IsShadowProperty())
+                    .ToArray();
+
                 // IEnumerable<string> edmProps1 = entityInfo.GetNavigations().Select(n => n.ForeignKey.DeclaringEntityType.Name).ToArray();
-                IEnumerable<INavigation> ownedTypes = entityInfo.GetNavigations().Where(n => ownedTypesMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name)).ToArray();
+                IEnumerable<INavigation> ownedTypes = entityInfo.GetNavigations()
+                    .Where(n => ownedTypesMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name))
+                    .ToArray();
 
-                FieldsList fields = GenerateFieldInfos(edmProps, ownedTypes, ownedTypesMap);
-
-                DbSetInfo dbSetInfo = new DbSetInfo(entityInfo.ClrType.Name, fields);
+                DbSetInfo dbSetInfo = new()
+                {
+                    dbSetName = entityInfo.ClrType.Name
+                };
 
                 dbSetInfo.SetEntityType(entityInfo.ClrType);
                 metadata.DbSets.Add(dbSetInfo);
+                GenerateFieldInfos(metadata, entityInfo, dbSetInfo, edmProps, ownedTypes, ownedTypesMap);
                 GenerateAssociations(metadata, entityInfo, dbSetInfo);
             }
 
@@ -120,6 +148,7 @@ namespace RIAPP.DataService.EFCore
         #endregion
 
         #region helper methods
+
         #region Complex Type Fields
         private void UpdateNestedFieldInfo(Field fieldInfo, PropertyInfo propInfo)
         {
@@ -200,7 +229,7 @@ namespace RIAPP.DataService.EFCore
         }
         #endregion
 
-        private void GenerateAssociation(DesignTimeMetadata metadata, INavigation childToParentNav)
+        private static void GenerateAssociation(DesignTimeMetadata metadata, IEntityType entityInfo, DbSetInfo dbSetInfo, INavigation childToParentNav)
         {
             INavigation inverseNavigation = childToParentNav.Inverse; //.FindInverse();
             string assoc_name = string.Format("{0}_{1}", inverseNavigation.Name, childToParentNav.Name);
@@ -244,9 +273,9 @@ namespace RIAPP.DataService.EFCore
             }
         }
 
-        private void UpdateFieldInfo(Field fieldInfo, IProperty edmProp)
+        private static void UpdateFieldInfo(Field fieldInfo, IProperty edmProp)
         {
-            fieldInfo.isAutoGenerated = isAutoGenerated(edmProp);
+            fieldInfo.isAutoGenerated = IsAutoGenerated(edmProp);
             fieldInfo.isNullable = edmProp.IsNullable;
             fieldInfo.isReadOnly = edmProp.GetAfterSaveBehavior() == PropertySaveBehavior.Throw;
             fieldInfo.allowClientDefault = !fieldInfo.isAutoGenerated && fieldInfo.isReadOnly && edmProp.GetBeforeSaveBehavior() == PropertySaveBehavior.Save;
@@ -260,7 +289,7 @@ namespace RIAPP.DataService.EFCore
             {
                 fieldInfo.fieldType = FieldType.RowTimeStamp;
             }
-            else if (isNotMapped(edmProp))
+            else if (IsNotMapped(edmProp))
             {
                 fieldInfo.fieldType = FieldType.ServerCalculated;
             }
@@ -325,9 +354,8 @@ namespace RIAPP.DataService.EFCore
             }
         }
 
-        private FieldsList GenerateFieldInfos(IEnumerable<IProperty> edmProps, IEnumerable<INavigation> ownedTypes, Dictionary<string, IEntityType> ownedMap)
+        private void GenerateFieldInfos(DesignTimeMetadata metadata, IEntityType entityInfo, DbSetInfo dbSetInfo, IEnumerable<IProperty> edmProps, IEnumerable<INavigation> ownedTypes, Dictionary<string, IEntityType> ownedMap)
         {
-            FieldsList fieldInfos = new FieldsList();
             short pkNum = 0;
             // Console.WriteLine($"Generate fields: {entityInfo.Name} FieldsCount: {edmProps.Count()}");
 
@@ -338,7 +366,7 @@ namespace RIAPP.DataService.EFCore
                 IEntityType ownedType = ownedMap[nm];
                 IEnumerable<INavigation> nestedOwnedTypes = ownedType.GetNavigations().Where(n => ownedMap.ContainsKey(n.ForeignKey.DeclaringEntityType.Name)).ToArray();
                 GenerateOwnedTypeFieldInfos(fieldInfo, ownedType, nestedOwnedTypes, ownedMap);
-                fieldInfos.Add(fieldInfo);
+                dbSetInfo.fieldInfos.Add(fieldInfo);
             }
 
             DataService.Utils.IValueConverter valueConverter = ServiceContainer.ValueConverter;
@@ -375,30 +403,32 @@ namespace RIAPP.DataService.EFCore
                     }
                 }
 
-                fieldInfos.Add(fieldInfo);
+                dbSetInfo.fieldInfos.Add(fieldInfo);
             }
-
-            return fieldInfos;
         }
 
-        private void GenerateAssociations(DesignTimeMetadata metadata, IEntityType entityInfo, DbSetInfo dbSetInfo)
+        private static void GenerateAssociations(DesignTimeMetadata metadata, IEntityType entityInfo, DbSetInfo dbSetInfo)
         {
-            IEnumerable<INavigation> childToParentNavs = entityInfo.GetNavigations().Where(n => n.IsOnDependent /*IsDependentToPrincipal() */);
+            IEnumerable<INavigation> childToParentNavs = entityInfo
+                .GetNavigations()
+                .Where(n => n.IsOnDependent /*IsDependentToPrincipal() */);
+
             foreach (INavigation childToParentNav in childToParentNavs)
             {
-                GenerateAssociation(metadata, childToParentNav);
+                GenerateAssociation(metadata, entityInfo, dbSetInfo, childToParentNav);
             }
         }
 
-        private bool isAutoGenerated(IProperty prop)
+        private static bool IsAutoGenerated(IProperty prop)
         {
             return prop.ValueGenerated == ValueGenerated.OnAdd;
         }
 
-        private bool isNotMapped(IProperty prop)
+        private static bool IsNotMapped(IProperty prop)
         {
             return prop.GetBeforeSaveBehavior() == PropertySaveBehavior.Ignore && prop.GetAfterSaveBehavior() == PropertySaveBehavior.Ignore;
         }
+
         #endregion
     }
 }

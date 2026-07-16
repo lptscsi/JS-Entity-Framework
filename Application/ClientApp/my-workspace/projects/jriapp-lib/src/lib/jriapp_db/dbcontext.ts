@@ -7,10 +7,10 @@ import {
     IAbortablePromise, IBaseObject, IIndexer, IPromise, IStatefulPromise, Lazy,
     TErrorHandler, TEventHandler, Utils, WaitQueue
 } from "../jriapp_shared";
-import { COLL_CHANGE_REASON } from "../jriapp_shared/collection/const";
+import { COLL_CHANGE_REASON, DATA_TYPE } from "../jriapp_shared/collection/const";
 import { ValueUtils } from "../jriapp_shared/collection/utils";
 import { Association } from "./association";
-import { DATA_OPER } from "./const";
+import { DATA_OPER, REFRESH_MODE } from "./const";
 import { TDataQuery } from "./dataquery";
 import { DbSet } from "./dbset";
 import { DbSets, TDbSetCreatingArgs } from "./dbsets";
@@ -78,7 +78,8 @@ const enum DBCTX_EVENTS {
   SUBMITTING = "submitting",
   SUBMITTED = "submitted",
   SUBMIT_ERROR = "submit_error",
-  DBSET_CREATING = "dbset_creating"
+  DBSET_CREATING = "dbset_creating",
+  REJECT_CHANGES = "rejected_changes"
 }
 
 export type TSubmitErrArgs = { error: any, isHandled: boolean, context: IIndexer<any> };
@@ -202,7 +203,7 @@ export abstract class DbContext<TMethods extends {
       throw new Error(ERRS.ERR_DOMAIN_CONTEXT_INITIALIZED);
     }
     if (!metadata) {
-      const self = this, invokeUrl = self.getUrl(DATA_SVC_METH.Metadata);
+      const self = this, invokeUrl = self._getUrl(DATA_SVC_METH.Metadata);
 
       const reqPromise = new AbortablePromise<IMetadata>((resolve, reject, token) => {
         self.http.get<IMetadata>(invokeUrl).subscribe(
@@ -210,7 +211,7 @@ export abstract class DbContext<TMethods extends {
           err => reject(err) // error path
         );
       });
-      self._addRequestPromise(reqPromise, 'Init');
+      self._addRequestPromise(reqPromise, DATA_OPER.Init);
 
       metadata = await reqPromise;
     }
@@ -271,10 +272,10 @@ export abstract class DbContext<TMethods extends {
         if (!res) {
           throw new Error(format(ERRS.ERR_UNEXPECTED_SVC_ERROR!, "operation result is empty"));
         }
-        fn_checkError(res.error, 'Invoke');
+        fn_checkError(res.error, DATA_OPER.Invoke);
         return res.result;
       }).catch((err) => {
-        self._onDataOperError(err, 'Invoke');
+        self._onDataOperError(err, DATA_OPER.Invoke);
         ERROR.throwDummy(err);
       });
     };
@@ -317,7 +318,7 @@ export abstract class DbContext<TMethods extends {
 
     for (const pinfo of paramInfos) {
       let val = args[pinfo.name];
-      if (!pinfo.isNullable && !pinfo.isArray && !(pinfo.dataType === 'String' || pinfo.dataType === 'Binary') && isNt(val)) {
+      if (!pinfo.isNullable && !pinfo.isArray && !(pinfo.dataType === DATA_TYPE.String || pinfo.dataType === DATA_TYPE.Binary) && isNt(val)) {
         throw new Error(format(ERRS.ERR_SVC_METH_PARAM_INVALID!, pinfo.name, val, methodInfo.methodName));
       }
       if (isFunc(val)) {
@@ -329,7 +330,7 @@ export abstract class DbContext<TMethods extends {
 
       let value: string | null = null;
       // byte arrays are optimized for serialization
-      if (pinfo.dataType === 'Binary' && isArray(val)) {
+      if (pinfo.dataType === DATA_TYPE.Binary && isArray(val)) {
         value = JSON.stringify(val);
       } else if (isArray(val)) {
         const arr: string[] = [];
@@ -356,7 +357,7 @@ export abstract class DbContext<TMethods extends {
       return data;
     }).then((postData) => {
       self._checkDisposed();
-      const invokeUrl = this.getUrl(DATA_SVC_METH.Invoke);
+      const invokeUrl = this._getUrl(DATA_SVC_METH.Invoke);
       const reqPromise = new AbortablePromise<IInvokeResponse>((resolve, reject, token) => {
         self.http.post<IInvokeResponse>(invokeUrl, postData).subscribe(
           (res) => resolve(res), // success path
@@ -364,7 +365,7 @@ export abstract class DbContext<TMethods extends {
         );
       });
 
-      self._addRequestPromise(reqPromise, 'Invoke');
+      self._addRequestPromise(reqPromise, DATA_OPER.Invoke);
 
       return reqPromise;
     });
@@ -403,7 +404,7 @@ export abstract class DbContext<TMethods extends {
       if (isNt(dbSet)) {
         throw new Error(format(ERRS.ERR_DBSET_NAME_INVALID!, dbSetName));
       }
-      fn_checkError(response.error, 'Query');
+      fn_checkError(response.error, DATA_OPER.Query);
       const isClearAll = (!!query && query.isClearPrevData);
       return dbSet._getInternal().fillFromService(
         {
@@ -418,7 +419,7 @@ export abstract class DbContext<TMethods extends {
     const self = this;
     try {
       try {
-        fn_checkError(response.error, 'Submit');
+        fn_checkError(response.error, DATA_OPER.Submit);
       } catch (ex) {
         const submitted: IEntityItem[] = [], notvalid: IEntityItem[] = [];
         response.dbSets.forEach((jsDB) => {
@@ -463,6 +464,14 @@ export abstract class DbContext<TMethods extends {
     });
     return request;
   }
+  protected _getUrl(action: string): string {
+    let loadUrl = this.serviceUrl;
+    if (!endsWith(loadUrl, "/")) {
+      loadUrl = loadUrl + "/";
+    }
+    loadUrl = loadUrl + [action, ""].join("/");
+    return loadUrl;
+  }
   protected _onDataOperError(ex: any, oper: DATA_OPER): boolean {
     if (ERROR.checkIsDummy(ex)) {
       return true;
@@ -478,7 +487,7 @@ export abstract class DbContext<TMethods extends {
     this.objEvents.raise(DBCTX_EVENTS.SUBMIT_ERROR, args);
     if (!args.isHandled) {
       // this.rejectChanges();
-      this._onDataOperError(error, 'Submit');
+      this._onDataOperError(error, DATA_OPER.Submit);
     }
   }
   protected _onSubmitting(context: IIndexer<any>): boolean {
@@ -565,7 +574,7 @@ export abstract class DbContext<TMethods extends {
         queryName: context.query.queryName
       };
 
-      const invokeUrl = self.getUrl(DATA_SVC_METH.Query);
+      const invokeUrl = self._getUrl(DATA_SVC_METH.Query);
       const reqPromise = new AbortablePromise<IQueryResponse>((resolve, reject, token) => {
         self.http.post<IQueryResponse>(invokeUrl, requestInfo).subscribe(
           (res) => resolve(res), // success path
@@ -573,7 +582,7 @@ export abstract class DbContext<TMethods extends {
         );
       });
 
-      self._addRequestPromise(reqPromise, 'Query', requestInfo.dbSetName);
+      self._addRequestPromise(reqPromise, DATA_OPER.Query, requestInfo.dbSetName);
 
       return reqPromise.then((response: IQueryResponse) => {
         self._checkDisposed();
@@ -588,16 +597,16 @@ export abstract class DbContext<TMethods extends {
   }
   protected _onItemRefreshed(res: IRefreshResponse, item: IEntityItem): void {
     try {
-      fn_checkError(res.error, 'Refresh');
+      fn_checkError(res.error, DATA_OPER.Refresh);
       if (!res.rowInfo) {
         item._aspect.dbSet.removeItem(item);
         item.dispose();
         throw new Error(ERRS.ERR_ITEM_DELETED_BY_ANOTHER_USER);
       } else {
-        item._aspect._refreshValues(res.rowInfo, 'MergeIntoCurrent');
+        item._aspect._refreshValues(res.rowInfo, REFRESH_MODE.MergeIntoCurrent);
       }
     } catch (ex) {
-      this._onDataOperError(ex, 'Refresh');
+      this._onDataOperError(ex, DATA_OPER.Refresh);
       ERROR.throwDummy(ex);
     }
   }
@@ -621,7 +630,7 @@ export abstract class DbContext<TMethods extends {
       };
 
       args.item._aspect._checkCanRefresh();
-      const invokeUrl = self.getUrl(DATA_SVC_METH.Refresh);
+      const invokeUrl = self._getUrl(DATA_SVC_METH.Refresh);
       const reqPromise = new AbortablePromise<IRefreshResponse>((resolve, reject, token) => {
         self.http.post<IRefreshResponse>(invokeUrl, request).subscribe(
           (res) => resolve(res), // success path
@@ -629,7 +638,7 @@ export abstract class DbContext<TMethods extends {
         );
       });
 
-      self._addRequestPromise(reqPromise, 'Refresh');
+      self._addRequestPromise(reqPromise, DATA_OPER.Refresh);
       return reqPromise;
     }).then((res: IRefreshResponse) => {
       self._checkDisposed();
@@ -654,7 +663,7 @@ export abstract class DbContext<TMethods extends {
       fn_onErr: (ex: any) => {
         try {
           context.fn_onEnd();
-          self._onDataOperError(ex, 'Refresh');
+          self._onDataOperError(ex, DATA_OPER.Refresh);
         } finally {
           deferred.reject();
         }
@@ -740,7 +749,7 @@ export abstract class DbContext<TMethods extends {
       fn_onErr: (ex: any) => {
         try {
           context.fn_onEnd();
-          self._onDataOperError(ex, 'Query');
+          self._onDataOperError(ex, DATA_OPER.Query);
         } finally {
           deferred.reject();
         }
@@ -748,7 +757,7 @@ export abstract class DbContext<TMethods extends {
     };
 
     if (query.isClearPrevData) {
-      self._tryAbortRequest(['Query', 'Refresh'], context.dbSetName);
+      self._tryAbortRequest([DATA_OPER.Query, DATA_OPER.Refresh], context.dbSetName);
     }
 
     context.dbSet.waitForNotBusy(() => {
@@ -780,14 +789,14 @@ export abstract class DbContext<TMethods extends {
       }
       return res;
     }).then((changes) => {
-      const invokeUrl = self.getUrl(DATA_SVC_METH.Submit);
+      const invokeUrl = self._getUrl(DATA_SVC_METH.Submit);
       const reqPromise = new AbortablePromise<IChangeResponse>((resolve, reject, token) => {
         self.http.post<IChangeResponse>(invokeUrl, changes).subscribe(
           (res) => resolve(res), // success path
           err => reject(err) // error path
         );
       });
-      self._addRequestPromise(reqPromise, 'Submit');
+      self._addRequestPromise(reqPromise, DATA_OPER.Submit);
       return reqPromise;
     }).then((res: IChangeResponse) => {
       self._checkDisposed();
@@ -860,13 +869,11 @@ export abstract class DbContext<TMethods extends {
   offOnDbSetCreating(nmspace?: string): void {
     this.objEvents.off(DBCTX_EVENTS.DBSET_CREATING, nmspace);
   }
-  getUrl(action: string): string {
-    let loadUrl = this.serviceUrl;
-    if (!endsWith(loadUrl, "/")) {
-      loadUrl = loadUrl + "/";
-    }
-    loadUrl = loadUrl + [action, ""].join("/");
-    return loadUrl;
+  addOnRejectChanges(fn: TEventHandler<DbContext, any>, nmspace?: string, context?: IBaseObject): void {
+    this.objEvents.on(DBCTX_EVENTS.REJECT_CHANGES, fn, nmspace, context);
+  }
+  offOnRejectChanges(nmspace?: string): void {
+    this.objEvents.off(DBCTX_EVENTS.REJECT_CHANGES, nmspace);
   }
   getDbSet(name: string): DbSet {
     return this._dbSets!.getDbSet(name);
@@ -939,7 +946,7 @@ export abstract class DbContext<TMethods extends {
     return submitState.promise;
   }
   load(query: TDataQuery): IStatefulPromise<IQueryResult<IEntityItem>> {
-    return this._load(query, 'None');
+    return this._load(query, COLL_CHANGE_REASON.None);
   }
   acceptChanges(): void {
     const arr = this._dbSets!.arrDbSets;
@@ -952,13 +959,15 @@ export abstract class DbContext<TMethods extends {
     arr.forEach((dbSet) => {
       dbSet.rejectChanges();
     });
+
+    this.objEvents.raise(DBCTX_EVENTS.REJECT_CHANGES, {});
   }
   abortRequests(reason?: string, operType?: DATA_OPER): void {
     if (isNt(operType)) {
-      operType = 'None';
+      operType = DATA_OPER.None;
     }
     const arr: IRequestPromise[] = this._requests.filter((a) => {
-      return operType === 'None' ? true : (a.operType === operType);
+      return operType === DATA_OPER.None ? true : (a.operType === operType);
     });
 
     for (let i = 0; i < arr.length; i += 1) {

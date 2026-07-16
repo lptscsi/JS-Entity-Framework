@@ -25,10 +25,10 @@ namespace RIAPP.DataService.Core.Metadata
         /// <param name="allList"></param>
         /// <param name="valueConverter"></param>
         /// <returns></returns>
-        public static MethodsList GetSvcMethods(this IEnumerable<MethodInfoData> allList, IValueConverter valueConverter, MethodType methodTypes)
+        public static MethodsList GetSvcMethods(this IEnumerable<MethodInfoData> allList, IValueConverter valueConverter)
         {
-            MethodInfoData[] queryAndInvokes = allList.GetMethods(methodTypes).ToArray();
-            MethodsList methodList = new MethodsList();
+            MethodInfoData[] queryAndInvokes = [.. allList.GetMethods(MethodType.Query | MethodType.Invoke)];
+            MethodsList methodList = new();
 
             Array.ForEach(queryAndInvokes, info =>
             {

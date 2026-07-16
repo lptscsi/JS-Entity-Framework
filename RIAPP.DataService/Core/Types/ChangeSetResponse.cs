@@ -7,16 +7,16 @@ namespace RIAPP.DataService.Core.Types
     {
         public ChangeSetResponse(ChangeSetRequest request)
         {
-            DbSets = request.DbSets;
+            dbSets = request.dbSets;
         }
 
 
-        public DbSetList DbSets { get; set; }
+        public DbSetList dbSets { get; set; }
 
 
-        public ErrorInfo Error { get; set; }
+        public ErrorInfo error { get; set; }
 
 
-        public IEnumerable<Subset> Subsets { get; set; }
+        public IEnumerable<Subset> subsets { get; set; }
     }
 }

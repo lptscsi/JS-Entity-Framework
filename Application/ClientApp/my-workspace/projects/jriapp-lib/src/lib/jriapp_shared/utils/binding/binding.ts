@@ -16,7 +16,7 @@ sys.isBinding = (obj: any): boolean => {
   return (!!obj && obj instanceof Binding);
 };
 
-export const enum BindTo {
+export enum BindTo {
   Source = 0,
   Target = 1
 }
@@ -639,8 +639,7 @@ export class Binding extends BaseObject implements IBinding {
         this.targetValue = this._converter.convertToTarget(this.sourceValue, this.param, this.source);
       }
     } catch (ex) {
-      let isHandled = this.handleError(ex, this);
-      //utils.err.reThrow(ex, isHandled);
+      utils.err.reThrow(ex, this.handleError(ex, this));
     }
   }
   updateSource(): void {
@@ -654,17 +653,14 @@ export class Binding extends BaseObject implements IBinding {
         this.sourceValue = this._converter.convertToSource(this.targetValue, this.param, this.source);
       }
     } catch (ex) {
-      let isHandled = this.handleError(ex, this);
-      /*
       if (!sys.isValidationError(ex) || !sys.isValidatable(this._tgtEnd)) {
         // BaseElView is notified about errors in _onSrcErrChanged event handler
         // err_notif.addOnErrorsChanged(self._onSrcErrChanged, self._uniqueID, self);
         // we only need to rethrow in other cases:
         // 1) when target is not a IValidatable
         // 2) when error is not a ValidationError
-        utils.err.reThrow(ex, isHandled);
+        utils.err.reThrow(ex, this.handleError(ex, this));
       }
-      */
     }
   }
   override toString(): string {

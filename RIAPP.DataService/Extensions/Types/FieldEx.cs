@@ -4,16 +4,15 @@ namespace RIAPP.DataService.Core.Types
 {
     public static class FieldEx
     {
-        public static Column[] GetNames(this Field fieldInfo)
+        public static FieldName[] GetNames(this Field fieldInfo)
         {
-            return fieldInfo.GetNestedInResultFields()
+            return [.. fieldInfo.GetNestedInResultFields()
                     .Select(fi =>
-                            new Column
+                            new FieldName
                             {
-                                Name = fi.fieldName,
-                                Nested = fi.fieldType == FieldType.Object ? fi.GetNames() : null
-                            })
-                    .ToArray();
+                                n = fi.fieldName,
+                                p = fi.fieldType == FieldType.Object ? fi.GetNames() : null
+                            })];
         }
 
         public static int GetOrdinal(this Field field)

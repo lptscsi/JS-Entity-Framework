@@ -10,7 +10,7 @@ namespace RIAPP.DataService.Core
     {
         protected RequestContext RequestContext => RequestContext.Current;
 
-        public ChangeType ChangeType => RequestContext.CurrentRowInfo.ChangeType;
+        public ChangeType ChangeType => RequestContext.CurrentRowInfo.changeType;
 
         public T Original => RequestContext.GetOriginal<T>();
 

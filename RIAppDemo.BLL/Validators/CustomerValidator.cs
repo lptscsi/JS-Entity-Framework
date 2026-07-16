@@ -20,8 +20,8 @@ namespace RIAppDemo.BLL.Validators
             {
                 errors.AddLast(new ValidationErrorInfo
                 {
-                    FieldName = "CustomerContact.Phone",
-                    Message = "Phone number must not start with 000!"
+                    fieldName = "CustomerContact.Phone",
+                    message = "Phone number must not start with 000!"
                 });
             }
 
@@ -29,8 +29,8 @@ namespace RIAppDemo.BLL.Validators
             {
                 errors.AddLast(new ValidationErrorInfo
                 {
-                    FieldName = "ModifiedDate",
-                    Message = "ModifiedDate must be greater than the previous ModifiedDate"
+                    fieldName = "ModifiedDate",
+                    message = "ModifiedDate must be greater than the previous ModifiedDate"
                 });
             }
 

@@ -13,107 +13,73 @@ using System.Text;
 
 namespace RIAPP.DataService.Core.Metadata
 {
-    public class RunTimeMetadataBuilder
+    public class RunTimeMetadataBuilder(Type domainServiceType,
+        DesignTimeMetadata designTimeMetadata,
+        IDataHelper dataHelper,
+        IValueConverter valueConverter)
     {
-        #region Fields
-
-        private readonly Type domainServiceType;
-        private readonly DesignTimeMetadata designTimeMetadata;
-        private readonly IDataHelper dataHelper;
-        private readonly IValueConverter valueConverter;
-
-        #endregion
-
-        public RunTimeMetadataBuilder(Type domainServiceType,
-            DesignTimeMetadata designTimeMetadata,
-            IDataHelper dataHelper,
-            IValueConverter valueConverter)
-        {
-            this.domainServiceType = domainServiceType;
-            this.designTimeMetadata = designTimeMetadata;
-            this.dataHelper = dataHelper;
-            this.valueConverter = valueConverter;
-        }
-
         public RunTimeMetadata Build()
         {
-            HashSet<string> dbSetNames = new HashSet<string>();
+            DbSetsDictionary dbSets = [];
 
             foreach (DbSetInfo dbSetInfo in designTimeMetadata.DbSets)
             {
-                if (dbSetNames.Contains(dbSetInfo.dbSetName))
-                {
-                    throw new InvalidOperationException($"Metadata has a duplicated DbSetName: {dbSetInfo.dbSetName}");
-                }
-
-                dbSetNames.Add(dbSetInfo.dbSetName);
+                dbSets.Add(dbSetInfo.dbSetName, dbSetInfo);
             }
 
-            ILookup<Type, string> dbSetsByTypeLookUp = designTimeMetadata.DbSets
-                .ToLookup(v => v.GetEntityType(), v => v.dbSetName);
+            ILookup<Type, DbSetInfo> dbSetsByTypeLookUp = dbSets
+                .Values
+                .ToLookup(v => v.GetEntityType());
+            MethodMap svcMethods = new();
+            OperationalMethods operMethods = new();
 
-            MethodMap svcMethods = new MethodMap();
-            OperationalMethods operMethods = new OperationalMethods();
-
-            foreach (var dbSet in designTimeMetadata.DbSets)
+            foreach (DbSetInfo dbSetInfo in dbSets.Values)
             {
-                Type handlerType = dbSet.GetHandlerType();
+                Type handlerType = dbSetInfo.GetHandlerType();
                 if (handlerType != null)
                 {
                     Type[] interfaces = handlerType.GetInterfaces();
                     bool isDataManager = interfaces.Any(i => i.IsAssignableTo(typeof(IDataManager)));
                     if (!isDataManager)
                     {
-                        throw new InvalidOperationException($"Invalid handler type {handlerType.Name} for DbSet {dbSet.dbSetName}");
+                        throw new InvalidOperationException($"Invalid handler type {handlerType.Name} for DbSet {dbSetInfo.dbSetName}");
                     }
                 }
 
-                Type validatorType = dbSet.GetValidatorType();
+                Type validatorType = dbSetInfo.GetValidatorType();
                 if (validatorType != null)
                 {
                     Type[] interfaces = validatorType.GetInterfaces();
                     bool isValidator = interfaces.Any(i => i.IsAssignableTo(typeof(IValidator)));
                     if (!isValidator)
                     {
-                        throw new InvalidOperationException($"Invalid validator type {validatorType.Name} for DbSet {dbSet.dbSetName}");
+                        throw new InvalidOperationException($"Invalid validator type {validatorType.Name} for DbSet {dbSetInfo.dbSetName}");
                     }
                 }
 
+                dbSetInfo.Initialize(dataHelper);
                 if (handlerType != null)
                 {
-                    ProcessHandlerMethodDescriptions(handlerType, svcMethods, operMethods, dbSet.dbSetName);
+                    ProcessHandlerMethodDescriptions(handlerType, svcMethods, operMethods, dbSetInfo);
                 }
             }
 
-            ProcessDataServiceMethodDescriptions(domainServiceType, svcMethods, operMethods, dbSetNames, dbSetsByTypeLookUp);
+            ProcessDataServiceMethodDescriptions(domainServiceType, svcMethods, operMethods, dbSets, dbSetsByTypeLookUp);
 
             operMethods.MakeReadOnly();
             svcMethods.MakeReadOnly();
 
-            List<DbSetRec> dbSetList = new List<DbSetRec>();
-
-            foreach (var dbSet in designTimeMetadata.DbSets)
-            {
-                FieldsList fieldList = new FieldsList(dbSet.fieldInfos);
-                fieldList.Initialize(dataHelper);
-                dbSetList.Add(new DbSetRec(dbSet, fieldList));
-            }
-
-            IDictionary<string, DbSetRec> dbSetRecMap = dbSetList.ToDictionary(v => v.dbSetInfo.dbSetName);
-
-            AssociationMap associations = new AssociationMap();
+            AssociationsDictionary associations = new();
 
             foreach (Association assoc in designTimeMetadata.Associations)
             {
-                ProcessAssociation(assoc, dbSetRecMap, associations);
+                ProcessAssociation(assoc, dbSets, associations);
             }
 
-            DbSetInfoMap dbSets = new DbSetInfoMap(dbSetRecMap);
-
-            return new RunTimeMetadata(dbSets, associations, svcMethods, operMethods, designTimeMetadata.TypeScriptImports.ToArray());
+            return new RunTimeMetadata(dbSets, dbSetsByTypeLookUp, associations, svcMethods, operMethods, [.. designTimeMetadata.TypeScriptImports]);
         }
 
-        private static readonly Dictionary<Type, MethodType> _attributeMap = new Dictionary<Type, MethodType>()
+        private static readonly Dictionary<Type, MethodType> _attributeMap = new()
         {
             { typeof(QueryAttribute), MethodType.Query },
             { typeof(InvokeAttribute), MethodType.Invoke },
@@ -200,7 +166,7 @@ namespace RIAPP.DataService.Core.Metadata
                 IsInDataManager = isDataManager
             }).Where(m => m.MethodType != MethodType.None);
 
-            IEnumerable<MethodInfoData> UnionMethods(IEnumerable<MethodInfoData> list, IDictionary<MethodType, MethodInfoData> crudMethods)
+            static IEnumerable<MethodInfoData> UnionMethods(IEnumerable<MethodInfoData> list, IDictionary<MethodType, MethodInfoData> crudMethods)
             {
                 foreach (KeyValuePair<MethodType, MethodInfoData> kv in crudMethods)
                 {
@@ -222,94 +188,80 @@ namespace RIAPP.DataService.Core.Metadata
             if (isDataManager)
             {
                 IDictionary<MethodType, MethodInfoData> crudMethods = GetHandlerCRUDMethods(fromType);
-                result = UnionMethods(allList, crudMethods).ToArray();
+                result = [.. UnionMethods(allList, crudMethods)];
             }
             else
             {
-                result = allList.ToArray();
+                result = [.. allList];
             }
 
             foreach (MethodInfoData data in result)
             {
-                switch (data.MethodType)
+                data.EntityType = data.MethodType switch
                 {
-                    case MethodType.Query:
-                        data.EntityType = data.MethodInfo.ReturnType.GetTaskResultType().GetGenericArguments().First();
-                        break;
-                    case MethodType.Invoke:
-                        data.EntityType = null;
-                        break;
-                    case MethodType.Refresh:
-                        data.EntityType = data.MethodInfo.ReturnType.GetTaskResultType();
-                        break;
-                    case MethodType.Insert:
-                    case MethodType.Update:
-                    case MethodType.Delete:
-                    case MethodType.Validate:
-                        data.EntityType = data.MethodInfo.GetParameters().First().ParameterType;
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Unknown Method Type: {data.MethodType}");
-                }
+                    MethodType.Query => data.MethodInfo.ReturnType.GetTaskResultType().GetGenericArguments().First(),
+                    MethodType.Invoke => null,
+                    MethodType.Refresh => data.MethodInfo.ReturnType.GetTaskResultType(),
+                    MethodType.Insert or MethodType.Update or MethodType.Delete or MethodType.Validate => data.MethodInfo.GetParameters().First().ParameterType,
+                    _ => throw new InvalidOperationException($"Unknown Method Type: {data.MethodType}"),
+                };
             }
 
             return result;
         }
 
-        private void ProcessHandlerMethodDescriptions(Type handlerType, MethodMap svcMethods, OperationalMethods operMethods, string dbSetName)
+        private void ProcessHandlerMethodDescriptions(Type handlerType, MethodMap svcMethods, OperationalMethods operMethods, DbSetInfo dbSetInfo)
         {
             IEnumerable<MethodInfoData> allMethods = GetMethodsFromType(handlerType, true);
 
-            // For handlers only query methods (no invoke ones, because they belong to the dataservice only, and the handlers don't have them) 
-            MethodsList svcMethInfos = allMethods.GetSvcMethods(valueConverter, MethodType.Query);
+            // query and invoke only 
+            MethodsList svcMethInfos = allMethods.GetSvcMethods(valueConverter);
 
-            InitHandlerSvcMethods(svcMethInfos, svcMethods, dbSetName);
+            InitHandlerSvcMethods(svcMethInfos, svcMethods, dbSetInfo);
 
             IEnumerable<MethodInfoData> otherMethods = allMethods.GetMethods(MethodType.Insert | MethodType.Update | MethodType.Delete | MethodType.Refresh | MethodType.Validate);
 
-            InitHandlerOperMethods(otherMethods, operMethods, dbSetName);
+            InitHandlerOperMethods(otherMethods, operMethods, dbSetInfo);
         }
 
         private void ProcessDataServiceMethodDescriptions(
-            Type serviceType,
+            Type serviceType, 
             MethodMap svcMethods,
-            OperationalMethods operMethods,
-            HashSet<string> dbSetNames,
-            ILookup<Type, string> dbSetsByTypeLookUp)
+            OperationalMethods operMethods, 
+            DbSetsDictionary dbSets, 
+            ILookup<Type, DbSetInfo> dbSetsByTypeLookUp)
         {
             IEnumerable<MethodInfoData> allMethods = GetMethodsFromType(serviceType, false);
 
-            // For DataService query and invoke only 
-            MethodsList svcMethInfos = allMethods.GetSvcMethods(valueConverter, MethodType.Query | MethodType.Invoke);
+            // query and invoke only 
+            MethodsList svcMethInfos = allMethods.GetSvcMethods(valueConverter);
 
-            InitSvcMethods(svcMethInfos, svcMethods, dbSetNames, dbSetsByTypeLookUp);
+            InitSvcMethods(svcMethInfos, svcMethods, dbSets, dbSetsByTypeLookUp);
 
             IEnumerable<MethodInfoData> otherMethods = allMethods.GetMethods(MethodType.Insert | MethodType.Update | MethodType.Delete | MethodType.Refresh | MethodType.Validate);
 
-            InitOperMethods(otherMethods, operMethods, dbSetNames, dbSetsByTypeLookUp);
+            InitOperMethods(otherMethods, operMethods, dbSets, dbSetsByTypeLookUp);
         }
 
-        private void ProcessAssociation(Association assoc, IDictionary<string, DbSetRec> dbSetMap, AssociationMap associations)
+        private static void ProcessAssociation(Association assoc, DbSetsDictionary dbSets, AssociationsDictionary associations)
         {
             if (string.IsNullOrWhiteSpace(assoc.name))
             {
                 throw new DomainServiceException(ErrorStrings.ERR_ASSOC_EMPTY_NAME);
             }
-            if (!dbSetMap.ContainsKey(assoc.parentDbSetName))
+            if (!dbSets.TryGetValue(assoc.parentDbSetName, out DbSetInfo parentDb))
             {
                 throw new DomainServiceException(string.Format(ErrorStrings.ERR_ASSOC_INVALID_PARENT, assoc.name,
                     assoc.parentDbSetName));
             }
-            if (!dbSetMap.ContainsKey(assoc.childDbSetName))
+            if (!dbSets.TryGetValue(assoc.childDbSetName, out DbSetInfo childDb))
             {
                 throw new DomainServiceException(string.Format(ErrorStrings.ERR_ASSOC_INVALID_CHILD, assoc.name,
                     assoc.childDbSetName));
             }
 
-            DbSetRec childDb = dbSetMap[assoc.childDbSetName];
-            DbSetRec parentDb = dbSetMap[assoc.parentDbSetName];
-            IReadOnlyDictionary<string, Field> parentDbFields = parentDb.fieldList.GetFieldByNames();
-            IReadOnlyDictionary<string, Field> childDbFields = childDb.fieldList.GetFieldByNames();
+            Dictionary<string, Field> parentDbFields = parentDb.GetFieldByNames();
+            Dictionary<string, Field> childDbFields = childDb.GetFieldByNames();
 
             //check navigation field
             //dont allow to define  it explicitly, the association adds the field by itself (implicitly)
@@ -354,13 +306,13 @@ namespace RIAPP.DataService.Core.Metadata
 
             if (!string.IsNullOrEmpty(assoc.childToParentName))
             {
-                StringBuilder sb = new StringBuilder(120);
+                StringBuilder sb = new(120);
                 string dependentOn =
                     assoc.fieldRels.Aggregate(sb, (a, b) => a.Append((a.Length == 0 ? "" : ",") + b.childField),
                         a => a).ToString();
 
                 //add navigation field to dbSet's field collection
-                Field field = new Field
+                Field fld = new()
                 {
                     fieldName = assoc.childToParentName,
                     fieldType = FieldType.Navigation,
@@ -368,28 +320,30 @@ namespace RIAPP.DataService.Core.Metadata
                     dependentOn = dependentOn
                 };
 
-                field.SetTypeScriptDataType(TypeScriptHelper.GetEntityInterfaceName(parentDb.dbSetInfo.dbSetName));
-                childDb.fieldList.Add(field);
+                fld.SetTypeScriptDataType(TypeScriptHelper.GetEntityInterfaceName(parentDb.dbSetName));
+                childDb.fieldInfos.Add(fld);
             }
 
             if (!string.IsNullOrEmpty(assoc.parentToChildrenName))
             {
-                StringBuilder sb = new StringBuilder(120);
-                Field field = new Field
+                StringBuilder sb = new(120);
+                Field fld = new()
                 {
                     fieldName = assoc.parentToChildrenName,
                     fieldType = FieldType.Navigation,
                     dataType = DataType.None
                 };
 
-                field.SetTypeScriptDataType($"{TypeScriptHelper.GetEntityInterfaceName(childDb.dbSetInfo.dbSetName)}[]");
+                fld.SetTypeScriptDataType($"{TypeScriptHelper.GetEntityInterfaceName(childDb.dbSetName)}[]");
                 //add navigation field to dbSet's field collection
-                parentDb.fieldList.Add(field);
+                parentDb.fieldInfos.Add(fld);
             }
         }
 
-        private void InitHandlerSvcMethods(MethodsList methods, MethodMap svcMethods, string dbSetName)
+        private static void InitHandlerSvcMethods(MethodsList methods, MethodMap svcMethods, DbSetInfo dbSetInfo)
         {
+            string dbSetName = dbSetInfo.dbSetName;
+
             methods.ForEach(methodDescription =>
             {
                 if (methodDescription.isQuery)
@@ -403,15 +357,17 @@ namespace RIAPP.DataService.Core.Metadata
             });
         }
 
-        private void InitHandlerOperMethods(IEnumerable<MethodInfoData> methods, OperationalMethods operMethods, string dbSetName)
+        private static void InitHandlerOperMethods(IEnumerable<MethodInfoData> methods, OperationalMethods operMethods, DbSetInfo dbSetInfo)
         {
-            foreach (MethodInfoData methodData in methods)
+            string dbSetName = dbSetInfo.dbSetName;
+
+            foreach(MethodInfoData methodData in methods)
             {
                 operMethods.Add(dbSetName, methodData);
             }
         }
 
-        private void InitSvcMethods(MethodsList methods, MethodMap svcMethods, HashSet<string> dbSetNames, ILookup<Type, string> dbSetsByTypeLookUp)
+        private static void InitSvcMethods(MethodsList methods, MethodMap svcMethods, DbSetsDictionary dbSets, ILookup<Type, DbSetInfo> dbSetsByTypeLookUp)
         {
             methods.ForEach(methodDescription =>
             {
@@ -427,7 +383,7 @@ namespace RIAPP.DataService.Core.Metadata
 
                     if (!string.IsNullOrWhiteSpace(dbSetName))
                     {
-                        if (!dbSetNames.Contains(dbSetName))
+                        if (!dbSets.ContainsKey(dbSetName))
                         {
                             throw new DomainServiceException(string.Format("Can not determine the DbSet for a query method: {0} by DbSetName {1}", methodDescription.methodName, dbSetName));
                         }
@@ -436,14 +392,14 @@ namespace RIAPP.DataService.Core.Metadata
                     }
                     else
                     {
-                        System.Type entityType = methodDescription.GetMethodData().EntityType;
+                        Type entityType = methodDescription.GetMethodData().EntityType;
 
-                        IEnumerable<string> entityTypeDbSets = dbSetsByTypeLookUp[entityType];
+                        IEnumerable<DbSetInfo> entityTypeDbSets = dbSetsByTypeLookUp[entityType];
 
                         int cnt = 0;
-                        foreach (string dbSetName2 in entityTypeDbSets)
+                        foreach (DbSetInfo dbSetInfo in entityTypeDbSets)
                         {
-                            svcMethods.Add(dbSetName2, methodDescription);
+                            svcMethods.Add(dbSetInfo.dbSetName, methodDescription);
                             ++cnt;
                         }
 
@@ -461,9 +417,9 @@ namespace RIAPP.DataService.Core.Metadata
             });
         }
 
-        private void InitOperMethods(IEnumerable<MethodInfoData> methods, OperationalMethods operMethods, HashSet<string> dbSetNames, ILookup<Type, string> dbSetsByTypeLookUp)
+        private static void InitOperMethods(IEnumerable<MethodInfoData> methods, OperationalMethods operMethods, DbSetsDictionary dbSets, ILookup<Type, DbSetInfo> dbSetsByTypeLookUp)
         {
-            MethodInfoData[] otherMethods = methods.ToArray();
+            MethodInfoData[] otherMethods = [.. methods];
 
             Array.ForEach(otherMethods, methodData =>
             {
@@ -476,7 +432,7 @@ namespace RIAPP.DataService.Core.Metadata
 
                 if (!string.IsNullOrWhiteSpace(dbSetName))
                 {
-                    if (!dbSetNames.Contains(dbSetName))
+                    if (!dbSets.ContainsKey(dbSetName))
                     {
                         throw new DomainServiceException(string.Format("Can not determine the DbSet for a query method: {0} by DbSetName {1}", methodData.MethodInfo.Name, dbSetName));
                     }
@@ -485,11 +441,11 @@ namespace RIAPP.DataService.Core.Metadata
                 }
                 else if (methodData.EntityType != null)
                 {
-                    IEnumerable<string> dbSets = dbSetsByTypeLookUp[methodData.EntityType];
+                    IEnumerable<DbSetInfo> dbSets = dbSetsByTypeLookUp[methodData.EntityType];
 
-                    foreach (string dbSetName2 in dbSets)
+                    foreach (DbSetInfo dbSetInfo in dbSets)
                     {
-                        operMethods.Add(dbSetName2, methodData);
+                        operMethods.Add(dbSetInfo.dbSetName, methodData);
                     }
                 }
                 else

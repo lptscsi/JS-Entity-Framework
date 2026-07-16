@@ -2,7 +2,7 @@ import { IBaseObject, IConverter } from "../../int";
 
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 
-export const enum BINDING_MODE {
+export enum BINDING_MODE {
   OneTime = 0,
   OneWay = 1,
   TwoWay = 2,
@@ -51,7 +51,7 @@ export interface IBinding extends IBaseObject {
   updateSource(): void;
 }
 
-export const enum TOKEN {
+export enum TOKEN {
     DELIMETER1 = ":",
     DELIMETER2 = "=",
     COMMA = ",",
@@ -64,7 +64,7 @@ export const enum TOKEN {
     INJECT = "inject"
 }
 
-export const enum TAG {
+export enum TAG {
     NONE = "",
     LITERAL = "0",
     BIND = "1",
@@ -75,12 +75,12 @@ export const enum TAG {
     INDEXER = "6"
 }
 
-export const enum PARSE_TYPE {
+export enum PARSE_TYPE {
     NONE = 0,
     BINDING = 1
 }
 
-export const enum DATES {
+export enum DATES {
     NOW = "now",
     TODAY = "today",
     TOMORROW = "tomorrow",

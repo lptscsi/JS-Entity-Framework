@@ -7,19 +7,19 @@ namespace RIAPP.DataService.Core.Types
     {
         public FilterItem()
         {
-            FieldName = string.Empty;
-            Values = new List<string>();
-            Kind = FilterType.Equals;
+            fieldName = string.Empty;
+            values = new List<string>();
+            kind = FilterType.Equals;
         }
 
 
-        public string FieldName { get; set; }
+        public string fieldName { get; set; }
 
 
-        public List<string> Values { get; set; }
+        public List<string> values { get; set; }
 
 
-        public FilterType Kind { get; set; }
+        public FilterType kind { get; set; }
     }
 
 
@@ -27,10 +27,10 @@ namespace RIAPP.DataService.Core.Types
     {
         public FilterInfo()
         {
-            FilterItems = new List<FilterItem>();
+            filterItems = new List<FilterItem>();
         }
 
 
-        public List<FilterItem> FilterItems { get; set; }
+        public List<FilterItem> filterItems { get; set; }
     }
 }

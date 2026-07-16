@@ -12,7 +12,7 @@ namespace RIAPP.DataService.Utils
         private const char RIGHT_CHAR1 = '}';
         private const char LEFT_CHAR2 = '<';
         private const char RIGHT_CHAR2 = '>';
-        private readonly LinkedList<Part> list = new LinkedList<Part>();
+        private readonly LinkedList<Part> list = new();
         private Lazy<IEnumerable<DocPart>> DocParts { get; }
 
         public TemplateParser(string templateName, string template) :
@@ -35,7 +35,7 @@ namespace RIAPP.DataService.Utils
 
         private DocPart GetDocPart(string str, bool IsTemplateRef = false)
         {
-            string[] parts = str.Split(':').Select(s => s.Trim()).ToArray();
+            string[] parts = [.. str.Split(':').Select(s => s.Trim())];
 
             return new DocPart
             {
@@ -51,9 +51,9 @@ namespace RIAPP.DataService.Utils
             char? prevChar = null;
             bool isPlaceHolder1 = false;
             bool isPlaceHolder2 = false;
-            LinkedList<DocPart> list = new LinkedList<DocPart>();
+            LinkedList<DocPart> list = new();
 
-            StringBuilder sb = new StringBuilder(512);
+            StringBuilder sb = new(512);
 
             char[] chars = template.ToCharArray();
             for (int i = 0; i < chars.Length; ++i)
@@ -184,9 +184,9 @@ namespace RIAPP.DataService.Utils
             }
 
             Execute(dic, valueGetter);
-            Context context = new Context(list);
+            Context context = new(list);
 
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             foreach (Part item in list)
             {
@@ -233,7 +233,7 @@ namespace RIAPP.DataService.Utils
         {
             internal Context(LinkedList<Part> parts)
             {
-                Parts = parts.ToList();
+                Parts = [.. parts];
             }
 
             public List<Part> Parts

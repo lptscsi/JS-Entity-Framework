@@ -5,19 +5,20 @@ using RIAPP.DataService.Core.Security;
 using RIAPP.DataService.Core.Types;
 using RIAPP.DataService.Utils;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace RIAPP.DataService.Core
 {
-    public abstract class BaseDomainService : IDomainService, IDataServiceComponent, IMetaDataProvider
+    /// <summary>
+    /// Базовый класс сервиса для работы с данными
+    /// </summary>
+    /// <param name="serviceContainer"></param>
+    public abstract class BaseDomainService(IServiceContainer serviceContainer) 
+        : IDomainService, IDataServiceComponent, IMetaDataProvider
     {
-        public BaseDomainService(IServiceContainer serviceContainer)
-        {
-            ServiceContainer = serviceContainer;
-        }
-
         public ClaimsPrincipal User => ServiceContainer.GetUserProvider().User;
 
         public ISerializer Serializer => ServiceContainer.Serializer;
@@ -25,7 +26,7 @@ namespace RIAPP.DataService.Core
         public IServiceContainer ServiceContainer
         {
             get;
-        }
+        } = serviceContainer;
 
         BaseDomainService IDataServiceComponent.DataService => this;
 
@@ -50,7 +51,7 @@ namespace RIAPP.DataService.Core
         }
 
         #region Overridable Methods
-        protected abstract DesignTimeMetadata GetDesignTimeMetadata(bool isDraft);
+        protected abstract DesignTimeMetadata GetDesignTimeMetadata(bool isDraft, List<Type>? dataServiceEntityTypes = null);
 
         /// <summary>
         ///     Can be used for tracking what is changed by CRUD methods
@@ -64,6 +65,7 @@ namespace RIAPP.DataService.Core
 
         protected virtual void OnError(Exception ex)
         {
+            Console.WriteLine(ex.Message);
         }
 
         protected virtual string GetFriendlyErrorMessage(Exception ex)
@@ -95,7 +97,7 @@ namespace RIAPP.DataService.Core
             try
             {
                 string[] changed = new string[0];
-                switch (rowInfo.ChangeType)
+                switch (rowInfo.changeType)
                 {
                     case ChangeType.Updated:
                         {
@@ -104,17 +106,17 @@ namespace RIAPP.DataService.Core
                         break;
                     default:
                         {
-                            changed = dbSetInfo.GetColumns().Select(f => f.Name).ToArray();
+                            changed = [.. dbSetInfo.GetNames().Select(f => f.n)];
                         }
                         break;
                 }
 
-                string[] pknames = dbSetInfo.GetPKFields().Select(f => f.fieldName).ToArray();
+                string[] pknames = [.. dbSetInfo.GetPKFields().Select(f => f.fieldName)];
                 string diffgram = DiffGram.GetDiffGram(rowInfo.GetChangeState().OriginalEntity,
-                    rowInfo.ChangeType == ChangeType.Deleted ? null : rowInfo.GetChangeState().Entity,
-                    dbSetInfo.GetEntityType(), changed, pknames, rowInfo.ChangeType, dbSetInfo.dbSetName);
+                    rowInfo.changeType == ChangeType.Deleted ? null : rowInfo.GetChangeState().Entity,
+                    dbSetInfo.GetEntityType(), changed, pknames, rowInfo.changeType, dbSetInfo.dbSetName);
 
-                OnTrackChange(dbSetInfo.dbSetName, rowInfo.ChangeType, diffgram);
+                OnTrackChange(dbSetInfo.dbSetName, rowInfo.changeType, diffgram);
             }
             catch (Exception ex)
             {
@@ -136,7 +138,7 @@ namespace RIAPP.DataService.Core
         /// <returns></returns>
         public async Task<QueryResponse> GetQueryData(string dbSetName, string queryName)
         {
-            QueryRequest getInfo = new QueryRequest { DbSetName = dbSetName, QueryName = queryName };
+            QueryRequest getInfo = new() { dbSetName = dbSetName, queryName = queryName };
             return await ServiceGetData(getInfo);
         }
 
@@ -165,12 +167,12 @@ namespace RIAPP.DataService.Core
             {
                 await Task.CompletedTask;
                 RunTimeMetadata metadata = GetMetadata();
-                Permissions result = new Permissions() { };
+                Permissions result = new() {};
                 IAuthorizer authorizer = ServiceContainer.Authorizer;
                 foreach (DbSetInfo dbInfo in metadata.DbSets.Values)
                 {
                     DbSetPermit permissions = await authorizer.GetDbSetPermissions(metadata, dbInfo.dbSetName);
-                    result.Items.Add(permissions);
+                    result.permissions.Add(permissions);
                 }
 
                 return result;
@@ -187,7 +189,7 @@ namespace RIAPP.DataService.Core
             try
             {
                 RunTimeMetadata metadata = GetMetadata();
-                MetadataResult result = new MetadataResult() { methods = metadata.MethodDescriptions };
+                MetadataResult result = new() { methods = metadata.MethodDescriptions };
                 result.associations.AddRange(metadata.Associations.Values);
                 result.dbSets.AddRange(metadata.DbSets.Values.OrderBy(d => d.dbSetName));
                 return result;
@@ -213,7 +215,7 @@ namespace RIAPP.DataService.Core
         public async Task<ChangeSetResponse> ServiceApplyChangeSet(ChangeSetRequest changeSet)
         {
             ICRUDOperationsUseCaseFactory factory = ServiceContainer.CRUDOperationsUseCaseFactory;
-            CRUDServiceMethods serviceMethods = new CRUDServiceMethods(
+            CRUDServiceMethods serviceMethods = new(
                 (err) => { _OnError(err); return GetFriendlyErrorMessage(err); },
                 (row) => TrackChangesToEntity(row),
                 async () =>
@@ -271,6 +273,7 @@ namespace RIAPP.DataService.Core
         void IDisposable.Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion

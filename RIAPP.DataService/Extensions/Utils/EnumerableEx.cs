@@ -8,7 +8,7 @@ namespace RIAPP.DataService.Utils.Extensions
 {
     public static class EnumerableEx
     {
-        private static readonly ConcurrentDictionary<Type, Func<IEnumerable, IEnumerable>> _cacheToArray = new ConcurrentDictionary<Type, Func<IEnumerable, IEnumerable>>();
+        private static readonly ConcurrentDictionary<Type, Func<IEnumerable, IEnumerable>> _cacheToArray = new();
 
         public static IEnumerable ToArray(this IEnumerable list, Type elementType)
         {

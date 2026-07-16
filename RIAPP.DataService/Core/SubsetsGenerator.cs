@@ -21,7 +21,7 @@ namespace RIAPP.DataService.Core
 
         public SubsetList CreateSubsets(IEnumerable<SubResult> subResults)
         {
-            SubsetList result = new SubsetList();
+            SubsetList result = new();
             if (subResults == null)
             {
                 return result;
@@ -31,18 +31,18 @@ namespace RIAPP.DataService.Core
             {
                 DbSetInfo dbSetInfo = _metadata.DbSets[subResult.dbSetName];
 
-                if (result.Any(r => r.DbSetName == subResult.dbSetName))
+                if (result.Any(r => r.dbSetName == subResult.dbSetName))
                 {
                     throw new DomainServiceException(string.Format("The included sub results already have DbSet {0} entities", dbSetInfo.dbSetName));
                 }
 
-                RowGenerator rowGenerator = new RowGenerator(dbSetInfo, subResult.Result, _dataHelper);
+                RowGenerator rowGenerator = new(dbSetInfo, subResult.Result, _dataHelper);
 
-                Subset current = new Subset
+                Subset current = new()
                 {
-                    DbSetName = dbSetInfo.dbSetName,
-                    Rows = rowGenerator.CreateDistinctRows(),
-                    Columns = dbSetInfo.GetColumns()
+                    dbSetName = dbSetInfo.dbSetName,
+                    rows = rowGenerator.CreateDistinctRows(),
+                    names = dbSetInfo.GetNames()
                 };
 
                 result.Add(current);

@@ -19,25 +19,25 @@ namespace RIAPP.DataService.Core.UseCases.RefreshMiddleware
 
         public async Task Invoke(RefreshContext<TService> ctx)
         {
-            DbSetInfo dbSetInfo = ctx.Request.GetDbSetInfo() ?? throw new InvalidOperationException($"Could not get the DbSet for {ctx.Request.DbSetName}");
+            DbSetInfo dbSetInfo = ctx.Request.GetDbSetInfo() ?? throw new InvalidOperationException($"Could not get the DbSet for {ctx.Request.dbSetName}");
             IServiceOperationsHelper<TService> serviceHelper = ctx.ServiceContainer.GetServiceHelper();
             RunTimeMetadata metadata = ctx.Service.GetMetadata();
 
-            RequestContext req = RefreshContext<TService>.CreateRequestContext(ctx.Service, ctx.Request.RowInfo);
-            using (RequestCallContext callContext = new RequestCallContext(req))
+            RequestContext req = RefreshContext<TService>.CreateRequestContext(ctx.Service, ctx.Request.rowInfo);
+            using (RequestCallContext callContext = new(req))
             {
-                MethodInfoData methodData = metadata.GetOperationMethodInfo(ctx.Request.DbSetName, MethodType.Refresh);
-                object instance = serviceHelper.GetMethodOwner(dbSetInfo.dbSetName, methodData);
+                MethodInfoData methodData = metadata.GetOperationMethodInfo(ctx.Request.dbSetName, MethodType.Refresh);
+                object instance = serviceHelper.GetMethodOwner(methodData);
                 object invokeRes = methodData.MethodInfo.Invoke(instance, new object[] { ctx.Request });
-                object dbEntity = await PropHelper.GetMethodResult(invokeRes);
+                object dbEntity = await serviceHelper.GetMethodResult(invokeRes);
 
                 if (dbEntity != null)
                 {
-                    serviceHelper.UpdateRowInfoFromEntity(dbEntity, ctx.Request.RowInfo);
+                    serviceHelper.UpdateRowInfoFromEntity(dbEntity, ctx.Request.rowInfo);
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Refresh Operation for {ctx.Request.DbSetName} did not return a result");
+                    throw new InvalidOperationException($"Refresh Operation for {ctx.Request.dbSetName} did not return a result");
                 }
             }
 

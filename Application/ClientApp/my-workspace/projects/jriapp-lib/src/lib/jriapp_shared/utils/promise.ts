@@ -22,8 +22,9 @@ export function createSyncDefer<T>(): IStatefulDeferred<T> {
 
 export function whenAll<T>(promises: Array<T | IThenable<T>>): IStatefulPromise<T[]> {
     const results: T[] = [], resolved: IThenable<T> = createDefer<T>().resolve(null);
-    const merged: any = promises.reduce((acc: IThenable<T>, p: T | IThenable<T>) => acc.then(() => p).then((r: T) => { results.push(r); return r; })
-        , resolved);
+    const merged: any = promises.reduce((acc: IThenable<T>, p: T | IThenable<T>) => acc.then(() => p)
+        .then((r: T) => { results.push(r); return r; })
+    , resolved);
     return merged.then(() => results);
 }
 
@@ -240,7 +241,7 @@ export class StatefulPromise<T = any> implements IStatefulPromise<T> {
         this._deferred = deferred;
         if (!!fn) {
             getTaskQueue().enque(() => {
-                fn((res?: T) => deferred.resolve(res), (err?: any) => deferred.reject(err));
+                fn(((res?: T) => deferred.resolve(res)) as any, (err?: any) => deferred.reject(err));
             });
         }
     }
@@ -371,7 +372,7 @@ export class AbortablePromise<T = any> extends StatefulPromise implements IAbort
             });
 
             getTaskQueue().enque(() => {
-                fn((res?: T) => deferred.resolve(res), (err?: any) => deferred.reject(err), tokenSource.token);
+                fn(((res?: T) => deferred.resolve(res)) as any, (err?: any) => deferred.reject(err), tokenSource.token);
             });
         }
     }

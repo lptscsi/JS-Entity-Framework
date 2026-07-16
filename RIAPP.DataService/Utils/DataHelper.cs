@@ -121,14 +121,14 @@ namespace RIAPP.DataService.Utils
             {
                 if (fieldInfo.fieldType == FieldType.Object)
                 {
-                    return DeSerializeObjectField(typeof(Expando), fieldInfo, (object[])value);
+                    return DeSerializeObjectField(typeof(Expando), fieldInfo, (object[]) value);
                 }
                 else
                 {
                     return _valueConverter.DeserializeField(fieldInfo, (string)value);
                 }
             }
-
+ 
         }
 
         private IEnumerable ToEnumerable(Type elementType, ParamMetadata pinfo, string[] arr)
@@ -157,12 +157,12 @@ namespace RIAPP.DataService.Utils
 
         public object ParseParameter(Type paramType, ParamMetadata pinfo, bool isArray, string val)
         {
-            return (isArray && val != null) ? ParseArray(paramType, pinfo, val) : _valueConverter.DeserializeValue(paramType, pinfo.DataType, pinfo.DateConversion, val);
+            return (isArray && val != null) ? ParseArray(paramType, pinfo, val) : _valueConverter.DeserializeValue(paramType, pinfo.dataType, pinfo.dateConversion, val);
         }
 
         public Field GetFieldInfo(DbSetInfo dbSetInfo, string fullName)
         {
-            IReadOnlyDictionary<string, Field> fieldsByName = dbSetInfo.fieldInfos.GetFieldByNames();
+            Dictionary<string, Field> fieldsByName = dbSetInfo.GetFieldByNames();
             return fieldsByName[fullName];
         }
 

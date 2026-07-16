@@ -4,7 +4,7 @@
     public class InvokeResponse
     {
 
-        public object Result { get; set; }
+        public object result { get; set; }
 
         /// <summary>
         ///     Client must first check this field
@@ -12,6 +12,6 @@
         ///     otherwise it contains error message
         /// </summary>
 
-        public ErrorInfo Error { get; set; }
+        public ErrorInfo error { get; set; }
     }
 }

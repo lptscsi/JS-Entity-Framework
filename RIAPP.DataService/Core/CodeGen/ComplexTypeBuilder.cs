@@ -43,10 +43,10 @@ namespace RIAPP.DataService.Core.CodeGen
             string interfaceName = string.Format("I{0}", typeName);
             fieldInfo.SetTypeScriptDataType(typeName);
 
-            StringBuilder sbProperties = new StringBuilder();
-            StringBuilder sbFieldsDef = new StringBuilder();
-            StringBuilder sbFieldsInit = new StringBuilder();
-            StringBuilder sbInterfaceFields = new StringBuilder();
+            StringBuilder sbProperties = new();
+            StringBuilder sbFieldsDef = new();
+            StringBuilder sbFieldsInit = new();
+            StringBuilder sbInterfaceFields = new();
 
             Action<Field> AddProperty = f =>
             {
@@ -118,7 +118,7 @@ namespace RIAPP.DataService.Core.CodeGen
                 templateName = "ChildComplexProperty.txt";
             }
 
-            Dictionary<string, Func<TemplateParser.Context, string>> dic = new Dictionary<string, Func<TemplateParser.Context, string>>
+            Dictionary<string, Func<TemplateParser.Context, string>> dic = new()
             {
                 { "PROPERTIES", (context) => TrimEnd(sbProperties.ToString()) },
                 { "TYPE_NAME", (context) => typeName },
@@ -136,7 +136,7 @@ namespace RIAPP.DataService.Core.CodeGen
 
         public string GetComplexTypes()
         {
-            StringBuilder sb = new StringBuilder(1024);
+            StringBuilder sb = new(1024);
             _complexTypes.Values.ToList().ForEach(typeDef =>
             {
                 sb.AppendLine(typeDef);
