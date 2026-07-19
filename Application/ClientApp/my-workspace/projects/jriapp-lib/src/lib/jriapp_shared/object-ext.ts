@@ -74,26 +74,28 @@ export const BaseObjectExt = {
           const superProto: any = Object.getPrototypeOf(obj);
           if (name == 'dispose') {
             p.value = function () {
-              const old = this._super;
-              this._super = superProto[name];
+              const self: any = this;
+              const old = self._super;
+              self._super = superProto[name];
               try {
-                this._objState = ObjState.Disposing;
-                return fn.apply(this, arguments);
+                self._objState = ObjState.Disposing;
+                return fn.apply(self, arguments);
               }
               finally {
-                this._super = old;
+                self._super = old;
               }
             };
           }
           else {
             p.value = function () {
-              const old = this._super;
-              this._super = superProto[name];
+              const self: any = this;
+              const old = self._super;
+              self._super = superProto[name];
               try {
-                return fn.apply(this, arguments);
+                return fn.apply(self, arguments);
               }
               finally {
-                this._super = old;
+                self._super = old;
               }
             };
           }
@@ -101,7 +103,8 @@ export const BaseObjectExt = {
         }
         else if (name == 'dispose') {
           p.value = function () {
-            this._objState = ObjState.Disposing;
+            const self: any = this;
+            self._objState = ObjState.Disposing;
             return fn.apply(this, arguments);
           };
           Object.defineProperty(obj, name, p);
@@ -171,7 +174,7 @@ export const BaseObjectExt = {
   get __objSig() {
     return objSignature;
   }
-} as IObjectFactory<IBaseObject>;
+} as unknown as IObjectFactory<IBaseObject>;
 
 /*
 

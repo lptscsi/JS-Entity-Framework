@@ -568,7 +568,7 @@ namespace RIAPP.DataService.Core.CodeGen
             _dbSets.ForEach(dbSetInfo =>
             {
                 string dbSetType = GetDbSetTypeName(dbSetInfo.dbSetName);
-                sbCreateDbSets.AppendFormat("\t\tthis._createDbSet(\"{0}\", (options) => new {1}(options));", dbSetInfo.dbSetName, dbSetType);
+                sbCreateDbSets.AppendFormat("\t\tthis._createDbSet(\"{0}\", (options) => new {1}(options) as any);", dbSetInfo.dbSetName, dbSetType);
                 sbCreateDbSets.AppendLine();
             });
 
