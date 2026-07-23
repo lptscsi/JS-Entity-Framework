@@ -24,8 +24,8 @@ type IQueryResponse = {
 };
 
 type IStaticData = {
-  productModelData: IQueryResponse;
-  productCategoryData: IQueryResponse;
+  ProductModelData: IQueryResponse;
+  ProductCategoryData: IQueryResponse;
 };
 
 export class Filter extends BaseObject {
@@ -194,9 +194,9 @@ export class AdwService {
 
     }, this.uniqueID);
 
-    this.dbContext.dbSets.ProductModel.fillData(staticData.productModelData);
+    this.dbContext.dbSets.ProductModel.fillData(staticData.ProductModelData);
     // when we fill the data (when data changed), the dataview based on this dataset is automatically refreshed
-    this.dbContext.dbSets.ProductCategory.fillData(staticData.productCategoryData);
+    this.dbContext.dbSets.ProductCategory.fillData(staticData.ProductCategoryData);
   }
 
   load(pageIndex: number = 0, pageSize: number): IStatefulPromise<IQueryResult<Product>> {

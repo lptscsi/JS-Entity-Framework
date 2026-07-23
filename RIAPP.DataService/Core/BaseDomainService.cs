@@ -90,7 +90,7 @@ namespace RIAPP.DataService.Core
             try
             {
                 string[] changed = [];
-                switch (rowInfo.ChangeType)
+                switch (rowInfo.changeType)
                 {
                     case ChangeType.Updated:
                         {
@@ -99,17 +99,17 @@ namespace RIAPP.DataService.Core
                         break;
                     default:
                         {
-                            changed = [.. dbSetInfo.GetColumns().Select(f => f.Name)];
+                            changed = [.. dbSetInfo.GetColumns().Select(f => f.name)];
                         }
                         break;
                 }
 
                 string[] pknames = [.. dbSetInfo.GetPKFields().Select(f => f.fieldName)];
                 string diffgram = DiffGram.GetDiffGram(rowInfo.GetChangeState().OriginalEntity,
-                    rowInfo.ChangeType == ChangeType.Deleted ? null : rowInfo.GetChangeState().Entity,
-                    dbSetInfo.GetEntityType(), changed, pknames, rowInfo.ChangeType, dbSetInfo.dbSetName);
+                    rowInfo.changeType == ChangeType.Deleted ? null : rowInfo.GetChangeState().Entity,
+                    dbSetInfo.GetEntityType(), changed, pknames, rowInfo.changeType, dbSetInfo.dbSetName);
 
-                OnTrackChange(dbSetInfo.dbSetName, rowInfo.ChangeType, diffgram);
+                OnTrackChange(dbSetInfo.dbSetName, rowInfo.changeType, diffgram);
             }
             catch (Exception ex)
             {
@@ -131,7 +131,7 @@ namespace RIAPP.DataService.Core
         /// <returns></returns>
         public async Task<QueryResponse> GetQueryData(string dbSetName, string queryName)
         {
-            QueryRequest getInfo = new() { DbSetName = dbSetName, QueryName = queryName };
+            QueryRequest getInfo = new() { dbSetName = dbSetName, queryName = queryName };
             return await ServiceGetData(getInfo);
         }
 
@@ -165,7 +165,7 @@ namespace RIAPP.DataService.Core
                 foreach (DbSetInfo dbInfo in metadata.DbSets.Values)
                 {
                     DbSetPermit permissions = await authorizer.GetDbSetPermissions(metadata, dbInfo.dbSetName);
-                    result.Items.Add(permissions);
+                    result.items.Add(permissions);
                 }
 
                 return result;

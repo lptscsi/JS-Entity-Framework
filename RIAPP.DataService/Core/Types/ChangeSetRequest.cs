@@ -1,19 +1,16 @@
 ﻿namespace RIAPP.DataService.Core.Types
 {
 
-
     public class ChangeSetRequest : IUseCaseRequest<ChangeSetResponse>
     {
         public ChangeSetRequest()
         {
-            DbSets = [];
-            TrackAssocs = [];
+            dbSets = [];
+            trackAssocs = [];
         }
 
+        public DbSetList dbSets { get; set; }
 
-        public DbSetList DbSets { get; set; }
-
-
-        public TrackAssocList TrackAssocs { get; set; }
+        public TrackAssocList trackAssocs { get; set; }
     }
 }

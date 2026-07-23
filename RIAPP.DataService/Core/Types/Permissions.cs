@@ -8,6 +8,6 @@
 
         }
 
-        public PermissionList Items { get; set; } = [];
+        public PermissionList items { get; set; } = [];
     }
 }

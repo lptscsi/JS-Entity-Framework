@@ -28,7 +28,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
                 {
                     if (!await serviceHelper.ValidateEntity(metadata, req))
                     {
-                        rowInfo.Invalid = rowInfo.GetChangeState().ValidationErrors;
+                        rowInfo.invalid = rowInfo.GetChangeState().ValidationErrors;
                         return false;
                     }
                 }

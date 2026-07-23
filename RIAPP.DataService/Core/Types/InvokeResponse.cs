@@ -3,15 +3,14 @@
 
     public class InvokeResponse
     {
-
-        public object Result { get; set; }
+        public object result { get; set; }
 
         /// <summary>
-        ///     Client must first check this field
-        ///     if all ok, then error is empty
-        ///     otherwise it contains error message
+        ///  Client must first check this field
+        ///  if all ok, then error is empty
+        ///  otherwise it contains error message
         /// </summary>
 
-        public ErrorInfo Error { get; set; }
+        public ErrorInfo error { get; set; }
     }
 }

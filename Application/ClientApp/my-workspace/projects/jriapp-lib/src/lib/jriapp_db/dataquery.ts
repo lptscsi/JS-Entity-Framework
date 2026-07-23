@@ -144,7 +144,7 @@ export class DataQuery<TItem extends IEntityItem = IEntityItem> extends BaseObje
   }
   private _getCache(): DataCache {
     if (!this._dataCache) {
-      this._dataCache = new DataCache(this);
+      this._dataCache = new DataCache(this as unknown as TDataQuery);
     }
     return this._dataCache;
   }
@@ -202,7 +202,7 @@ export class DataQuery<TItem extends IEntityItem = IEntityItem> extends BaseObje
     return this._dbSet.getFieldNames();
   }
   load(): IStatefulPromise<IQueryResult<TItem>> {
-    return <IStatefulPromise<IQueryResult<TItem>>>this.dbSet.dbContext.load(this);
+    return <IStatefulPromise<IQueryResult<TItem>>>this.dbSet.dbContext.load(this as unknown as TDataQuery);
   }
   override toString(): string {
     return "DataQuery";

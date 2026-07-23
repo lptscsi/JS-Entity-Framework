@@ -974,6 +974,9 @@ export abstract class BaseCollection<TItem extends ICollectionItem = ICollection
   get items(): TItem[] {
     return this._items;
   }
+  get currentPos(): number {
+    return this._currentPos;
+  }
   get currentItem(): TItem | null {
     return this.getItemByPos(this._currentPos);
   }

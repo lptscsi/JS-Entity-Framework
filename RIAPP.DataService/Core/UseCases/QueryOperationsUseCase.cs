@@ -20,21 +20,21 @@ namespace RIAPP.DataService.Core
         {
             QueryResponse response = new()
             {
-                PageIndex = message.PageIndex,
-                PageCount = message.PageCount,
-                DbSetName = message.DbSetName,
-                Rows = new Row[0],
-                TotalCount = null,
-                Error = null
+                pageIndex = message.pageIndex,
+                pageCount = message.pageCount,
+                dbSetName = message.dbSetName,
+                rows = new Row[0],
+                totalCount = null,
+                error = null
             };
 
             try
             {
                 Metadata.RunTimeMetadata metadata = _service.GetMetadata();
-                DbSetInfo dbSetInfo = metadata.DbSets.Get(message.DbSetName) ?? throw new InvalidOperationException($"The DbSet {message.DbSetName} was not found in metadata");
+                DbSetInfo dbSetInfo = metadata.DbSets.Get(message.dbSetName) ?? throw new InvalidOperationException($"The DbSet {message.dbSetName} was not found in metadata");
                 message.SetDbSetInfo(dbSetInfo);
 
-                bool isMultyPageRequest = dbSetInfo.enablePaging && message.PageCount > 1;
+                bool isMultyPageRequest = dbSetInfo.enablePaging && message.pageCount > 1;
 
                 QueryContext<TService> context = new(message,
                     response,
@@ -52,7 +52,7 @@ namespace RIAPP.DataService.Core
                 }
 
                 string err = _onError(ex);
-                response.Error = new ErrorInfo(err, ex.GetType().Name);
+                response.error = new ErrorInfo(err, ex.GetType().Name);
             }
 
             outputPort.Handle(response);

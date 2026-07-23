@@ -148,14 +148,20 @@ namespace RIAppDemo.BLL.DataServices
         public async Task<QueryResult<SalesInfo>> ReadSalesInfo()
         {
             QueryRequest queryInfo = this.GetCurrentQueryInfo();
-            string startsWithVal = queryInfo.FilterInfo.FilterItems[0].Values.First().TrimEnd('%');
+            string startsWithVal = queryInfo.filterInfo
+                .FilterItems[0]
+                .values
+                .First()
+                .TrimEnd('%');
             IQueryable<SalesInfo> res = DB.Customer.AsNoTracking().Where(c => c.SalesPerson.StartsWith(startsWithVal))
                     .Select(s => s.SalesPerson)
                     .Distinct()
                     .OrderBy(s => s)
                     .Select(s => new SalesInfo { SalesPerson = s });
 
-            List<SalesInfo> resPage = await res.Skip(queryInfo.PageIndex * queryInfo.PageSize).Take(queryInfo.PageSize).ToListAsync();
+            List<SalesInfo> resPage = await res.Skip(queryInfo.pageIndex * queryInfo.pageSize)
+                .Take(queryInfo.pageSize)
+                .ToListAsync();
 
             return new QueryResult<SalesInfo>(resPage, await res.CountAsync());
         }
@@ -232,16 +238,16 @@ namespace RIAppDemo.BLL.DataServices
         {
             IQueryable<Customer> customers = DB.Customer.AsNoTracking().Where(c => c.CustomerAddress.Any());
             QueryRequest queryInfo = this.GetCurrentQueryInfo();
-            int? totalCount = queryInfo.PageIndex == 0 ? 0 : (int?)null;
+            int? totalCount = queryInfo.pageIndex == 0 ? 0 : (int?)null;
             // calculate totalCount only when we fetch first page (to speed up query)
-            PerformQueryResult<Customer> custQueryResult = this.PerformQuery(customers, queryInfo.PageIndex == 0 ? (countQuery) => countQuery.CountAsync() : (Func<IQueryable<Customer>, Task<int>>)null);
+            PerformQueryResult<Customer> custQueryResult = this.PerformQuery(customers, queryInfo.pageIndex == 0 ? (countQuery) => countQuery.CountAsync() : (Func<IQueryable<Customer>, Task<int>>?)null);
             List<Customer> custList = await custQueryResult.Data.ToListAsync();
 
             // only execute total counting if we got full page size of rows, preventing unneeded database call to count total
-            if (queryInfo.PageIndex == 0 && custList.Any())
+            if (queryInfo.pageIndex == 0 && custList.Any())
             {
                 int cnt = custList.Count;
-                if (cnt < queryInfo.PageSize)
+                if (cnt < queryInfo.pageSize)
                 {
                     totalCount = cnt;
                 }

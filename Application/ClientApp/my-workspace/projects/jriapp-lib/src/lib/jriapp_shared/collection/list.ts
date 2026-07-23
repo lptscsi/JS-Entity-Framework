@@ -37,7 +37,7 @@ export class ListItemAspect extends ItemAspect {
         if (!!validationInfo && validationInfo.errors.length > 0) {
           throw new ValidationError([validationInfo], this);
         }
-      } catch (ex) {
+      } catch (ex: any) {
         if (utils.sys.isValidationError(ex)) {
           error = ex;
         } else {

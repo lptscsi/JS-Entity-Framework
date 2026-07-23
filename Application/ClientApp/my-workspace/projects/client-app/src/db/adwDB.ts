@@ -1,12 +1,12 @@
 /*
-	Generated from: /api/demo/ts on 2026-07-16 at 06:22
+	Generated from: /api/demo/ts on 2026-07-23 at 20:53
 	Don't make manual changes here, they will be lost when this interface will be regenerated!
 */
 
 import * as RIAPP from "jriapp-lib";
 
 
-//******BEGIN INTERFACE REGION******
+// #region INTERFACE REGION
 export interface IAddressInfo2
 {
 	AddressId:number;
@@ -94,7 +94,7 @@ export enum TestEnum2
 	Two=2,
 	Three=3
 }
-//******END INTERFACE REGION******
+// #endregion INTERFACE REGION
 
 export interface ISvcMethods
 {
@@ -109,7 +109,7 @@ export interface ISvcMethods
 	}) => RIAPP.IPromise<string>;
 }
 
-//******BEGIN LISTS REGION******
+// #region LISTS REGION
 export class TestModelListItem extends RIAPP.ListItem {
 	get Key():string { return <string>this._aspect._getProp('Key'); }
 	set Key(v:string) { this._aspect._setProp('Key', v); }
@@ -253,9 +253,9 @@ export class HistoryList extends RIAPP.BaseList<HistoryItemListItem> {
 		return 'HistoryList';
 	}
 }
-//******END LISTS REGION******
+// #endregion LISTS REGION
 
-//******BEGIN COMPLEX TYPES REGION*****
+// #region COMPLEX TYPES REGION
 export class Customer_Contact1 extends RIAPP.ChildComplexProperty
 {
 	constructor(name: string, parent: RIAPP.BaseComplexProperty) {
@@ -289,7 +289,7 @@ export class Customer_CustomerName extends RIAPP.RootComplexProperty
 		return 'Customer_CustomerName';
 	}
 }
-//******END COMPLEX TYPES REGION******
+// #endregion COMPLEX TYPES REGION
 
 export interface IAddress
 {
@@ -1076,20 +1076,20 @@ export interface IAssocs
 export class DbSets extends RIAPP.DbSets{
 	constructor() {
 		super();
-		this._createDbSet("Address", (options) => new AddressDb(options));
-		this._createDbSet("AddressInfo", (options) => new AddressInfoDb(options));
-		this._createDbSet("Customer", (options) => new CustomerDb(options));
-		this._createDbSet("CustomerAddress", (options) => new CustomerAddressDb(options));
-		this._createDbSet("CustomerJSON", (options) => new CustomerJSONDb(options));
-		this._createDbSet("LookUpProduct", (options) => new LookUpProductDb(options));
-		this._createDbSet("Product", (options) => new ProductDb(options));
-		this._createDbSet("ProductCategory", (options) => new ProductCategoryDb(options));
-		this._createDbSet("ProductDescription", (options) => new ProductDescriptionDb(options));
-		this._createDbSet("ProductModel", (options) => new ProductModelDb(options));
-		this._createDbSet("ProductModelProductDescription", (options) => new ProductModelProductDescriptionDb(options));
-		this._createDbSet("SalesInfo", (options) => new SalesInfoDb(options));
-		this._createDbSet("SalesOrderDetail", (options) => new SalesOrderDetailDb(options));
-		this._createDbSet("SalesOrderHeader", (options) => new SalesOrderHeaderDb(options));
+		this._createDbSet("Address", (options) => new AddressDb(options) as any);
+		this._createDbSet("AddressInfo", (options) => new AddressInfoDb(options) as any);
+		this._createDbSet("Customer", (options) => new CustomerDb(options) as any);
+		this._createDbSet("CustomerAddress", (options) => new CustomerAddressDb(options) as any);
+		this._createDbSet("CustomerJSON", (options) => new CustomerJSONDb(options) as any);
+		this._createDbSet("LookUpProduct", (options) => new LookUpProductDb(options) as any);
+		this._createDbSet("Product", (options) => new ProductDb(options) as any);
+		this._createDbSet("ProductCategory", (options) => new ProductCategoryDb(options) as any);
+		this._createDbSet("ProductDescription", (options) => new ProductDescriptionDb(options) as any);
+		this._createDbSet("ProductModel", (options) => new ProductModelDb(options) as any);
+		this._createDbSet("ProductModelProductDescription", (options) => new ProductModelProductDescriptionDb(options) as any);
+		this._createDbSet("SalesInfo", (options) => new SalesInfoDb(options) as any);
+		this._createDbSet("SalesOrderDetail", (options) => new SalesOrderDetailDb(options) as any);
+		this._createDbSet("SalesOrderHeader", (options) => new SalesOrderHeaderDb(options) as any);
 	}
 	get Address() { return this.getDbSet("Address") as unknown as AddressDb; }
 	get AddressInfo() { return this.getDbSet("AddressInfo") as unknown as AddressInfoDb; }

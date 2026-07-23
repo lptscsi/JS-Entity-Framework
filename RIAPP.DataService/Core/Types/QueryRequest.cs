@@ -3,33 +3,23 @@
 
     public class QueryRequest : IUseCaseRequest<QueryResponse>
     {
+        public string dbSetName { get; set; }
 
-        public string DbSetName { get; set; }
+        public string queryName { get; set; }
 
+        public FilterInfo filterInfo { get; set; } = new FilterInfo();
 
-        public string QueryName { get; set; }
+        public SortInfo sortInfo { get; set; } = new SortInfo();
 
+        public MethodParameters paramInfo { get; set; } = new MethodParameters();
 
-        public FilterInfo FilterInfo { get; set; } = new FilterInfo();
+        public int pageIndex { get; set; }
 
+        public int pageSize { get; set; }
 
-        public SortInfo SortInfo { get; set; } = new SortInfo();
+        public int pageCount { get; set; }
 
-
-        public MethodParameters ParamInfo { get; set; } = new MethodParameters();
-
-
-        public int PageIndex { get; set; }
-
-
-        public int PageSize { get; set; }
-
-
-        public int PageCount { get; set; }
-
-
-
-        public bool IsIncludeTotalCount { get; set; }
+        public bool isIncludeTotalCount { get; set; }
 
         internal DbSetInfo _dbSetInfo { get; set; }
     }

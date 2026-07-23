@@ -6,6 +6,6 @@ namespace RIAPP.DataService.Core.Types
     {
         public string dbSetName { get; set; }
 
-        public IEnumerable<object> Result { get; set; }
+        public IEnumerable<object> result { get; set; }
     }
 }

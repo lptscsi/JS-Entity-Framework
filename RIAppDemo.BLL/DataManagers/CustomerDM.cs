@@ -19,11 +19,12 @@ namespace RIAppDemo.BLL.DataManagers
             IQueryable<Customer> customers = DB.Customer;
             QueryRequest queryInfo = this.GetCurrentQueryInfo();
             // AddressCount does not exists in Database (we calculate it), so it is needed to sort it manually
-            SortItem addressCountSortItem = queryInfo.SortInfo.SortItems.FirstOrDefault(sortItem => sortItem.FieldName == "AddressCount");
+            SortItem addressCountSortItem = queryInfo.sortInfo.SortItems
+                .FirstOrDefault(sortItem => sortItem.fieldName == "AddressCount");
             if (addressCountSortItem != null)
             {
-                queryInfo.SortInfo.SortItems.Remove(addressCountSortItem);
-                if (addressCountSortItem.SortOrder == SortOrder.ASC)
+                queryInfo.sortInfo.SortItems.Remove(addressCountSortItem);
+                if (addressCountSortItem.sortOrder == SortOrder.ASC)
                 {
                     customers = customers.OrderBy(c => c.CustomerAddress.Count());
                 }
@@ -33,15 +34,15 @@ namespace RIAppDemo.BLL.DataManagers
                 }
             }
 
-            int? totalCount = queryInfo.PageIndex == 0 ? 0 : (int?)null;
+            int? totalCount = queryInfo.pageIndex == 0 ? 0 : (int?)null;
             // perform query
-            PerformQueryResult<Customer> customersResult = this.PerformQuery(customers.AsNoTracking(), queryInfo.PageIndex == 0 ? (countQuery) => countQuery.CountAsync() : (Func<IQueryable<Customer>, Task<int>>)null);
+            PerformQueryResult<Customer> customersResult = this.PerformQuery(customers.AsNoTracking(), queryInfo.pageIndex == 0 ? (countQuery) => countQuery.CountAsync() : (Func<IQueryable<Customer>, Task<int>>)null);
             System.Collections.Generic.List<Customer> customersList = await customersResult.Data.ToListAsync();
             // only execute total counting if we got full page size of rows, preventing unneeded database call to count total
-            if (queryInfo.PageIndex == 0 && customersList.Any())
+            if (queryInfo.pageIndex == 0 && customersList.Any())
             {
                 int cnt = customersList.Count;
-                if (cnt < queryInfo.PageSize)
+                if (cnt < queryInfo.pageSize)
                 {
                     totalCount = cnt;
                 }
@@ -56,19 +57,21 @@ namespace RIAppDemo.BLL.DataManagers
             if (includeNav == true)
             {
                 int[] customerIDs = [.. customersList.Select(c => c.CustomerId)];
-                System.Collections.Generic.List<CustomerAddress> customerAddress = await DB.CustomerAddress.AsNoTracking().Where(ca => customerIDs.Contains(ca.CustomerId)).ToListAsync();
+                System.Collections.Generic.List<CustomerAddress> customerAddress = await DB.CustomerAddress
+                    .AsNoTracking()
+                    .Where(ca => customerIDs.Contains(ca.CustomerId)).ToListAsync();
                 int[] addressIDs = [.. customerAddress.Select(ca => ca.AddressId)];
 
                 SubResult subResult1 = new()
                 {
                     dbSetName = "CustomerAddress",
-                    Result = customerAddress
+                    result = customerAddress
                 };
 
                 SubResult subResult2 = new()
                 {
                     dbSetName = "Address",
-                    Result = await DB.Address.AsNoTracking().Where(adr => addressIDs.Contains(adr.AddressId)).ToListAsync()
+                    result = await DB.Address.AsNoTracking().Where(adr => addressIDs.Contains(adr.AddressId)).ToListAsync()
                 };
 
                 // since we have loaded customer addresses - update server side calculated field: AddressCount 
@@ -80,8 +83,8 @@ namespace RIAppDemo.BLL.DataManagers
                 });
 
                 // return two subresults with the query results
-                queryRes.SubResults.Add(subResult1);
-                queryRes.SubResults.Add(subResult2);
+                queryRes.subResults.Add(subResult1);
+                queryRes.subResults.Add(subResult2);
             }
 
             return queryRes;

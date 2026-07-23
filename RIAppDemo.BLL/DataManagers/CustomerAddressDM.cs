@@ -22,16 +22,19 @@ namespace RIAppDemo.BLL.DataManagers
             DbSetInfo custAddrDbSet = this.GetSetInfoByName("CustomerAddress");
             DbSetInfo customerDbSet = this.GetSetInfoByName("Customer");
 
-            DbSet dbCustAddr = changeSet.DbSets.FirstOrDefault(d => d.DbSetName == custAddrDbSet.dbSetName);
+            DbSet dbCustAddr = changeSet.dbSets.FirstOrDefault(d => d.dbSetName == custAddrDbSet.dbSetName);
             if (dbCustAddr != null)
             {
-                int[] custIDs = [.. dbCustAddr.Rows
-                    .Where(r => r.ChangeType == ChangeType.Deleted || r.ChangeType == ChangeType.Added)
-                    .Select(r => r.Values.First(v => v.FieldName == "CustomerId").Val)
+                int[] custIDs = [.. dbCustAddr.rows
+                    .Where(r => r.changeType == ChangeType.Deleted || r.changeType == ChangeType.Added)
+                    .Select(r => r.values.First(v => v.fieldName == "CustomerId").val)
                     .Select(id => int.Parse(id))];
 
-                System.Collections.Generic.List<Customer> customersList = await DB.Customer.AsNoTracking().Where(c => custIDs.Contains(c.CustomerId)).ToListAsync();
-                System.Collections.Generic.List<int> customerAddress = await DB.CustomerAddress.AsNoTracking().Where(ca => custIDs.Contains(ca.CustomerId)).Select(ca => ca.CustomerId).ToListAsync();
+                System.Collections.Generic.List<Customer> customersList = await DB.Customer.AsNoTracking()
+                    .Where(c => custIDs.Contains(c.CustomerId)).ToListAsync();
+                System.Collections.Generic.List<int> customerAddress = await DB.CustomerAddress.AsNoTracking()
+                    .Where(ca => custIDs.Contains(ca.CustomerId))
+                    .Select(ca => ca.CustomerId).ToListAsync();
 
                 customersList.ForEach(customer =>
                 {
@@ -41,7 +44,7 @@ namespace RIAppDemo.BLL.DataManagers
                 SubResult subResult = new()
                 {
                     dbSetName = customerDbSet.dbSetName,
-                    Result = customersList
+                    result = customersList
                 };
                 refreshResult.Add(subResult);
             }
@@ -58,7 +61,9 @@ namespace RIAppDemo.BLL.DataManagers
         public async Task<QueryResult<CustomerAddress>> ReadAddressForCustomers(int[] custIDs)
         {
             int? totalCount = null;
-            System.Collections.Generic.List<CustomerAddress> res = await DB.CustomerAddress.Where(ca => custIDs.Contains(ca.CustomerId)).ToListAsync();
+            System.Collections.Generic.List<CustomerAddress> res = await DB.CustomerAddress
+                .Where(ca => custIDs.Contains(ca.CustomerId))
+                .ToListAsync();
             return new QueryResult<CustomerAddress>(res, totalCount);
         }
 

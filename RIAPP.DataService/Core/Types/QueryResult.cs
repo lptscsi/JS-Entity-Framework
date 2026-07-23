@@ -13,13 +13,13 @@ namespace RIAPP.DataService.Core.Types
             _subResults = new Lazy<SubResultList>(() => [], true);
         }
 
-        public int? TotalCount { get; set; }
+        public int? totalCount { get; set; }
 
-        public IEnumerable<object> Result { get; set; }
+        public IEnumerable<object> result { get; set; }
 
-        public object ExtraInfo { get; set; }
+        public object extraInfo { get; set; }
 
-        public SubResultList SubResults => _subResults.Value;
+        public SubResultList subResults => _subResults.Value;
     }
 
     public class QueryResult<T> : QueryResult
@@ -37,13 +37,13 @@ namespace RIAPP.DataService.Core.Types
 
         public QueryResult(IEnumerable<T> result, int? totalCount)
         {
-            Result = result;
-            TotalCount = totalCount;
+            base.result = result;
+            base.totalCount = totalCount;
         }
 
         public IEnumerable<T> getResult()
         {
-            return (IEnumerable<T>)Result;
+            return (IEnumerable<T>)result;
         }
     }
 }

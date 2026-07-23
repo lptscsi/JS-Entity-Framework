@@ -7,25 +7,25 @@ namespace RIAPP.DataService.Core.Types
     {
         public RowInfo()
         {
-            ChangeType = ChangeType.None;
-            Values = [];
-            ServerKey = string.Empty;
+            changeType = ChangeType.None;
+            values = [];
+            serverKey = string.Empty;
             _dbSetInfo = null;
             _changeState = null;
         }
 
 
-        public ValuesList Values { get; set; }
+        public ValuesList values { get; set; }
 
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public ChangeType ChangeType { get; set; }
+        public ChangeType changeType { get; set; }
 
         /// <summary>
         ///     Unique server row id in DbSet - primary key values concantenated by ;
         /// </summary>
 
-        public string ServerKey { get; set; }
+        public string serverKey { get; set; }
 
         /// <summary>
         ///     When row change type is added row has empty serverKey
@@ -33,12 +33,12 @@ namespace RIAPP.DataService.Core.Types
         ///     the client could find the row in its rows store.
         /// </summary>
 
-        public string ClientKey { get; set; }
+        public string clientKey { get; set; }
 
 
-        public string Error { get; set; }
+        public string error { get; set; }
 
-        public ValidationErrorInfo[] Invalid { get; set; }
+        public ValidationErrorInfo[] invalid { get; set; }
 
         internal DbSetInfo _dbSetInfo { get; set; }
 

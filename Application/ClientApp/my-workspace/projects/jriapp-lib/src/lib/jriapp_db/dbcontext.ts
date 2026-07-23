@@ -78,7 +78,8 @@ const enum DBCTX_EVENTS {
   SUBMITTING = "submitting",
   SUBMITTED = "submitted",
   SUBMIT_ERROR = "submit_error",
-  DBSET_CREATING = "dbset_creating"
+  DBSET_CREATING = "dbset_creating",
+  REJECT_CHANGES = "rejected_changes"
 }
 
 export type TSubmitErrArgs = { error: any, isHandled: boolean, context: IIndexer<any> };
@@ -853,6 +854,12 @@ export abstract class DbContext<TMethods extends {
   }
   offOnSubmitError(nmspace?: string): void {
     this.objEvents.off(DBCTX_EVENTS.SUBMIT_ERROR, nmspace);
+  }
+  addOnRejectChanges(fn: TEventHandler<DbContext, any>, nmspace?: string, context?: IBaseObject): void {
+    this.objEvents.on(DBCTX_EVENTS.REJECT_CHANGES, fn, nmspace, context);
+  }
+  offOnRejectChanges(nmspace?: string): void {
+    this.objEvents.off(DBCTX_EVENTS.REJECT_CHANGES, nmspace);
   }
   addOnDbSetCreating(fn: TEventHandler<this, TDbSetCreatingArgs>, nmspace?: string, context?: IBaseObject): void {
     this.objEvents.on(DBCTX_EVENTS.DBSET_CREATING, fn, nmspace, context);

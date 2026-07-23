@@ -15,18 +15,18 @@ namespace RIAPP.DataService.Core.Types
     {
         public MethodParameter()
         {
-            Name = "";
-            Value = null;
+            name = "";
+            value = null;
         }
 
 
         [Description("Parameter name")]
-        public string Name { get; set; }
+        public string name { get; set; }
 
 
 
         [Description("Parameter value as string")]
-        public string Value { get; set; }
+        public string value { get; set; }
     }
 
 
@@ -34,28 +34,35 @@ namespace RIAPP.DataService.Core.Types
     {
         public MethodParameters()
         {
-            Parameters = [];
+            parameters = [];
         }
 
 
-        public List<MethodParameter> Parameters { get; set; }
+        public List<MethodParameter> parameters { get; set; }
 
         public object GetValue(string name, MethodDescription methodDescription, IDataHelper dataHelper)
         {
-            MethodParameter par = Parameters.Where(p => p.Name == name).FirstOrDefault();
+            MethodParameter par = parameters
+                .Where(p => p.name == name)
+                .FirstOrDefault();
+
             if (par == null)
             {
                 return null;
             }
 
-            ParamMetadata paraminfo = methodDescription.parameters.Where(p => p.Name == name).FirstOrDefault();
+            ParamMetadata paraminfo = methodDescription
+                .parameters
+                .Where(p => p.name == name)
+                .FirstOrDefault();
+
             if (paraminfo == null)
             {
                 throw new DomainServiceException(string.Format("Method: {0} has no parameter with a name: {1}",
                     methodDescription.methodName, name));
             }
-            return dataHelper.ParseParameter(paraminfo.GetParameterType(), paraminfo, paraminfo.IsArray,
-                par.Value);
+            return dataHelper.ParseParameter(paraminfo.GetParameterType(), paraminfo, paraminfo.isArray,
+                par.value);
         }
     }
 }

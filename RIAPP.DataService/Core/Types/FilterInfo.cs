@@ -8,20 +8,17 @@ namespace RIAPP.DataService.Core.Types
     {
         public FilterItem()
         {
-            FieldName = string.Empty;
-            Values = [];
-            Kind = FilterType.Equals;
+            fieldName = string.Empty;
+            values = [];
+            kind = FilterType.Equals;
         }
 
+        public string fieldName { get; set; }
 
-        public string FieldName { get; set; }
-
-
-        public List<string> Values { get; set; }
-
+        public List<string> values { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public FilterType Kind { get; set; }
+        public FilterType kind { get; set; }
     }
 
 

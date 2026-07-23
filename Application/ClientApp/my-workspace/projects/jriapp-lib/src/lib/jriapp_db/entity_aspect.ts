@@ -478,7 +478,7 @@ export class EntityAspect extends ItemAspect {
           throw new ValidationError([validationInfo], this);
         }
       }
-    } catch (ex) {
+    } catch (ex: any) {
       let error: IValidationError;
       if (sys.isValidationError(ex)) {
         error = ex;

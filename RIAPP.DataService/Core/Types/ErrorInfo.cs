@@ -8,9 +8,8 @@
         {
         }
 
-        public string Message { get; set; } = message;
+        public string message { get; set; } = message;
 
-
-        public string Name { get; set; } = name;
+        public string name { get; set; } = name;
     }
 }

@@ -20,7 +20,7 @@ export type IObjectFactory<T extends IBaseObject> = {
  * Analog of BaseObject but allows for dynamic types creation
  * for example: is used in DbSet class for dynamic entity types creation
  */
-export const BaseObjectExt = {
+const impl: any = {
   _init() {
     this._super = null;
     this._objState = ObjState.None;
@@ -174,7 +174,9 @@ export const BaseObjectExt = {
   get __objSig() {
     return objSignature;
   }
-} as unknown as IObjectFactory<IBaseObject>;
+};
+
+export const BaseObjectExt = impl as unknown as IObjectFactory<IBaseObject>;
 
 /*
 

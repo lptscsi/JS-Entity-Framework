@@ -5,15 +5,15 @@
     {
         public Value()
         {
-            Val = null;
-            Ord = -1;
+            val = null;
+            ord = -1;
         }
 
 
-        public string Val { get; set; }
+        public string val { get; set; }
 
 
 
-        public int Ord { get; set; }
+        public int ord { get; set; }
     }
 }

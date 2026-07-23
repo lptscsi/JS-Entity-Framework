@@ -10,20 +10,20 @@ namespace RIAPP.DataService.Core.Types
     {
         public SortItem()
         {
-            FieldName = string.Empty;
-            SortOrder = SortOrder.ASC;
+            fieldName = string.Empty;
+            sortOrder = SortOrder.ASC;
         }
 
         /// <summary>
         /// Имя поля
         /// </summary>
-        public string FieldName { get; set; }
+        public string fieldName { get; set; }
 
         /// <summary>
         /// Направление сортировки
         /// </summary>
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public SortOrder SortOrder { get; set; }
+        public SortOrder sortOrder { get; set; }
     }
 
 

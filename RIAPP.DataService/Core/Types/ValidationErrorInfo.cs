@@ -9,19 +9,19 @@
 
         public ValidationErrorInfo(string message)
         {
-            this.Message = message;
+            this.message = message;
         }
 
         public ValidationErrorInfo(string fieldName, string message)
         {
-            this.FieldName = fieldName;
-            this.Message = message;
+            this.fieldName = fieldName;
+            this.message = message;
         }
 
 
-        public string FieldName { get; set; }
+        public string fieldName { get; set; }
 
 
-        public string Message { get; set; }
+        public string message { get; set; }
     }
 }

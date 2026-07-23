@@ -3,14 +3,14 @@ import {
    IStatefulDeferred, IStatefulPromise, IPromise, IThenable
 } from "./ipromise";
 import {
-    createDefer, whenAll, race, StatefulPromise, promiseSerial
+    createDefer, StatefulPromise, promiseSerial
 } from "./promise";
 import {
     getTaskQueue, ITaskQueue
 } from "./queue";
 import { Checks } from "./checks";
 
-const { isString, isFunc } = Checks, _whenAll = whenAll, _race = race, _getTaskQueue = getTaskQueue, _createDefer = createDefer;
+const { isString, isFunc } = Checks, _whenAll = Promise.all, _race = Promise.race, _getTaskQueue = getTaskQueue, _createDefer = createDefer;
 
 export type TDelayedFunc<T> = () => IPromise<T> | T;
 
@@ -31,10 +31,10 @@ export class AsyncUtils {
     static promiseSerial<T>(funcs: { (): IPromise<T>; }[]): IStatefulPromise<T[]> {
         return promiseSerial(funcs);
     }
-    static whenAll<T>(args: Array<T | IThenable<T>>): IStatefulPromise<T[]> {
+    static whenAll<T>(args: Array<T | IThenable<T>>): Promise<T[]> {
         return _whenAll(args);
     }
-    static race<T>(promises: Array<IThenable<T>>): IPromise<T> {
+    static race<T>(promises: Array<IThenable<T>>): Promise<T> {
         return _race(promises);
     }
     static getTaskQueue(): ITaskQueue {

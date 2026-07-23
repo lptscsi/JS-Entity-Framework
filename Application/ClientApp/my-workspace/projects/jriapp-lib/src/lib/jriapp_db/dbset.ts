@@ -489,7 +489,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     const calcFldBuilder = function (f: IFieldInfo) {
       const name = f.fieldName;
 
-      let getFunc = function () {
+      let getFunc = function (this: any) {
         return this._aspect._getCalcFieldVal(name);
       };
       let setFunc: { (v: any): any; } | undefined = void 0;
@@ -502,13 +502,13 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
     const navFldBuilder = function (f: IFieldInfo) {
       const name = f.fieldName, fInfo = self.getFieldInfo(name);
-      let getFunc = function () {
+      let getFunc = function (this: any) {
         return this._aspect._getNavFieldVal(name);
       };
       let setFunc:  { (v: any): any; } | undefined  = void 0;
 
       if (!fInfo.isReadOnly) {
-        setFunc = function (v) {
+        setFunc = function (this: any, v) {
           this._aspect._setNavFieldVal(name, v);
         }
       }
@@ -522,13 +522,13 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     const simpleFldBuilder = function (f: IFieldInfo) {
       const name = f.fieldName, fInfo = self.getFieldInfo(name);
 
-      let getFunc = function () {
+      let getFunc = function (this: any) {
         return this._aspect._getFieldVal(name);
       };
       let setFunc: { (v: any): any; } | undefined = void 0;
 
       if (!fInfo.isReadOnly) {
-        setFunc = function (v) {
+        setFunc = function (this: any, v) {
           this._aspect._setFieldVal(name, v);
         }
       }
@@ -553,13 +553,13 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     });
 
     propDesc['_aspect'] = {
-      get: function () {
+      get: function (this: any) {
         return this.__aspect;
       },
       enumerable: false
     };
     propDesc['_key'] = {
-      get: function () {
+      get: function (this: any) {
         return this.__aspect.key;
       },
       enumerable: false
@@ -568,19 +568,19 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
     const TEntity: IEntityFactory = BaseObjectExt.extend<any>(
       {
         _init(aspect: any): void {
-          this._super();
-          this.__aspect = aspect;
+          this['_super']();
+          this['__aspect'] = aspect;
         },
         dispose(): void {
-          if (this.getIsDisposed()) {
+          if (this['getIsDisposed']()) {
             return;
           }
-          this.setDisposing();
-          const aspect = this.__aspect;
+          this['setDisposing']();
+          const aspect: IBaseObject = this['__aspect'] as unknown as IBaseObject;
           if (!aspect.getIsStateDirty()) {
             aspect.dispose();
           }
-          this._super();
+          this['_super']();
         }
       },
       propDesc,

@@ -20,19 +20,6 @@ export function createSyncDefer<T>(): IStatefulDeferred<T> {
     return createDefer<T>(true);
 }
 
-export function whenAll<T>(promises: Array<T | IThenable<T>>): IStatefulPromise<T[]> {
-    const results: T[] = [], resolved: IThenable<T> = createDefer<T>().resolve(null);
-    const merged: any = promises.reduce((acc: IThenable<T>, p: T | IThenable<T>) => acc.then(() => p).then((r: T) => { results.push(r); return r; })
-        , resolved);
-    return merged.then(() => results);
-}
-
-export function race<T>(promises: IThenable<T>[]): IStatefulPromise<T> {
-    return new StatefulPromise((res, rej) => {
-        promises.forEach(p => p.then(res).then(_undefined, rej));
-    });
-}
-
 /**
  * Sequentially executes functions which return promises
    instead  it returns a promise which have a result - an array of results of the promises
@@ -240,7 +227,7 @@ export class StatefulPromise<T = any> implements IStatefulPromise<T> {
         this._deferred = deferred;
         if (!!fn) {
             getTaskQueue().enque(() => {
-                fn((res?: T) => deferred.resolve(res), (err?: any) => deferred.reject(err));
+                fn((res?: unknown) => deferred.resolve(res as T), (err?: any) => deferred.reject(err));
             });
         }
     }
@@ -268,20 +255,20 @@ export class StatefulPromise<T = any> implements IStatefulPromise<T> {
         });
     }
 
-    static all<T>(...promises: Array<T | IThenable<T>>): IStatefulPromise<T[]>;
+    static all<T>(...promises: Array<T | IThenable<T>>): Promise<T[]>;
 
-    static all<T>(promises: Array<T | IThenable<T>>): IStatefulPromise<T[]>;
+    static all<T>(promises: Array<T | IThenable<T>>): Promise<T[]>;
 
-    static all<T>(...args: Array<any>): IStatefulPromise<T[]> {
-        return (args.length === 1 && isArray(args[0])) ? whenAll(<any>args[0]) : whenAll(args);
+    static all<T>(...args: Array<any>): Promise<T[]> {
+        return (args.length === 1 && isArray(args[0])) ? Promise.all(<any>args[0]) : Promise.all(args);
     }
 
-    static race<T>(...promises: Array<IPromise<T>>): IPromise<T>;
+    static race<T>(...promises: Array<IPromise<T>>): Promise<T>;
 
-    static race<T>(promises: Array<IPromise<T>>): IPromise<T>;
+    static race<T>(promises: Array<IPromise<T>>): Promise<T>;
 
-    static race<T>(...args: Array<any>): IPromise<T> {
-        return (args.length === 1 && isArray(args[0])) ? race(<any>args[0]) : race(args);
+    static race<T>(...args: Array<any>): Promise<T> {
+        return (args.length === 1 && isArray(args[0])) ? Promise.race(<any>args[0]) : Promise.race(args);
     }
 
     static reject<T>(reason?: any, isSync?: boolean): IStatefulPromise<T> {
@@ -371,7 +358,7 @@ export class AbortablePromise<T = any> extends StatefulPromise implements IAbort
             });
 
             getTaskQueue().enque(() => {
-                fn((res?: T) => deferred.resolve(res), (err?: any) => deferred.reject(err), tokenSource.token);
+                fn((res?: unknown) => deferred.resolve(res as T), (err?: any) => deferred.reject(err), tokenSource.token);
             });
         }
     }

@@ -5,26 +5,26 @@
     {
         public ValueChange()
         {
-            Val = null;
-            Orig = null;
-            Flags = (int)ValueFlags.None;
-            FieldName = string.Empty;
+            val = null;
+            orig = null;
+            flags = (int)ValueFlags.None;
+            fieldName = string.Empty;
         }
 
-        public string Val { get; set; }
+        public string val { get; set; }
 
-        public string Orig { get; set; }
+        public string orig { get; set; }
 
-        public string FieldName { get; set; }
+        public string fieldName { get; set; }
 
         /// <summary>
         /// Flags has the type <see cref="ValueFlags"/> 
         /// </summary>
-        public int Flags { get; set; }
+        public int flags { get; set; }
 
         /// <summary>
         /// Nested values used for object field
         /// </summary>
-        public ValuesList Nested { get; set; }
+        public ValuesList nested { get; set; }
     }
 }

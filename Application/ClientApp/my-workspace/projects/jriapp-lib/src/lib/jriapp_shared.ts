@@ -13,6 +13,7 @@ export { BaseCollection } from "./jriapp_shared/collection/base";
 export { CollectionItem } from "./jriapp_shared/collection/item";
 export { ItemAspect } from "./jriapp_shared/collection/aspect";
 export * from "./jriapp_shared/collection/const";
+export * from "./jriapp_shared/collection/int";
 export { ListItemAspect, ListItem, BaseList } from "./jriapp_shared/collection/list";
 export type { IListItem } from "./jriapp_shared/collection/list";
 export { BaseDictionary } from "./jriapp_shared/collection/dictionary";

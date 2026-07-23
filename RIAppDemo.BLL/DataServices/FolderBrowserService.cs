@@ -129,7 +129,7 @@ namespace RIAppDemo.BLL.DataServices
         private IEnumerable<FolderItem> _ReadAll(bool includeFiles, string infoType)
         {
             QueryResult<FolderItem> root = ReadRoot(includeFiles, infoType);
-            foreach (FolderItem item in root.Result.Cast<FolderItem>())
+            foreach (FolderItem item in root.result.Cast<FolderItem>())
             {
                 yield return item;
                 if (item.IsFolder)
@@ -146,7 +146,7 @@ namespace RIAppDemo.BLL.DataServices
             string infoType)
         {
             QueryResult<FolderItem> parent = ReadChildren(parentKey, level, path, includeFiles, infoType);
-            foreach (FolderItem item in parent.Result.Cast<FolderItem>())
+            foreach (FolderItem item in parent.result.Cast<FolderItem>())
             {
                 yield return item;
                 if (item.IsFolder)

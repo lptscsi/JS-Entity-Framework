@@ -31,7 +31,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
 
                 foreach (RowInfo rowInfo in graph.AllList)
                 {
-                    if (rowInfo.ChangeType != ChangeType.Deleted)
+                    if (rowInfo.changeType != ChangeType.Deleted)
                     {
                         serviceHelper.UpdateRowInfoAfterUpdates(rowInfo);
                     }
@@ -42,7 +42,7 @@ namespace RIAPP.DataService.Core.UseCases.CRUDMiddleware
                 await serviceMethods.AfterChangeSetCommited(subResults);
 
                 SubsetsGenerator subsetsGenerator = new(metadata, dataHelper);
-                ctx.Response.Subsets = subsetsGenerator.CreateSubsets(subResults);
+                ctx.Response.subsets = subsetsGenerator.CreateSubsets(subResults);
             }
 
 

@@ -36,7 +36,7 @@ namespace RIAPP.DataService.Core
                 }
 
                 string err = _onError(ex);
-                response.Error = new ErrorInfo(err, ex.GetType().Name);
+                response.error = new ErrorInfo(err, ex.GetType().Name);
             }
 
             outputPort.Handle(response);
