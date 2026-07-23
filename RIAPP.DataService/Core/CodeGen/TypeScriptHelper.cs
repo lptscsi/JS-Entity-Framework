@@ -262,10 +262,10 @@ namespace RIAPP.DataService.Core.CodeGen
             sbISvcMeth.AppendLine("export interface ISvcMethods");
             sbISvcMeth.AppendLine("{");
             StringBuilder sbArgs = new(255);
-            List<MethodDescription> svcMethods = _metadata
+            List<MethodDescription> svcMethods = [.. _metadata
                 .GetInvokeMethods()
-                .OrderBy(m => m.methodName)
-                .ToList();
+                .OrderBy(m => m.methodName)];
+                
 
             svcMethods.ForEach(methodInfo =>
             {
@@ -283,26 +283,26 @@ namespace RIAPP.DataService.Core.CodeGen
 
                     if (methodInfo.methodResult)
                     {
-                        sbArgs.Append("\t}) => RIAPP.IPromise<");
+                        sbArgs.Append("\t}) => Promise<");
                         sbArgs.Append(dotNet2TS.RegisterType(methodInfo.GetMethodData().MethodInfo.ReturnType.GetTaskResultType()));
                         sbArgs.Append(">");
                     }
                     else
                     {
-                        sbArgs.Append("\t}) => RIAPP.IPromise<void>");
+                        sbArgs.Append("\t}) => Promise<void>");
                     }
                 }
                 else
                 {
                     if (methodInfo.methodResult)
                     {
-                        sbArgs.Append("() => RIAPP.IPromise<");
+                        sbArgs.Append("() => Promise<");
                         sbArgs.Append(dotNet2TS.RegisterType(methodInfo.GetMethodData().MethodInfo.ReturnType.GetTaskResultType()));
                         sbArgs.Append(">");
                     }
                     else
                     {
-                        sbArgs.Append("() => RIAPP.IPromise<void>");
+                        sbArgs.Append("() => Promise<void>");
                     }
                 }
 

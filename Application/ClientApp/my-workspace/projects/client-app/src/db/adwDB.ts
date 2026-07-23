@@ -1,5 +1,5 @@
 /*
-	Generated from: /api/demo/ts on 2026-07-23 at 20:53
+	Generated from: /api/demo/ts on 2026-07-23 at 21:37
 	Don't make manual changes here, they will be lost when this interface will be regenerated!
 */
 
@@ -98,15 +98,15 @@ export enum TestEnum2
 
 export interface ISvcMethods
 {
-	GetClassifiers: () => RIAPP.IPromise<IDEMOCLS>;
+	GetClassifiers: () => Promise<IDEMOCLS>;
 	TestComplexInvoke: (args: {
 		info: IAddressInfo2;
 		keys: IKeyVal[];
-	}) => RIAPP.IPromise<number[]>;
+	}) => Promise<number[]>;
 	TestInvoke: (args: {
 		param1: number[];
 		param2: string;
-	}) => RIAPP.IPromise<string>;
+	}) => Promise<string>;
 }
 
 // #region LISTS REGION

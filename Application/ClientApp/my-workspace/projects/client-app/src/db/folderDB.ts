@@ -1,5 +1,5 @@
 /*
-	Generated from: /api/folders/ts on 2026-07-16 at 06:26
+	Generated from: /api/folders/ts on 2026-07-23 at 21:38
 	Don't make manual changes here, they will be lost when this interface will be regenerated!
 */
 
@@ -94,7 +94,7 @@ export interface IAssocs
 export class DbSets extends RIAPP.DbSets{
 	constructor() {
 		super();
-		this._createDbSet("FileSystemObject", (options) => new FileSystemObjectDb(options));
+		this._createDbSet("FileSystemObject", (options) => new FileSystemObjectDb(options) as any);
 	}
 	get FileSystemObject() { return this.getDbSet("FileSystemObject") as unknown as FileSystemObjectDb; }
 }
