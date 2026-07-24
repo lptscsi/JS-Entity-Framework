@@ -15,14 +15,13 @@ import { ERROR } from "./utils/error";
 import { EventHelper, IEventList } from "./utils/eventhelper";
 import { SysUtils } from "./utils/sysutils";
 
-const { isHasProp } = Checks, evHelper = EventHelper, sys = SysUtils, { Indexer } = CoreUtils,
-    signature = { signature: "BaseObject" };
+const { isHasProp } = Checks, evHelper = EventHelper, sys = SysUtils, { Indexer } = CoreUtils;
 
 // it can be used in external IBaseObject implementations
-export const objSignature: object = signature;
+export const OBJ_SIGNATURE: unique symbol = Symbol("BaseObject");
 
 sys.isBaseObj = (obj: any): obj is IBaseObject => {
-    return (!!obj && obj.__objSig === signature);
+    return (!!obj && obj[OBJ_SIGNATURE] === true);
 };
 
 export const enum ObjState { None = 0, Disposing = 1, Disposed = 2 }
@@ -161,10 +160,12 @@ export class ObjectEvents implements IObjectEvents {
 export class BaseObject implements IBaseObject {
   private _objState: ObjState;
   private _objEvents: IObjectEvents;
+  [OBJ_SIGNATURE]: boolean;
 
   constructor() {
     this._objState = ObjState.None;
     this._objEvents = null;
+    this[OBJ_SIGNATURE] = true;
   }
   protected setDisposing() {
     this._objState = ObjState.Disposing;
@@ -217,8 +218,5 @@ export class BaseObject implements IBaseObject {
       this._objEvents = new ObjectEvents(this);
     }
     return this._objEvents;
-  }
-  get __objSig(): object {
-    return signature;
   }
 }

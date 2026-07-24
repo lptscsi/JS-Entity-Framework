@@ -2,7 +2,7 @@
 import {
     IBaseObject, TErrorArgs
 } from "./int";
-import { OBJ_EVENTS, ObjState, ObjectEvents, dummyEvents, objSignature } from "./object";
+import { OBJ_EVENTS, ObjState, ObjectEvents, dummyEvents, OBJ_SIGNATURE } from "./object";
 import { Checks } from "./utils/checks";
 import { ERROR } from "./utils/error";
 
@@ -28,12 +28,14 @@ const impl: any = {
   },
   create(): IBaseObject {
     const instance: {
-      _init: Function,
+      _init: Function
     } = Object.create(this);
  
+     // Bypass the identifier check using an 'any' type assertion
+    (instance as any)[OBJ_SIGNATURE] = true;
     instance._init.apply(instance, arguments);
     Object.seal(instance);
-    return instance as any;
+    return instance as unknown as IBaseObject;
   },
   extend(properties: object, propertyDescriptors: PropertyDescriptorMap, fnAfterExtend: { (obj: any): void; } | null = null): any {
     const pds: PropertyDescriptorMap = propertyDescriptors || {}, pdsProperties: string[] = Object.getOwnPropertyNames(pds);
@@ -172,7 +174,7 @@ const impl: any = {
     return this._objEvents;
   },
   get __objSig() {
-    return objSignature;
+    return OBJ_SIGNATURE;
   }
 };
 
