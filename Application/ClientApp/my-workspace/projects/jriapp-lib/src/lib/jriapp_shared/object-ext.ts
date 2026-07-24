@@ -172,9 +172,6 @@ const impl: any = {
       this._objEvents = new ObjectEvents(this);
     }
     return this._objEvents;
-  },
-  get __objSig() {
-    return OBJ_SIGNATURE;
   }
 };
 
