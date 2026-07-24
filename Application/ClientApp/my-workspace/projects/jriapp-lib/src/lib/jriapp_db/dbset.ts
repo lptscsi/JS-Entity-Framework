@@ -565,7 +565,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
       enumerable: false
     };
 
-    const TEntity: IEntityFactory = BaseObjectExt.extend<any>(
+    const Factory: IEntityFactory = BaseObjectExt.extend<IEntityItem>(
       {
         _init(aspect: any): void {
           this['_super']();
@@ -589,7 +589,7 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
       }
     );
 
-    return (aspect) => TEntity.create(aspect);
+    return (aspect) => Factory.create(aspect);
   }
   protected _beforeLoad(query: DataQuery<TItem>, oldQuery: DataQuery<TItem>): void {
     if (!!query.isForAppend) {
