@@ -567,20 +567,20 @@ export class DbSet<TItem extends IEntityItem = IEntityItem> extends BaseCollecti
 
     const Factory: IEntityFactory = BaseObjectExt.extend<IEntityItem>(
       {
-        _init(aspect: any): void {
-          this['_super']();
-          this['__aspect'] = aspect;
+        _init(this: any, aspect: any): void {
+          this._super();
+          this.__aspect = aspect;
         },
-        dispose(): void {
-          if (this['getIsDisposed']()) {
+        dispose(this: IEntityItem & { setDisposing(): void; _super(): void }): void {
+          if (this.getIsDisposed()) {
             return;
           }
-          this['setDisposing']();
-          const aspect: IBaseObject = this['__aspect'] as unknown as IBaseObject;
+          this.setDisposing();
+          const aspect = this._aspect;
           if (!aspect.getIsStateDirty()) {
             aspect.dispose();
           }
-          this['_super']();
+          this._super();
         }
       },
       propDesc,

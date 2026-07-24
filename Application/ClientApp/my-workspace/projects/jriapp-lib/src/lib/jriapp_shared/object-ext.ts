@@ -117,8 +117,8 @@ const impl: IImplInternal = {
                     const superProto: any = Object.getPrototypeOf(obj);
                     if (name === 'dispose') {
                         p.value = function (this: any) {
-                            const self = this;
-                            const old = self._super;
+                            const self: any = this;
+                            const old: any = self._super;
                             self._super = superProto[name];
                             try {
                                 self._objState = ObjState.Disposing;
@@ -129,8 +129,8 @@ const impl: IImplInternal = {
                         };
                     } else {
                         p.value = function (this: any) {
-                            const self = this;
-                            const old = self._super;
+                            const self: any = this;
+                            const old: any = self._super;
                             self._super = superProto[name];
                             try {
                                 return fn.apply(self, arguments);
@@ -221,7 +221,6 @@ const impl: IImplInternal = {
 export const BaseObjectExt = impl as unknown as IObjectFactory<IBaseObject>;
 
 /*
-
 interface ITestObj extends IBaseObject {
   readonly arg1: string;
   readonly arg2: number;
@@ -236,7 +235,7 @@ interface ITestObjFactory extends IObjectFactory<ITestObj>
 
 export const TestObj: ITestObjFactory = BaseObjectExt.extend<ITestObj>(
   {
-    _init(arg1: string, arg2: number): void {
+    _init(this: any, arg1: string, arg2: number): void {
       this._super();
       this._val = "YYYYYYYYYYYY";
       this._arg1 = arg1;
